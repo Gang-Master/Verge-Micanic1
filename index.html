@@ -907,6 +907,90 @@
             visibility: visible;
             bottom: calc(100% + 10px);
         }
+
+        /* تحسينات للألوان */
+        .color-box {
+            height: 60px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 3px #000;
+            cursor: pointer;
+            margin: 8px 0;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .color-box:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+        }
+
+        .copy-card {
+            background: var(--bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 2px dashed var(--primary);
+            cursor: pointer;
+            font-family: monospace;
+            color: var(--primary);
+            text-align: center;
+            transition: all 0.3s;
+            word-break: break-all;
+        }
+
+        .copy-card:hover {
+            background: rgba(78, 204, 163, 0.1);
+        }
+
+        .result-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 2px solid var(--primary);
+            background: var(--bg);
+            padding: 5px;
+            display: none;
+        }
+
+        .result-image.active {
+            display: block;
+        }
+
+        .vip-image {
+            border-color: var(--vip);
+        }
+
+        .vip-badge {
+            background: var(--vip);
+            color: #000;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .help-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 5px;
+            text-align: right;
+            font-style: italic;
+        }
+
+        .vip-help {
+            color: var(--vip);
+            border-right: 3px solid var(--vip);
+            padding-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -1106,134 +1190,6 @@
 <!-- رسائل التنبيه -->
 <div id="toast" class="toast" style="display: none;"></div>
 
-<!-- قوالب الصفحات -->
-<template id="dashboardTemplate">
-    <div class="fade-in">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon primary">
-                    <i class="fas fa-car"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="dashboardVehicles">0</h3>
-                    <p>إجمالي المركبات</p>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon vip">
-                    <i class="fas fa-crown"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="dashboardVipVehicles">0</h3>
-                    <p>مركبات VIP</p>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon admin">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="dashboardUsers">0</h3>
-                    <p>إجمالي المستخدمين</p>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon users">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <div class="stat-info">
-                    <h3 id="dashboardSectors">0</h3>
-                    <p>عدد القطاعات</p>
-                </div>
-            </div>
-        </div>
-        
-        <div class="content-section">
-            <div class="section-header">
-                <div class="section-title">
-                    <i class="fas fa-bolt"></i>
-                    <span>الوصول السريع</span>
-                </div>
-            </div>
-            
-            <div class="cards-grid">
-                <div class="card-item" onclick="navigateTo('search')" style="cursor: pointer;">
-                    <div class="card-header">
-                        <div class="card-title">البحث العام</div>
-                        <div class="card-badge badge-admin">عام</div>
-                    </div>
-                    <div class="card-body">
-                        ابحث في جميع المركبات المتاحة في النظام حسب القطاع والرتبة
-                    </div>
-                    <div class="card-footer">
-                        <div class="card-meta">
-                            <i class="fas fa-search"></i> متاح للجميع
-                        </div>
-                        <i class="fas fa-arrow-left"></i>
-                    </div>
-                </div>
-                
-                <div class="card-item" onclick="if(currentUser.role === 'vip') navigateTo('vip-search')" style="cursor: pointer;" id="vipQuickAccess">
-                    <div class="card-header">
-                        <div class="card-title">بحث VIP</div>
-                        <div class="card-badge badge-vip">VIP</div>
-                    </div>
-                    <div class="card-body">
-                        قم بالبحث في المركبات الخاصة بأعضاء VIP فقط
-                    </div>
-                    <div class="card-footer">
-                        <div class="card-meta">
-                            <i class="fas fa-crown"></i> خاص بأعضاء VIP
-                        </div>
-                        <i class="fas fa-arrow-left"></i>
-                    </div>
-                </div>
-                
-                <div class="card-item" onclick="if(currentUser.role === 'admin' || currentUser.role === 'editor') navigateTo('vehicles')" style="cursor: pointer;" id="manageQuickAccess">
-                    <div class="card-header">
-                        <div class="card-title">إدارة المركبات</div>
-                        <div class="card-badge badge-editor">محرر</div>
-                    </div>
-                    <div class="card-body">
-                        أضف أو عدل أو احذف المركبات العامة في النظام
-                    </div>
-                    <div class="card-footer">
-                        <div class="card-meta">
-                            <i class="fas fa-edit"></i> للمحررين والمديرين
-                        </div>
-                        <i class="fas fa-arrow-left"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="content-section">
-            <div class="section-header">
-                <div class="section-title">
-                    <i class="fas fa-history"></i>
-                    <span>آخر النشاطات</span>
-                </div>
-                <button class="btn btn-secondary" onclick="loadRecentActivity()">
-                    <i class="fas fa-sync-alt"></i> تحديث
-                </button>
-            </div>
-            
-            <div class="loading" id="activityLoading">
-                <div class="loading-spinner"></div>
-                <p>جاري تحميل النشاطات...</p>
-            </div>
-            
-            <div id="recentActivity" style="display: none;"></div>
-        </div>
-    </div>
-</template>
-
-<!-- ملف الإعدادات -->
-<script src="config.js"></script>
-
 <!-- الكود الرئيسي -->
 <script>
 // ============================================
@@ -1276,6 +1232,8 @@ let siteData = {
 let vipData = {};
 let systemLogs = [];
 let currentPage = 'dashboard';
+let editVehicleId = null;
+let editUserId = null;
 
 // ============================================
 // وظائف المساعدة
@@ -1313,33 +1271,13 @@ function copyToClipboard(text) {
 function formatDate(dateString) {
     try {
         const date = new Date(dateString);
-        const now = new Date();
-        const diff = now - date;
-        
-        // إذا كان أقل من دقيقة
-        if (diff < 60000) {
-            return 'الآن';
-        }
-        
-        // إذا كان أقل من ساعة
-        if (diff < 3600000) {
-            const minutes = Math.floor(diff / 60000);
-            return `قبل ${minutes} دقيقة`;
-        }
-        
-        // إذا كان أقل من يوم
-        if (diff < 86400000) {
-            const hours = Math.floor(diff / 3600000);
-            return `قبل ${hours} ساعة`;
-        }
-        
-        // إذا كان أقل من أسبوع
-        if (diff < 604800000) {
-            const days = Math.floor(diff / 86400000);
-            return `قبل ${days} يوم`;
-        }
-        
-        return date.toLocaleDateString('ar-SA');
+        return date.toLocaleDateString('ar-SA', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     } catch {
         return 'غير معروف';
     }
@@ -1569,31 +1507,19 @@ function updateUserInterface() {
     const vipNavSection = document.getElementById('vipNavSection');
     const adminNavSection = document.getElementById('adminNavSection');
     const superAdminNavSection = document.getElementById('superAdminNavSection');
-    const vipQuickAccess = document.getElementById('vipQuickAccess');
-    const manageQuickAccess = document.getElementById('manageQuickAccess');
     
     // إظهار قسم VIP
     if (currentUser.role === 'vip') {
         vipNavSection.style.display = 'block';
-        if (vipQuickAccess) vipQuickAccess.style.cursor = 'pointer';
     } else {
         vipNavSection.style.display = 'none';
-        if (vipQuickAccess) {
-            vipQuickAccess.style.cursor = 'not-allowed';
-            vipQuickAccess.style.opacity = '0.5';
-        }
     }
     
     // إظهار قسم الإدارة
     if (currentUser.role === 'admin' || currentUser.role === 'editor') {
         adminNavSection.style.display = 'block';
-        if (manageQuickAccess) manageQuickAccess.style.cursor = 'pointer';
     } else {
         adminNavSection.style.display = 'none';
-        if (manageQuickAccess) {
-            manageQuickAccess.style.cursor = 'not-allowed';
-            manageQuickAccess.style.opacity = '0.5';
-        }
     }
     
     // إظهار قسم المدير العام
@@ -1876,14 +1802,6 @@ function updateDashboardStats() {
     document.getElementById('totalVehicles').textContent = totalVehicles + totalVIPVehicles;
     document.getElementById('totalUsers').textContent = totalUsers;
     document.getElementById('totalVip').textContent = totalVIPVehicles;
-    
-    document.getElementById('dashboardVehicles').textContent = totalVehicles + totalVIPVehicles;
-    document.getElementById('dashboardVipVehicles').textContent = totalVIPVehicles;
-    document.getElementById('dashboardUsers').textContent = totalUsers;
-    document.getElementById('dashboardSectors').textContent = totalSectors;
-    
-    // تحديث العداد في القائمة الجانبية
-    document.getElementById('usersBadge').textContent = totalUsers;
 }
 
 function updateUsersCount() {
@@ -1894,11 +1812,137 @@ function updateUsersCount() {
 // ============================================
 // صفحات النظام
 // ============================================
+
+// الصفحة الرئيسية
 async function loadDashboard() {
-    const template = document.getElementById('dashboardTemplate');
-    const clone = template.content.cloneNode(true);
-    document.getElementById('pageContent').innerHTML = '';
-    document.getElementById('pageContent').appendChild(clone);
+    let html = `
+        <div class="fade-in">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon primary">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="dashboardVehicles">0</h3>
+                        <p>إجمالي المركبات</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon vip">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="dashboardVipVehicles">0</h3>
+                        <p>مركبات VIP</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon admin">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="dashboardUsers">0</h3>
+                        <p>إجمالي المستخدمين</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon users">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="dashboardSectors">0</h3>
+                        <p>عدد القطاعات</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-bolt"></i>
+                        <span>الوصول السريع</span>
+                    </div>
+                </div>
+                
+                <div class="cards-grid">
+                    <div class="card-item" onclick="navigateTo('search')" style="cursor: pointer;">
+                        <div class="card-header">
+                            <div class="card-title">البحث العام</div>
+                            <div class="card-badge badge-admin">عام</div>
+                        </div>
+                        <div class="card-body">
+                            ابحث في جميع المركبات المتاحة في النظام حسب القطاع والرتبة
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-meta">
+                                <i class="fas fa-search"></i> متاح للجميع
+                            </div>
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="card-item" onclick="${currentUser.role === 'vip' ? "navigateTo('vip-search')" : 'showToast(\'غير مسموح لك\', \'error\')'}" style="cursor: pointer;">
+                        <div class="card-header">
+                            <div class="card-title">بحث VIP</div>
+                            <div class="card-badge badge-vip">VIP</div>
+                        </div>
+                        <div class="card-body">
+                            قم بالبحث في المركبات الخاصة بأعضاء VIP فقط
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-meta">
+                                <i class="fas fa-crown"></i> خاص بأعضاء VIP
+                            </div>
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="card-item" onclick="${currentUser.role === 'admin' || currentUser.role === 'editor' ? "navigateTo('vehicles')" : 'showToast(\'غير مسموح لك\', \'error\')'}" style="cursor: pointer;">
+                        <div class="card-header">
+                            <div class="card-title">إدارة المركبات</div>
+                            <div class="card-badge badge-editor">محرر</div>
+                        </div>
+                        <div class="card-body">
+                            أضف أو عدل أو احذف المركبات العامة في النظام
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-meta">
+                                <i class="fas fa-edit"></i> للمحررين والمديرين
+                            </div>
+                            <i class="fas fa-arrow-left"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-history"></i>
+                        <span>آخر النشاطات</span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="loadRecentActivity()">
+                        <i class="fas fa-sync-alt"></i> تحديث
+                    </button>
+                </div>
+                
+                <div class="loading" id="activityLoading">
+                    <div class="loading-spinner"></div>
+                    <p>جاري تحميل النشاطات...</p>
+                </div>
+                
+                <div id="recentActivity" style="display: none;"></div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('pageContent').innerHTML = html;
+    
+    // تحديث الإحصائيات
+    updateDashboardStats();
     
     // تحميل النشاطات الأخيرة
     loadRecentActivity();
@@ -1995,6 +2039,8 @@ async function loadSearchPage() {
                         <option value="">-- اختر المركبة --</option>
                     </select>
                 </div>
+                
+                <div class="help-text">اختر القطاع أولاً، ثم الرتبة، ثم المركبة لعرض تفاصيلها</div>
             </div>
             
             <div class="content-section" id="searchResult" style="display: none;">
@@ -2020,9 +2066,2133 @@ async function loadSearchPage() {
     }
 }
 
-// [يتبع باقي الصفحات...]
-// بسبب طول الكود، سأركز على الهيكل الأساسي
-// باقي الصفحات يمكن بناؤها بنفس النمط
+// وظائف البحث العام
+function filterSearchRanks() {
+    const sectorId = document.getElementById('searchSector').value;
+    const rankSelect = document.getElementById('searchRank');
+    
+    rankSelect.innerHTML = '<option value="">-- اختر الرتبة --</option>';
+    rankSelect.disabled = true;
+    document.getElementById('searchVehicle').disabled = true;
+    document.getElementById('searchResult').style.display = 'none';
+    
+    if (sectorId && siteData[sectorId] && siteData[sectorId].vehicles) {
+        const vehicles = siteData[sectorId].vehicles || [];
+        const ranksSet = new Set();
+        vehicles.forEach(vehicle => ranksSet.add(vehicle.rank || "عام"));
+        const ranks = Array.from(ranksSet).sort();
+        ranks.forEach(rank => rankSelect.innerHTML += `<option value="${rank}">${rank}</option>`);
+        rankSelect.disabled = false;
+    }
+}
+
+function filterSearchVehicles() {
+    const sectorId = document.getElementById('searchSector').value;
+    const rankValue = document.getElementById('searchRank').value;
+    const vehicleSelect = document.getElementById('searchVehicle');
+    
+    vehicleSelect.innerHTML = '<option value="">-- اختر المركبة --</option>';
+    vehicleSelect.disabled = true;
+    document.getElementById('searchResult').style.display = 'none';
+    
+    if (sectorId && rankValue && siteData[sectorId] && siteData[sectorId].vehicles) {
+        const vehicles = siteData[sectorId].vehicles || [];
+        let hasVehicles = false;
+        vehicles.forEach((vehicle, index) => {
+            const vehicleRank = vehicle.rank || "عام";
+            if (vehicleRank === rankValue) {
+                vehicleSelect.innerHTML += `<option value="${index}">${vehicle.name}</option>`;
+                hasVehicles = true;
+            }
+        });
+        if (hasVehicles) vehicleSelect.disabled = false;
+    }
+}
+
+function showSearchResult() {
+    const sectorId = document.getElementById('searchSector').value;
+    const vehicleIndex = document.getElementById('searchVehicle').value;
+    const resultSection = document.getElementById('searchResult');
+    
+    if (vehicleIndex === "" || !sectorId) {
+        resultSection.style.display = 'none';
+        return;
+    }
+    
+    try {
+        const vehicle = siteData[sectorId].vehicles[parseInt(vehicleIndex)];
+        if (!vehicle) {
+            showToast('المركبة غير موجودة', 'error');
+            resultSection.style.display = 'none';
+            return;
+        }
+        
+        const colors = siteData[sectorId].colors || ["#FFFFFF", "#000000"];
+        
+        let resultHtml = `
+            <h3 style="text-align:center; margin-bottom:20px; color: var(--primary);">${vehicle.name || "غير معروف"}</h3>
+            
+            <div class="form-group">
+                <label class="form-label"><i class="fas fa-palette"></i> الألوان المعتمدة:</label>
+                <div style="display:flex; gap:15px; margin:15px 0;">
+                    <div class="color-box" style="background-color: ${colors[0]};" onclick="copyToClipboard('${colors[0]}')">${colors[0]}</div>
+                    <div class="color-box" style="background-color: ${colors[1]};" onclick="copyToClipboard('${colors[1]}')">${colors[1]}</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label"><i class="fas fa-code"></i> كود الوشم:</label>
+                <div class="copy-card" onclick="copyToClipboard('${vehicle.sign || "لا يوجد كود"}')">${vehicle.sign || "لا يوجد كود"}</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label"><i class="fas fa-link"></i> رابط الوشم:</label>
+                <div class="copy-card" onclick="copyToClipboard('${vehicle.link || "لا يوجد رابط"}')">${vehicle.link || "لا يوجد رابط"}</div>
+            </div>
+        `;
+        
+        if (vehicle.link && vehicle.link.startsWith('http')) {
+            resultHtml += `
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-images"></i> معاينة الوشم:</label>
+                    <img src="${vehicle.link}" class="result-image active" alt="صورة الوشم">
+                </div>
+            `;
+        }
+        
+        document.getElementById('resultContent').innerHTML = resultHtml;
+        document.getElementById('resultTitle').textContent = vehicle.name;
+        resultSection.style.display = 'block';
+        
+    } catch (error) {
+        console.error('Error showing result:', error);
+        showToast('خطأ في عرض النتيجة', 'error');
+    }
+}
+
+// صفحة بحث VIP
+async function loadVIPSearchPage() {
+    if (currentUser.role !== 'vip') {
+        document.getElementById('pageContent').innerHTML = '<div class="not-found"><h1><i class="fas fa-crown"></i></h1><h2>غير مصرح لك</h2><p>هذه الصفحة خاصة بأعضاء VIP فقط.</p><button class="btn btn-vip" onclick="navigateTo(\'dashboard\')"><i class="fas fa-home"></i> العودة للرئيسية</button></div>';
+        return;
+    }
+    
+    let html = `
+        <div class="fade-in">
+            <div class="content-section" style="border-color: var(--vip);">
+                <div class="section-header">
+                    <div class="section-title" style="color: var(--vip);">
+                        <i class="fas fa-crown"></i>
+                        <span>بحث VIP في المركبات</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">الرتبة في VIP:</label>
+                    <select id="vipSearchRank" class="form-control" onchange="filterVIPSearchVehicles()">
+                        <option value="">-- اختر الرتبة --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">المركبة:</label>
+                    <select id="vipSearchVehicle" class="form-control" onchange="showVIPSearchResult()" disabled>
+                        <option value="">-- اختر المركبة --</option>
+                    </select>
+                </div>
+                
+                <div class="help-text vip-help">
+                    <i class="fas fa-crown"></i> هذا القسم خاص بأعضاء VIP فقط. يمكنك البحث عن المركبات المضافة بواسطة أعضاء VIP
+                </div>
+            </div>
+            
+            <div class="content-section" id="vipSearchResult" style="display: none; border-color: var(--vip); background: var(--vip-light);">
+                <div class="section-header">
+                    <div class="section-title" style="color: var(--vip);">
+                        <i class="fas fa-crown"></i>
+                        <span id="vipResultTitle">نتيجة البحث في VIP</span>
+                    </div>
+                </div>
+                
+                <div id="vipResultContent"></div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('pageContent').innerHTML = html;
+    
+    // تحديث قوائم البحث في VIP
+    updateVIPSearchFilters();
+}
+
+function updateVIPSearchFilters() {
+    const vipRankSelect = document.getElementById('vipSearchRank');
+    
+    if (!vipRankSelect) return;
+    
+    if (!vipData || Object.keys(vipData).length === 0) {
+        vipRankSelect.innerHTML = '<option value="">لا توجد رتب في VIP</option>';
+        return;
+    }
+    
+    // جمع جميع الرتب الفريدة من بيانات VIP
+    const ranksSet = new Set();
+    for (let userId in vipData) {
+        if (vipData[userId].vehicles) {
+            for (let vehicleId in vipData[userId].vehicles) {
+                const vehicle = vipData[userId].vehicles[vehicleId];
+                ranksSet.add(vehicle.rank || "عام");
+            }
+        }
+    }
+    
+    const ranks = Array.from(ranksSet).sort();
+    
+    vipRankSelect.innerHTML = '<option value="">-- اختر الرتبة --</option>';
+    
+    ranks.forEach(rank => {
+        vipRankSelect.innerHTML += `<option value="${rank}">${rank}</option>`;
+    });
+}
+
+function filterVIPSearchVehicles() {
+    const rankValue = document.getElementById('vipSearchRank').value;
+    const vehicleSelect = document.getElementById('vipSearchVehicle');
+    
+    vehicleSelect.innerHTML = '<option value="">-- اختر المركبة --</option>';
+    vehicleSelect.disabled = true;
+    document.getElementById('vipSearchResult').style.display = 'none';
+    
+    if (!rankValue) return;
+    
+    let vehicles = [];
+    for (let userId in vipData) {
+        if (vipData[userId].vehicles) {
+            for (let vehicleId in vipData[userId].vehicles) {
+                const vehicle = vipData[userId].vehicles[vehicleId];
+                if (vehicle.rank === rankValue) {
+                    vehicles.push({
+                        ...vehicle,
+                        addedBy: userId,
+                        vehicleId: vehicleId
+                    });
+                }
+            }
+        }
+    }
+    
+    if (vehicles.length > 0) {
+        vehicles.forEach((vehicle, index) => {
+            vehicleSelect.innerHTML += `<option value="${index}">${vehicle.name} (${vehicle.addedBy})</option>`;
+        });
+        vehicleSelect.disabled = false;
+    } else {
+        vehicleSelect.innerHTML = '<option value="">لا توجد مركبات في هذه الرتبة</option>';
+    }
+}
+
+function showVIPSearchResult() {
+    const vehicleIndex = document.getElementById('vipSearchVehicle').value;
+    const vipResultSection = document.getElementById('vipSearchResult');
+    
+    if (vehicleIndex === "") {
+        vipResultSection.style.display = 'none';
+        return;
+    }
+    
+    try {
+        // جمع جميع مركبات VIP
+        let allVehicles = [];
+        for (let userId in vipData) {
+            if (vipData[userId].vehicles) {
+                for (let vehicleId in vipData[userId].vehicles) {
+                    const vehicle = vipData[userId].vehicles[vehicleId];
+                    allVehicles.push({
+                        ...vehicle,
+                        addedBy: userId,
+                        vehicleId: vehicleId
+                    });
+                }
+            }
+        }
+        
+        const selectedVehicle = allVehicles[parseInt(vehicleIndex)];
+        if (!selectedVehicle) {
+            showToast('المركبة غير موجودة', 'error');
+            vipResultSection.style.display = 'none';
+            return;
+        }
+        
+        let resultHtml = `
+            <h3 style="text-align:center; margin-bottom:20px; color: var(--vip);">${selectedVehicle.name || "غير معروف"}</h3>
+            
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+                <span class="vip-badge">VIP</span>
+                <span style="color:var(--text-secondary); font-size:0.9rem;">أضيفت بواسطة: ${selectedVehicle.addedBy}</span>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label"><i class="fas fa-palette"></i> الألوان المعتمدة:</label>
+                <div style="display:flex; gap:15px; margin:15px 0;">
+                    <div class="color-box" style="background-color: ${selectedVehicle.colors?.[0] || "#4ecca3"};" onclick="copyToClipboard('${selectedVehicle.colors?.[0] || "#4ecca3"}')">${selectedVehicle.colors?.[0] || "#4ecca3"}</div>
+                    <div class="color-box" style="background-color: ${selectedVehicle.colors?.[1] || "#1e293b"};" onclick="copyToClipboard('${selectedVehicle.colors?.[1] || "#1e293b"}')">${selectedVehicle.colors?.[1] || "#1e293b"}</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label"><i class="fas fa-code"></i> كود الوشم:</label>
+                <div class="copy-card" onclick="copyToClipboard('${selectedVehicle.sign || "لا يوجد كود"}')">${selectedVehicle.sign || "لا يوجد كود"}</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label"><i class="fas fa-link"></i> رابط الوشم:</label>
+                <div class="copy-card" onclick="copyToClipboard('${selectedVehicle.link || "لا يوجد رابط"}')">${selectedVehicle.link || "لا يوجد رابط"}</div>
+            </div>
+        `;
+        
+        if (selectedVehicle.link && selectedVehicle.link.startsWith('http')) {
+            resultHtml += `
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-images"></i> معاينة الوشم:</label>
+                    <img src="${selectedVehicle.link}" class="result-image vip-image active" alt="صورة الوشم">
+                </div>
+            `;
+        }
+        
+        document.getElementById('vipResultContent').innerHTML = resultHtml;
+        document.getElementById('vipResultTitle').textContent = selectedVehicle.name;
+        vipResultSection.style.display = 'block';
+        
+    } catch (error) {
+        console.error('Error showing VIP result:', error);
+        showToast('خطأ في عرض النتيجة', 'error');
+    }
+}
+
+// صفحة إضافة مركبة VIP
+async function loadVIPManagePage() {
+    if (currentUser.role !== 'vip') {
+        document.getElementById('pageContent').innerHTML = '<div class="not-found"><h1><i class="fas fa-crown"></i></h1><h2>غير مصرح لك</h2><p>هذه الصفحة خاصة بأعضاء VIP فقط.</p><button class="btn btn-vip" onclick="navigateTo(\'dashboard\')"><i class="fas fa-home"></i> العودة للرئيسية</button></div>';
+        return;
+    }
+    
+    let html = `
+        <div class="fade-in">
+            <div class="content-section" style="border-color: var(--vip); background: var(--vip-light);">
+                <div class="section-header">
+                    <div class="section-title" style="color: var(--vip);">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>إضافة مركبة جديدة في قسم VIP</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">الرتبة:</label>
+                    <input type="text" id="vipVehicleRank" class="form-control" placeholder="أدخل الرتبة (مطلوب)">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">اسم المركبة:</label>
+                    <input type="text" id="vipVehicleName" class="form-control" placeholder="أدخل اسم المركبة (مطلوب)">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">كود الوشم:</label>
+                    <input type="text" id="vipVehicleSign" class="form-control" placeholder="كود الوشم (اختياري)">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">رابط صورة الوشم:</label>
+                    <input type="text" id="vipVehicleLink" class="form-control" placeholder="رابط الصورة (اختياري)">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">اللون الأساسي:</label>
+                    <input type="color" id="vipColor1" class="form-control" value="#4ecca3" style="height: 50px; padding: 5px;">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">اللون الثانوي:</label>
+                    <input type="color" id="vipColor2" class="form-control" value="#1e293b" style="height: 50px; padding: 5px;">
+                </div>
+                
+                <button class="btn btn-vip" onclick="addVIPVehicle()" style="width:100%; padding:15px; margin-top:20px;">
+                    <i class="fas fa-plus"></i> إضافة مركبة VIP
+                </button>
+                
+                <div class="help-text vip-help" style="margin-top:15px;">
+                    <i class="fas fa-info-circle"></i> المركبات المضافة هنا ستظهر فقط لأعضاء VIP ويمكنهم البحث عنها حسب الرتبة
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('pageContent').innerHTML = html;
+}
+
+function addVIPVehicle() {
+    if (!currentUser || currentUser.role !== 'vip') {
+        showToast('غير مصرح لك بإضافة مركبات في VIP', 'error');
+        return;
+    }
+    
+    const rank = document.getElementById('vipVehicleRank').value.trim();
+    const name = document.getElementById('vipVehicleName').value.trim();
+    const sign = document.getElementById('vipVehicleSign').value.trim();
+    const link = document.getElementById('vipVehicleLink').value.trim();
+    const color1 = document.getElementById('vipColor1').value;
+    const color2 = document.getElementById('vipColor2').value;
+    
+    if (!rank || !name) {
+        showToast('الرتبة واسم المركبة مطلوبان', 'error');
+        return;
+    }
+    
+    // إنشاء هيكل بيانات VIP إذا لم يكن موجوداً
+    if (!vipData[currentUser.username]) {
+        vipData[currentUser.username] = {
+            vehicles: {},
+            joinedAt: new Date().toISOString()
+        };
+    }
+    
+    if (!vipData[currentUser.username].vehicles) {
+        vipData[currentUser.username].vehicles = {};
+    }
+    
+    const vehicleId = 'vip_' + Date.now();
+    vipData[currentUser.username].vehicles[vehicleId] = {
+        name: name,
+        rank: rank,
+        sign: sign,
+        link: link,
+        colors: [color1, color2],
+        addedAt: new Date().toISOString(),
+        addedBy: currentUser.username
+    };
+    
+    db.ref('vipData').set(vipData)
+        .then(() => {
+            showToast('تم إضافة المركبة في قسم VIP بنجاح', 'vip');
+            
+            // إضافة سجل للنشاط
+            addSystemLog('add', `${currentUser.username} أضاف مركبة VIP: ${name}`);
+            
+            // إعادة تعيين النموذج
+            document.getElementById('vipVehicleRank').value = '';
+            document.getElementById('vipVehicleName').value = '';
+            document.getElementById('vipVehicleSign').value = '';
+            document.getElementById('vipVehicleLink').value = '';
+            
+            // تحديث قوائم البحث
+            updateVIPSearchFilters();
+        })
+        .catch(error => {
+            console.error('Error adding VIP vehicle:', error);
+            showToast('خطأ في إضافة المركبة', 'error');
+        });
+}
+
+// صفحة مركباتي في VIP
+async function loadVIPListPage() {
+    if (currentUser.role !== 'vip') {
+        document.getElementById('pageContent').innerHTML = '<div class="not-found"><h1><i class="fas fa-crown"></i></h1><h2>غير مصرح لك</h2><p>هذه الصفحة خاصة بأعضاء VIP فقط.</p><button class="btn btn-vip" onclick="navigateTo(\'dashboard\')"><i class="fas fa-home"></i> العودة للرئيسية</button></div>';
+        return;
+    }
+    
+    let html = `
+        <div class="fade-in">
+            <div class="content-section" style="border-color: var(--vip); background: var(--vip-light);">
+                <div class="section-header">
+                    <div class="section-title" style="color: var(--vip);">
+                        <i class="fas fa-list"></i>
+                        <span>المركبات التي أضفتها في VIP</span>
+                    </div>
+                    <button class="btn btn-vip" onclick="refreshMyVIPList()">
+                        <i class="fas fa-sync-alt"></i> تحديث
+                    </button>
+                </div>
+                
+                <div id="myVIPList">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>جاري تحميل مركباتك في VIP...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('pageContent').innerHTML = html;
+    
+    // تحميل قائمة مركبات VIP
+    loadMyVIPList();
+}
+
+function loadMyVIPList() {
+    const myVIPList = document.getElementById('myVIPList');
+    
+    if (!currentUser || !vipData[currentUser.username] || !vipData[currentUser.username].vehicles) {
+        myVIPList.innerHTML = '<p style="text-align:center; padding:20px; color:var(--text-secondary);">لم تقم بإضافة أي مركبات في VIP</p>';
+        return;
+    }
+    
+    let html = '';
+    const vehicles = vipData[currentUser.username].vehicles;
+    
+    if (Object.keys(vehicles).length === 0) {
+        html = '<p style="text-align:center; padding:20px; color:var(--text-secondary);">لم تقم بإضافة أي مركبات في VIP</p>';
+    } else {
+        html = '<div class="cards-grid">';
+        
+        for (let vehicleId in vehicles) {
+            const vehicle = vehicles[vehicleId];
+            html += `
+                <div class="card-item" style="border-color: var(--vip);">
+                    <div class="card-header">
+                        <div class="card-title">${vehicle.name}</div>
+                        <div class="card-badge badge-vip">${vehicle.rank}</div>
+                    </div>
+                    <div class="card-body">
+                        <div><i class="fas fa-code"></i> كود الوشم: ${vehicle.sign || "لا يوجد"}</div>
+                        <div><i class="fas fa-palette"></i> الألوان: ${vehicle.colors?.[0] || "#4ecca3"}, ${vehicle.colors?.[1] || "#1e293b"}</div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="card-meta">
+                            <i class="fas fa-clock"></i> ${formatDate(vehicle.addedAt)}
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-icon btn-secondary" onclick="editVIPVehicle('${vehicleId}')" data-tooltip="تعديل">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-icon btn-danger" onclick="deleteVIPVehicle('${vehicleId}')" data-tooltip="حذف">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += '</div>';
+    }
+    
+    myVIPList.innerHTML = html;
+}
+
+function refreshMyVIPList() {
+    loadMyVIPList();
+}
+
+function editVIPVehicle(vehicleId) {
+    // تنقل إلى صفحة الإدارة مع تعبئة البيانات
+    navigateTo('vip-manage');
+    
+    // يمكن إضافة منطق لتعبئة النموذج هنا
+    showToast('سيتم إضافة خاصية التعديل قريباً', 'info');
+}
+
+function deleteVIPVehicle(vehicleId) {
+    if (!currentUser || !vipData[currentUser.username] || !vipData[currentUser.username].vehicles[vehicleId]) {
+        showToast('المركبة غير موجودة', 'error');
+        return;
+    }
+    
+    if (confirm('هل أنت متأكد من حذف هذه المركبة من قسم VIP؟')) {
+        const vehicleName = vipData[currentUser.username].vehicles[vehicleId].name;
+        delete vipData[currentUser.username].vehicles[vehicleId];
+        
+        // إذا لم يعد هناك مركبات للمستخدم، احذف بياناته
+        if (Object.keys(vipData[currentUser.username].vehicles).length === 0) {
+            delete vipData[currentUser.username];
+        }
+        
+        db.ref('vipData').set(vipData)
+            .then(() => {
+                showToast('تم حذف المركبة من قسم VIP', 'vip');
+                
+                // إضافة سجل للنشاط
+                addSystemLog('delete', `${currentUser.username} حذف مركبة VIP: ${vehicleName}`);
+                
+                // تحديث القائمة
+                loadMyVIPList();
+                updateVIPSearchFilters();
+            })
+            .catch(error => {
+                console.error('Error deleting VIP vehicle:', error);
+                showToast('خطأ في حذف المركبة', 'error');
+            });
+    }
+}
+
+// صفحة إدارة المركبات العامة
+async function loadVehiclesPage() {
+    if (currentUser.role !== 'admin' && currentUser.role !== 'editor') {
+        document.getElementById('pageContent').innerHTML = '<div class="not-found"><h1><i class="fas fa-lock"></i></h1><h2>غير مصرح لك</h2><p>هذه الصفحة خاصة بالمحررين والمديرين فقط.</p><button class="btn btn-primary" onclick="navigateTo(\'dashboard\')"><i class="fas fa-home"></i> العودة للرئيسية</button></div>';
+        return;
+    }
+    
+    let html = `
+        <div class="fade-in">
+            <div class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>${editVehicleId ? 'تعديل مركبة' : 'إضافة مركبة جديدة'}</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">القطاع:</label>
+                    <select id="vehicleSector" class="form-control">
+                        <option value="">-- اختر القطاع --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">اسم المركبة:</label>
+                    <input type="text" id="vehicleName" class="form-control" placeholder="أدخل اسم المركبة (مطلوب)">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">الرتبة:</label>
+                    <input type="text" id="vehicleRank" class="form-control" placeholder="الرتبة (اختياري)">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">كود الوشم:</label>
+                    <input type="text" id="vehicleSign" class="form-control" placeholder="كود الوشم (اختياري)">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">رابط صورة الوشم:</label>
+                    <input type="text" id="vehicleLink" class="form-control" placeholder="رابط صورة الوشم (اختياري)">
+                </div>
+                
+                <button class="btn btn-primary" onclick="saveVehicle()" style="width:100%; padding:15px; margin-top:20px;">
+                    <i class="fas fa-save"></i> ${editVehicleId ? 'تحديث المركبة' : 'حفظ المركبة'}
+                </button>
+                
+                ${editVehicleId ? `
+                <button class="btn btn-secondary" onclick="cancelEdit()" style="width:100%; padding:15px; margin-top:10px;">
+                    <i class="fas fa-times"></i> إلغاء التعديل
+                </button>
+                ` : ''}
+            </div>
+            
+            <div class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-list"></i>
+                        <span>قائمة المركبات العامة</span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="refreshVehiclesList()">
+                        <i class="fas fa-sync-alt"></i> تحديث
+                    </button>
+                </div>
+                
+                <div id="vehiclesList">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>جاري تحميل المركبات...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('pageContent').innerHTML = html;
+    
+    // تعبئة القطاعات
+    const sectorSelect = document.getElementById('vehicleSector');
+    sectorSelect.innerHTML = '<option value="">-- اختر القطاع --</option>';
+    for (let sectorId in siteData.sectors) {
+        sectorSelect.innerHTML += `<option value="${sectorId}">${siteData.sectors[sectorId]}</option>`;
+    }
+    
+    // تحميل قائمة المركبات
+    loadVehiclesList();
+}
+
+function loadVehiclesList() {
+    const vehiclesList = document.getElementById('vehiclesList');
+    
+    let html = '<div class="cards-grid">';
+    let vehicleCount = 0;
+    
+    for (let sectorId in siteData) {
+        if (sectorId !== 'sectors' && siteData[sectorId] && siteData[sectorId].vehicles) {
+            siteData[sectorId].vehicles.forEach((vehicle, index) => {
+                vehicleCount++;
+                html += `
+                    <div class="card-item">
+                        <div class="card-header">
+                            <div class="card-title">${vehicle.name}</div>
+                            <div class="card-badge ${currentUser.role === 'admin' ? 'badge-admin' : 'badge-editor'}">${vehicle.rank || "عام"}</div>
+                        </div>
+                        <div class="card-body">
+                            <div><i class="fas fa-layer-group"></i> القطاع: ${siteData.sectors[sectorId]}</div>
+                            <div><i class="fas fa-code"></i> كود الوشم: ${vehicle.sign || "لا يوجد"}</div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-meta">
+                                <i class="fas fa-hashtag"></i> ${index + 1}
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-icon btn-secondary" onclick="editGeneralVehicle('${sectorId}', ${index})" data-tooltip="تعديل">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-icon btn-danger" onclick="deleteGeneralVehicle('${sectorId}', ${index})" data-tooltip="حذف">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    }
+    
+    if (vehicleCount === 0) {
+        html = '<p style="text-align:center; padding:20px; color:var(--text-secondary);">لا توجد مركبات</p>';
+    } else {
+        html += '</div>';
+    }
+    
+    vehiclesList.innerHTML = html;
+}
+
+function refreshVehiclesList() {
+    loadVehiclesList();
+}
+
+function saveVehicle() {
+    if (currentUser.role !== 'admin' && currentUser.role !== 'editor') {
+        showToast('غير مصرح لك', 'error');
+        return;
+    }
+    
+    const sectorId = document.getElementById('vehicleSector').value;
+    const name = document.getElementById('vehicleName').value.trim();
+    const rank = document.getElementById('vehicleRank').value.trim();
+    const sign = document.getElementById('vehicleSign').value.trim();
+    const link = document.getElementById('vehicleLink').value.trim();
+    
+    if (!sectorId) {
+        showToast('اختر القطاع', 'error');
+        return;
+    }
+    
+    if (!name) {
+        showToast('أدخل اسم المركبة', 'error');
+        return;
+    }
+    
+    if (!siteData[sectorId]) {
+        siteData[sectorId] = { colors: ["#FFFFFF", "#000000"], vehicles: [] };
+    }
+    
+    if (!siteData[sectorId].vehicles) siteData[sectorId].vehicles = [];
+    
+    const vehicle = {
+        name: name,
+        rank: rank || "عام",
+        sign: sign,
+        link: link,
+        img2: ""
+    };
+    
+    if (editVehicleId) {
+        // تعديل مركبة موجودة
+        const [sector, index] = editVehicleId.split('_');
+        if (sector === sectorId) {
+            siteData[sectorId].vehicles[index] = vehicle;
+        } else {
+            // نقل المركبة إلى قطاع آخر
+            siteData[sector].vehicles.splice(index, 1);
+            siteData[sectorId].vehicles.push(vehicle);
+        }
+    } else {
+        // إضافة مركبة جديدة
+        siteData[sectorId].vehicles.push(vehicle);
+    }
+    
+    db.ref('siteData').set(siteData)
+        .then(() => {
+            showToast(editVehicleId ? 'تم تحديث المركبة' : 'تم إضافة المركبة');
+            
+            // إضافة سجل للنشاط
+            addSystemLog(editVehicleId ? 'edit' : 'add', 
+                `${currentUser.username} ${editVehicleId ? 'عدل' : 'أضاف'} مركبة: ${name}`);
+            
+            // إعادة تعيين النموذج
+            resetVehicleForm();
+            
+            // تحديث القائمة
+            loadVehiclesList();
+        })
+        .catch(error => {
+            console.error('Error saving vehicle:', error);
+            showToast('خطأ في الحفظ', 'error');
+        });
+}
+
+function editGeneralVehicle(sectorId, index) {
+    const vehicle = siteData[sectorId].vehicles[index];
+    if (!vehicle) return;
+    
+    editVehicleId = `${sectorId}_${index}`;
+    
+    document.getElementById('vehicleSector').value = sectorId;
+    document.getElementById('vehicleName').value = vehicle.name || '';
+    document.getElementById('vehicleRank').value = vehicle.rank || '';
+    document.getElementById('vehicleSign').value = vehicle.sign || '';
+    document.getElementById('vehicleLink').value = vehicle.link || '';
+    
+    // إعادة تحميل الصفحة
+    navigateTo('vehicles');
+}
+
+function deleteGeneralVehicle(sectorId, index) {
+    if (currentUser.role !== 'admin' && currentUser.role !== 'editor') {
+        showToast('غير مصرح لك', 'error');
+        return;
+    }
+    
+    const vehicle = siteData[sectorId].vehicles[index];
+    if (!vehicle) return;
+    
+    if (confirm('هل أنت متأكد من حذف هذه المركبة؟')) {
+        siteData[sectorId].vehicles.splice(index, 1);
+        
+        db.ref('siteData').set(siteData)
+            .then(() => {
+                showToast('تم حذف المركبة');
+                
+                // إضافة سجل للنشاط
+                addSystemLog('delete', `${currentUser.username} حذف مركبة: ${vehicle.name}`);
+                
+                // تحديث القائمة
+                loadVehiclesList();
+            })
+            .catch(error => {
+                console.error('Error deleting vehicle:', error);
+                showToast('خطأ في الحذف', 'error');
+            });
+    }
+}
+
+function cancelEdit() {
+    editVehicleId = null;
+    resetVehicleForm();
+    navigateTo('vehicles');
+}
+
+function resetVehicleForm() {
+    document.getElementById('vehicleSector').value = '';
+    document.getElementById('vehicleName').value = '';
+    document.getElementById('vehicleRank').value = '';
+    document.getElementById('vehicleSign').value = '';
+    document.getElementById('vehicleLink').value = '';
+    editVehicleId = null;
+}
+
+// صفحة إدارة القطاعات
+async function loadSectorsPage() {
+    if (currentUser.role !== 'admin' && currentUser.role !== 'editor') {
+        document.getElementById('pageContent').innerHTML = '<div class="not-found"><h1><i class="fas fa-lock"></i></h1><h2>غير مصرح لك</h2><p>هذه الصفحة خاصة بالمحررين والمديرين فقط.</p><button class="btn btn-primary" onclick="navigateTo(\'dashboard\')"><i class="fas fa-home"></i> العودة للرئيسية</button></div>';
+        return;
+    }
+    
+    let html = `
+        <div class="fade-in">
+            <div class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>إضافة قطاع جديد</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">اسم القطاع:</label>
+                    <input type="text" id="sectorName" class="form-control" placeholder="أدخل اسم القطاع">
+                </div>
+                
+                <button class="btn btn-primary" onclick="addSector()" style="width:100%; padding:15px; margin-top:20px;">
+                    <i class="fas fa-plus"></i> إضافة قطاع
+                </button>
+            </div>
+            
+            <div class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-list"></i>
+                        <span>قائمة القطاعات</span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="refreshSectorsList()">
+                        <i class="fas fa-sync-alt"></i> تحديث
+                    </button>
+                </div>
+                
+                <div id="sectorsList">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>جاري تحميل القطاعات...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('pageContent').innerHTML = html;
+    
+    // تحميل قائمة القطاعات
+    loadSectorsList();
+}
+
+function loadSectorsList() {
+    const sectorsList = document.getElementById('sectorsList');
+    
+    let html = '<div class="cards-grid">';
+    let sectorCount = 0;
+    
+    for (let sectorId in siteData.sectors) {
+        if (sectorId === 'sectors') continue;
+        
+        sectorCount++;
+        const vehicleCount = siteData[sectorId] && siteData[sectorId].vehicles ? siteData[sectorId].vehicles.length : 0;
+        
+        html += `
+            <div class="card-item">
+                <div class="card-header">
+                    <div class="card-title">${siteData.sectors[sectorId]}</div>
+                    <div class="card-badge ${currentUser.role === 'admin' ? 'badge-admin' : 'badge-editor'}">${vehicleCount}</div>
+                </div>
+                <div class="card-body">
+                    <div><i class="fas fa-hashtag"></i> المعرف: ${sectorId}</div>
+                    <div><i class="fas fa-car"></i> عدد المركبات: ${vehicleCount}</div>
+                </div>
+                <div class="card-footer">
+                    <div class="card-meta">
+                        <i class="fas fa-palette"></i> ${siteData[sectorId]?.colors?.[0] || "#FFFFFF"}
+                    </div>
+                    ${sectorId !== 's_default' ? `
+                    <div class="actions">
+                        <button class="btn btn-icon btn-danger" onclick="deleteSector('${sectorId}')" data-tooltip="حذف">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    ` : '<span style="color: var(--text-secondary); font-size: 0.8rem;">افتراضي</span>'}
+                </div>
+            </div>
+        `;
+    }
+    
+    if (sectorCount === 0) {
+        html = '<p style="text-align:center; padding:20px; color:var(--text-secondary);">لا توجد قطاعات</p>';
+    } else {
+        html += '</div>';
+    }
+    
+    sectorsList.innerHTML = html;
+}
+
+function refreshSectorsList() {
+    loadSectorsList();
+}
+
+function addSector() {
+    if (currentUser.role !== 'admin' && currentUser.role !== 'editor') {
+        showToast('غير مصرح لك', 'error');
+        return;
+    }
+    
+    const sectorName = document.getElementById('sectorName').value.trim();
+    
+    if (!sectorName) {
+        showToast('أدخل اسم القطاع', 'error');
+        return;
+    }
+    
+    const sectorId = 's_' + Date.now();
+    siteData.sectors[sectorId] = sectorName;
+    siteData[sectorId] = {
+        colors: ["#FFFFFF", "#000000"],
+        vehicles: []
+    };
+    
+    db.ref('siteData').set(siteData)
+        .then(() => {
+            showToast('تم إضافة القطاع');
+            
+            // إضافة سجل للنشاط
+            addSystemLog('add', `${currentUser.username} أضاف قطاع: ${sectorName}`);
+            
+            // إعادة تعيين النموذج
+            document.getElementById('sectorName').value = '';
+            
+            // تحديث القائمة
+            loadSectorsList();
+            
+            // تحديث القوائم الأخرى
+            updateAllSectorSelects();
+        })
+        .catch(error => {
+            console.error('Error adding sector:', error);
+            showToast('خطأ في الإضافة', 'error');
+        });
+}
+
+function deleteSector(sectorId) {
+    if (currentUser.role !== 'admin' && currentUser.role !== 'editor') {
+        showToast('غير مصرح لك', 'error');
+        return;
+    }
+    
+    if (sectorId === 's_default') {
+        showToast('لا يمكن حذف القطاع الافتراضي', 'error');
+        return;
+    }
+    
+    const sectorName = siteData.sectors[sectorId];
+    
+    if (confirm(`هل أنت متأكد من حذف القطاع "${sectorName}"؟ سيتم حذف جميع المركبات التابعة له.`)) {
+        delete siteData.sectors[sectorId];
+        delete siteData[sectorId];
+        
+        db.ref('siteData').set(siteData)
+            .then(() => {
+                showToast('تم حذف القطاع');
+                
+                // إضافة سجل للنشاط
+                addSystemLog('delete', `${currentUser.username} حذف قطاع: ${sectorName}`);
+                
+                // تحديث القائمة
+                loadSectorsList();
+                
+                // تحديث القوائم الأخرى
+                updateAllSectorSelects();
+            })
+            .catch(error => {
+                console.error('Error deleting sector:', error);
+                showToast('خطأ في الحذف', 'error');
+            });
+    }
+}
+
+function updateAllSectorSelects() {
+    // تحديث جميع قوائم القطاعات في الصفحات
+    const selects = ['searchSector', 'vehicleSector'];
+    selects.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (select) {
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">-- اختر القطاع --</option>';
+            for (let sectorId in siteData.sectors) {
+                select.innerHTML += `<option value="${sectorId}">${siteData.sectors[sectorId]}</option>`;
+            }
+            if (currentValue && siteData.sectors[currentValue]) {
+                select.value = currentValue;
+            }
+        }
+    });
+}
+
+// صفحة إدارة الألوان
+async function loadColorsPage() {
+    if (currentUser.role !== 'admin' && currentUser.role !== 'editor') {
+        document.getElementById('pageContent').innerHTML = '<div class="not-found"><h1><i class="fas fa-lock"></i></h1><h2>غير مصرح لك</h2><p>هذه الصفحة خاصة بالمحررين والمديرين فقط.</p><button class="btn btn-primary" onclick="navigateTo(\'dashboard\')"><i class="fas fa-home"></i> العودة للرئيسية</button></div>';
+        return;
+    }
+    
+    let html = `
+        <div class="fade-in">
+            <div class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-palette"></i>
+                        <span>تعديل ألوان القطاعات</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">اختر القطاع:</label>
+                    <select id="colorSector" class="form-control" onchange="loadSectorColors()">
+                        <option value="">-- اختر القطاع --</option>
+                    </select>
+                </div>
+                
+                <div id="colorForm" style="display: none;">
+                    <div class="form-group">
+                        <label class="form-label">اللون الأساسي:</label>
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <input type="color" id="colorPrimary" class="form-control" style="flex: 1; height: 50px; padding: 5px;">
+                            <input type="text" id="colorPrimaryHex" class="form-control" style="flex: 1;" placeholder="#RRGGBB" onchange="updateColorFromHex('colorPrimary')">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">اللون الثانوي:</label>
+                        <div style="display: flex; gap: 15px; align-items: center;">
+                            <input type="color" id="colorSecondary" class="form-control" style="flex: 1; height: 50px; padding: 5px;">
+                            <input type="text" id="colorSecondaryHex" class="form-control" style="flex: 1;" placeholder="#RRGGBB" onchange="updateColorFromHex('colorSecondary')">
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" onclick="saveColors()" style="width:100%; padding:15px; margin-top:20px;">
+                        <i class="fas fa-save"></i> حفظ الألوان
+                    </button>
+                </div>
+                
+                <div class="help-text">اختر قطاعاً لتعديل ألوانه الأساسية والثانوية</div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('pageContent').innerHTML = html;
+    
+    // تعبئة القطاعات
+    const sectorSelect = document.getElementById('colorSector');
+    sectorSelect.innerHTML = '<option value="">-- اختر القطاع --</option>';
+    for (let sectorId in siteData.sectors) {
+        sectorSelect.innerHTML += `<option value="${sectorId}">${siteData.sectors[sectorId]}</option>`;
+    }
+}
+
+function loadSectorColors() {
+    const sectorId = document.getElementById('colorSector').value;
+    const colorForm = document.getElementById('colorForm');
+    
+    if (!sectorId || !siteData[sectorId]) {
+        colorForm.style.display = 'none';
+        return;
+    }
+    
+    const colors = siteData[sectorId].colors || ["#FFFFFF", "#000000"];
+    
+    document.getElementById('colorPrimary').value = colors[0];
+    document.getElementById('colorPrimaryHex').value = colors[0];
+    document.getElementById('colorSecondary').value = colors[1];
+    document.getElementById('colorSecondaryHex').value = colors[1];
+    
+    colorForm.style.display = 'block';
+}
+
+function updateColorFromHex(inputId) {
+    const hexInput = document.getElementById(inputId + 'Hex');
+    const colorInput = document.getElementById(inputId);
+    
+    let hex = hexInput.value.trim();
+    if (!hex.startsWith('#')) {
+        hex = '#' + hex;
+    }
+    
+    // تحقق من صحة تنسيق HEX
+    if (/^#[0-9A-F]{6}$/i.test(hex)) {
+        colorInput.value = hex;
+        hexInput.value = hex;
+    }
+}
+
+function saveColors() {
+    if (currentUser.role !== 'admin' && currentUser.role !== 'editor') {
+        showToast('غير مصرح لك', 'error');
+        return;
+    }
+    
+    const sectorId = document.getElementById('colorSector').value;
+    const colorPrimary = document.getElementById('colorPrimary').value;
+    const colorSecondary = document.getElementById('colorSecondary').value;
+    
+    if (!sectorId) {
+        showToast('اختر القطاع', 'error');
+        return;
+    }
+    
+    if (!siteData[sectorId]) {
+        siteData[sectorId] = { colors: [], vehicles: [] };
+    }
+    
+    siteData[sectorId].colors = [colorPrimary, colorSecondary];
+    
+    db.ref('siteData').set(siteData)
+        .then(() => {
+            showToast('تم تحديث الألوان');
+            
+            // إضافة سجل للنشاط
+            addSystemLog('edit', `${currentUser.username} عدل ألوان قطاع: ${siteData.sectors[sectorId]}`);
+        })
+        .catch(error => {
+            console.error('Error saving colors:', error);
+            showToast('خطأ في الحفظ', 'error');
+        });
+}
+
+// صفحة إدارة المستخدمين (للمدير فقط)
+async function loadUsersPage() {
+    if (currentUser.role !== 'admin') {
+        document.getElementById('pageContent').innerHTML = '<div class="not-found"><h1><i class="fas fa-lock"></i></h1><h2>غير مصرح لك</h2><p>هذه الصفحة خاصة بالمدير العام فقط.</p><button class="btn btn-primary" onclick="navigateTo(\'dashboard\')"><i class="fas fa-home"></i> العودة للرئيسية</button></div>';
+        return;
+    }
+    
+    let html = `
+        <div class="fade-in">
+            <div class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-user-plus"></i>
+                        <span>${editUserId ? 'تعديل مستخدم' : 'إضافة مستخدم جديد'}</span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">اسم المستخدم:</label>
+                    <input type="text" id="userUsername" class="form-control" placeholder="أدخل اسم المستخدم" ${editUserId ? 'readonly' : ''}>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">الاسم المعروض:</label>
+                    <input type="text" id="userDisplayName" class="form-control" placeholder="الاسم المعروض في النظام">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">البريد الإلكتروني:</label>
+                    <input type="email" id="userEmail" class="form-control" placeholder="البريد الإلكتروني">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">${editUserId ? 'كلمة المرور الجديدة (اتركه فارغاً للحفاظ على القديمة)' : 'كلمة المرور:'}</label>
+                    <input type="password" id="userPassword" class="form-control" placeholder="${editUserId ? 'كلمة المرور الجديدة' : 'كلمة المرور'}">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">تأكيد كلمة المرور:</label>
+                    <input type="password" id="userConfirmPassword" class="form-control" placeholder="تأكيد كلمة المرور">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">الدور:</label>
+                    <select id="userRole" class="form-control">
+                        <option value="viewer">عضو (مشاهد)</option>
+                        <option value="editor">محرر</option>
+                        <option value="admin">مدير</option>
+                        <option value="vip">VIP</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="userActive" checked> حساب مفعل
+                    </label>
+                </div>
+                
+                <button class="btn btn-primary" onclick="saveUser()" style="width:100%; padding:15px; margin-top:20px;">
+                    <i class="fas fa-save"></i> ${editUserId ? 'تحديث المستخدم' : 'حفظ المستخدم'}
+                </button>
+                
+                ${editUserId ? `
+                <button class="btn btn-secondary" onclick="cancelUserEdit()" style="width:100%; padding:15px; margin-top:10px;">
+                    <i class="fas fa-times"></i> إلغاء التعديل
+                </button>
+                ` : ''}
+            </div>
+            
+            <div class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-list"></i>
+                        <span>قائمة المستخدمين</span>
+                    </div>
+                    <button class="btn btn-secondary" onclick="refreshUsersList()">
+                        <i class="fas fa-sync-alt"></i> تحديث
+                    </button>
+                </div>
+                
+                <div id="usersList">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>جاري تحميل المستخدمين...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('pageContent').innerHTML = html;
+    
+    // تحميل قائمة المستخدمين
+    loadUsersList();
+}
+
+function loadUsersList() {
+    const usersList = document.getElementById('usersList');
+    
+    let html = '<div class="cards-grid">';
+    let userCount = 0;
+    
+    for (let username in usersData) {
+        const user = usersData[username];
+        userCount++;
+        
+        html += `
+            <div class="card-item">
+                <div class="card-header">
+                    <div class="card-title">${user.displayName || username}</div>
+                    <div class="card-badge user-role ${user.role}">${getRoleName(user.role)}</div>
+                </div>
+                <div class="card-body">
+                    <div><i class="fas fa-user"></i> ${username}</div>
+                    <div><i class="fas fa-envelope"></i> ${user.email || 'لا يوجد'}</div>
+                    <div><i class="fas fa-calendar"></i> ${user.lastLogin ? formatDate(user.lastLogin) : 'لم يسجل دخول'}</div>
+                </div>
+                <div class="card-footer">
+                    <div class="card-meta">
+                        <i class="fas fa-circle" style="color: ${user.isActive ? 'var(--success)' : 'var(--danger)'}"></i>
+                        ${user.isActive ? 'مفعل' : 'معطل'}
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-icon btn-secondary" onclick="editUser('${username}')" data-tooltip="تعديل">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${username !== currentUser.username ? `
+                        <button class="btn btn-icon btn-danger" onclick="deleteUser('${username}')" data-tooltip="حذف">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    if (userCount === 0) {
+        html = '<p style="text-align:center; padding:20px; color:var(--text-secondary);">لا توجد مستخدمين</p>';
+    } else {
+        html += '</div>';
+    }
+    
+    usersList.innerHTML = html;
+}
+
+function refreshUsersList() {
+    loadUsersList();
+}
+
+function editUser(username) {
+    const user = usersData[username];
+    if (!user) return;
+    
+    editUserId = username;
+    
+    document.getElementById('userUsername').value = username;
+    document.getElementById('userDisplayName').value = user.displayName || '';
+    document.getElementById('userEmail').value = user.email || '';
+    document.getElementById('userPassword').value = '';
+    document.getElementById('userConfirmPassword').value = '';
+    document.getElementById('userRole').value = user.role;
+    document.getElementById('userActive').checked = user.isActive !== false;
+    
+    // إعادة تحميل الصفحة
+    navigateTo('users');
+}
+
+function saveUser() {
+    if (currentUser.role !== 'admin') {
+        showToast('غير مصرح لك', 'error');
+        return;
+    }
+    
+    const username = document.getElementById('userUsername').value.trim();
+    const displayName = document.getElementById('userDisplayName').value.trim();
+    const email = document.getElementById('userEmail').value.trim();
+    const password = document.getElementById('userPassword').value;
+    const confirmPassword = document.getElementById('userConfirmPassword').value;
+    const role = document.getElementById('userRole').value;
+    const isActive = document.getElementById('userActive').checked;
+    
+    if (!username) {
+        showToast('أدخل اسم المستخدم', 'error');
+        return;
+    }
+    
+    if (!displayName) {
+        showToast('أدخل الاسم المعروض', 'error');
+        return;
+    }
+    
+    if (!editUserId && !password) {
+        showToast('أدخل كلمة المرور', 'error');
+        return;
+    }
+    
+    if (password && password !== confirmPassword) {
+        showToast('كلمات المرور غير متطابقة', 'error');
+        return;
+    }
+    
+    // إذا كان المستخدم الجديد موجود بالفعل
+    if (!editUserId && usersData[username]) {
+        showToast('اسم المستخدم موجود مسبقاً', 'error');
+        return;
+    }
+    
+    // تحضير بيانات المستخدم
+    const userData = {
+        displayName: displayName,
+        email: email,
+        role: role,
+        isActive: isActive,
+        createdAt: editUserId ? usersData[username].createdAt : new Date().toISOString(),
+        lastLogin: editUserId ? usersData[username].lastLogin : null
+    };
+    
+    // إذا تم إدخال كلمة مرور جديدة
+    if (password) {
+        userData.password = btoa(password + firebaseConfig.apiKey);
+    } else if (editUserId) {
+        // الحفاظ على كلمة المرور القديمة
+        userData.password = usersData[username].password;
+    }
+    
+    usersData[username] = userData;
+    
+    db.ref('users').set(usersData)
+        .then(() => {
+            showToast(editUserId ? 'تم تحديث المستخدم' : 'تم إضافة المستخدم');
+            
+            // إضافة سجل للنشاط
+            addSystemLog(editUserId ? 'edit' : 'add', 
+                `${currentUser.username} ${editUserId ? 'عدل' : 'أضاف'} مستخدم: ${username}`);
+            
+            // إعادة تعيين النموذج
+            cancelUserEdit();
+            
+            // تحديث القائمة
+            loadUsersList();
+        })
+        .catch(error => {
+            console.error('Error saving user:', error);
+            showToast('خطأ في الحفظ', 'error');
+        });
+}
+
+function deleteUser(username) {
+    if (currentUser.role !== 'admin') {
+        showToast('غير مصرح لك', 'error');
+        return;
+    }
+    
+    if (username === currentUser.username) {
+        showToast('لا يمكن حذف حسابك الخاص', 'error');
+        return;
+    }
+    
+    if (confirm(`هل أنت متأكد من حذف المستخدم "${username}"؟`)) {
+        delete usersData[username];
+        
+        db.ref('users').set(usersData)
+            .then(() => {
+                showToast('تم حذف المستخدم');
+                
+                // إضافة سجل للنشاط
+                addSystemLog('delete', `${currentUser.username} حذف مستخدم: ${username}`);
+                
+                // تحديث القائمة
+                loadUsersList();
+            })
+            .catch(error => {
+                console.error('Error deleting user:', error);
+                showToast('خطأ في الحذف', 'error');
+            });
+    }
+}
+
+function cancelUserEdit() {
+    editUserId = null;
+    document.getElementById('userUsername').value = '';
+    document.getElementById('userDisplayName').value = '';
+    document.getElementById('userEmail').value = '';
+    document.getElementById('userPassword').value = '';
+    document.getElementById('userConfirmPassword').value = '';
+    document.getElementById('userRole').value = 'viewer';
+    document.getElementById('userActive').checked = true;
+    
+    navigateTo('users');
+}
+
+// صفحة إدارة VIP (للمدير فقط)
+async function loadSystemVIPPage() {
+    if (currentUser.role !== 'admin') {
+        document.getElementById('pageContent').innerHTML = '<div class="not-found"><h1><i class="fas fa-lock"></i></h1><h2>غير مصرح لك</h2><p>هذه الصفحة خاصة بالمدير العام فقط.</p><button class="btn btn-primary" onclick="navigateTo(\'dashboard\')"><i class="fas fa-home"></i> العودة للرئيسية</button></div>';
+        return;
+    }
+    
+    let html = `
+        <div class="fade-in">
+            <div class="content-section" style="border-color: var(--vip); background: var(--vip-light);">
+                <div class="section-header">
+                    <div class="section-title" style="color: var(--vip);">
+                        <i class="fas fa-crown"></i>
+                        <span>إدارة قسم VIP</span>
+                    </div>
+                    <button class="btn btn-vip" onclick="refreshAdminVIPList()">
+                        <i class="fas fa-sync-alt"></i> تحديث
+                    </button>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">فلترة حسب المستخدم:</label>
+                    <select id="vipUserFilter" class="form-control" onchange="filterAdminVIPList()">
+                        <option value="">جميع المستخدمين</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">فلترة حسب الرتبة:</label>
+                    <select id="vipRankFilter" class="form-control" onchange="filterAdminVIPList()">
+                        <option value="">جميع الرتب</option>
+                    </select>
+                </div>
+                
+                <div id="adminVIPList">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>جاري تحميل مركبات VIP...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('pageContent').innerHTML = html;
+    
+    // تحميل قائمة VIP
+    loadAdminVIPList();
+}
+
+function loadAdminVIPList() {
+    const adminVIPList = document.getElementById('adminVIPList');
+    const userFilter = document.getElementById('vipUserFilter');
+    const rankFilter = document.getElementById('vipRankFilter');
+    
+    if (!adminVIPList) return;
+    
+    // تحديث قائمة المستخدمين
+    if (userFilter) {
+        userFilter.innerHTML = '<option value="">جميع المستخدمين</option>';
+        for (let userId in vipData) {
+            userFilter.innerHTML += `<option value="${userId}">${userId}</option>`;
+        }
+    }
+    
+    // تحديث قائمة الرتب
+    if (rankFilter) {
+        const ranksSet = new Set();
+        for (let userId in vipData) {
+            if (vipData[userId].vehicles) {
+                for (let vehicleId in vipData[userId].vehicles) {
+                    const vehicle = vipData[userId].vehicles[vehicleId];
+                    ranksSet.add(vehicle.rank || "عام");
+                }
+            }
+        }
+        
+        const ranks = Array.from(ranksSet).sort();
+        rankFilter.innerHTML = '<option value="">جميع الرتب</option>';
+        ranks.forEach(rank => {
+            rankFilter.innerHTML += `<option value="${rank}">${rank}</option>`;
+        });
+    }
+    
+    filterAdminVIPList();
+}
+
+function filterAdminVIPList() {
+    const adminVIPList = document.getElementById('adminVIPList');
+    const userFilter = document.getElementById('vipUserFilter')?.value || '';
+    const rankFilter = document.getElementById('vipRankFilter')?.value || '';
+    
+    let html = '<div class="cards-grid">';
+    let vehicleCount = 0;
+    
+    for (let userId in vipData) {
+        // تطبيق فلتر المستخدم
+        if (userFilter && userId !== userFilter) continue;
+        
+        if (vipData[userId].vehicles) {
+            for (let vehicleId in vipData[userId].vehicles) {
+                const vehicle = vipData[userId].vehicles[vehicleId];
+                
+                // تطبيق فلتر الرتبة
+                if (rankFilter && vehicle.rank !== rankFilter) continue;
+                
+                vehicleCount++;
+                html += `
+                    <div class="card-item" style="border-color: var(--vip);">
+                        <div class="card-header">
+                            <div class="card-title">${vehicle.name}</div>
+                            <div class="card-badge badge-vip">${vehicle.rank}</div>
+                        </div>
+                        <div class="card-body">
+                            <div><i class="fas fa-user"></i> المستخدم: ${userId}</div>
+                            <div><i class="fas fa-code"></i> كود الوشم: ${vehicle.sign || "لا يوجد"}</div>
+                            <div><i class="fas fa-palette"></i> الألوان: ${vehicle.colors?.[0] || "#4ecca3"}, ${vehicle.colors?.[1] || "#1e293b"}</div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="card-meta">
+                                <i class="fas fa-clock"></i> ${formatDate(vehicle.addedAt)}
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-icon btn-danger" onclick="adminDeleteVIPVehicle('${userId}', '${vehicleId}')" data-tooltip="حذف">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    }
+    
+    if (vehicleCount === 0) {
+        html = '<p style="text-align:center; padding:20px; color:var(--text-secondary);">لا توجد مركبات تطابق الفلتر المحدد</p>';
+    } else {
+        html += '</div>';
+    }
+    
+    adminVIPList.innerHTML = html;
+}
+
+function refreshAdminVIPList() {
+    loadAdminVIPList();
+}
+
+function adminDeleteVIPVehicle(userId, vehicleId) {
+    if (currentUser.role !== 'admin') {
+        showToast('غير مصرح لك', 'error');
+        return;
+    }
+    
+    if (!vipData[userId] || !vipData[userId].vehicles || !vipData[userId].vehicles[vehicleId]) {
+        showToast('المركبة غير موجودة', 'error');
+        return;
+    }
+    
+    const vehicleName = vipData[userId].vehicles[vehicleId].name;
+    
+    if (confirm(`هل أنت متأكد من حذف مركبة VIP "${vehicleName}" للمستخدم "${userId}"؟`)) {
+        delete vipData[userId].vehicles[vehicleId];
+        
+        // إذا لم يعد هناك مركبات للمستخدم، احذف بياناته
+        if (Object.keys(vipData[userId].vehicles).length === 0) {
+            delete vipData[userId];
+        }
+        
+        db.ref('vipData').set(vipData)
+            .then(() => {
+                showToast('تم حذف مركبة VIP', 'vip');
+                
+                // إضافة سجل للنشاط
+                addSystemLog('delete', `${currentUser.username} حذف مركبة VIP: ${vehicleName} للمستخدم ${userId}`);
+                
+                // تحديث القائمة
+                filterAdminVIPList();
+                updateVIPSearchFilters();
+            })
+            .catch(error => {
+                console.error('Error deleting VIP vehicle:', error);
+                showToast('خطأ في الحذف', 'error');
+            });
+    }
+}
+
+// صفحة سجلات النظام
+async function loadLogsPage() {
+    if (currentUser.role !== 'admin') {
+        document.getElementById('pageContent').innerHTML = '<div class="not-found"><h1><i class="fas fa-lock"></i></h1><h2>غير مصرح لك</h2><p>هذه الصفحة خاصة بالمدير العام فقط.</p><button class="btn btn-primary" onclick="navigateTo(\'dashboard\')"><i class="fas fa-home"></i> العودة للرئيسية</button></div>';
+        return;
+    }
+    
+    let html = `
+        <div class="fade-in">
+            <div class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-history"></i>
+                        <span>سجلات النظام</span>
+                    </div>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary" onclick="refreshLogs()">
+                            <i class="fas fa-sync-alt"></i> تحديث
+                        </button>
+                        <button class="btn btn-danger" onclick="clearLogs()">
+                            <i class="fas fa-trash"></i> مسح السجلات
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">فلترة حسب النوع:</label>
+                    <select id="logTypeFilter" class="form-control" onchange="filterLogs()">
+                        <option value="">جميع الأنواع</option>
+                        <option value="login">تسجيلات الدخول</option>
+                        <option value="logout">تسجيلات الخروج</option>
+                        <option value="add">إضافات</option>
+                        <option value="edit">تعديلات</option>
+                        <option value="delete">حذف</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">فلترة حسب المستخدم:</label>
+                    <select id="logUserFilter" class="form-control" onchange="filterLogs()">
+                        <option value="">جميع المستخدمين</option>
+                    </select>
+                </div>
+                
+                <div id="systemLogsList">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>جاري تحميل السجلات...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('pageContent').innerHTML = html;
+    
+    // تحميل السجلات
+    loadLogs();
+}
+
+function loadLogs() {
+    const logsList = document.getElementById('systemLogsList');
+    const userFilter = document.getElementById('logUserFilter');
+    
+    if (!logsList) return;
+    
+    // تحديث قائمة المستخدمين
+    if (userFilter) {
+        const usersSet = new Set();
+        systemLogs.forEach(log => usersSet.add(log.user));
+        
+        userFilter.innerHTML = '<option value="">جميع المستخدمين</option>';
+        usersSet.forEach(user => {
+            userFilter.innerHTML += `<option value="${user}">${user}</option>`;
+        });
+    }
+    
+    filterLogs();
+}
+
+function filterLogs() {
+    const logsList = document.getElementById('systemLogsList');
+    const typeFilter = document.getElementById('logTypeFilter')?.value || '';
+    const userFilter = document.getElementById('logUserFilter')?.value || '';
+    
+    let html = '<div style="max-height: 500px; overflow-y: auto;">';
+    html += `
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>التاريخ</th>
+                    <th>النوع</th>
+                    <th>المستخدم</th>
+                    <th>الوصف</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    const filteredLogs = systemLogs.filter(log => {
+        if (typeFilter && log.type !== typeFilter) return false;
+        if (userFilter && log.user !== userFilter) return false;
+        return true;
+    }).reverse(); // عرض الأحدث أولاً
+    
+    if (filteredLogs.length === 0) {
+        html += `
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                    لا توجد سجلات تطابق الفلتر المحدد
+                </td>
+            </tr>
+        `;
+    } else {
+        filteredLogs.forEach(log => {
+            const typeText = log.type === 'login' ? 'تسجيل دخول' :
+                           log.type === 'logout' ? 'تسجيل خروج' :
+                           log.type === 'add' ? 'إضافة' :
+                           log.type === 'edit' ? 'تعديل' :
+                           log.type === 'delete' ? 'حذف' : log.type;
+            
+            const typeClass = log.type === 'login' ? 'success' :
+                            log.type === 'logout' ? 'warning' :
+                            log.type === 'add' ? 'primary' :
+                            log.type === 'edit' ? 'info' :
+                            log.type === 'delete' ? 'danger' : 'secondary';
+            
+            html += `
+                <tr>
+                    <td>${formatDate(log.timestamp)}</td>
+                    <td><span class="card-badge" style="background: var(--${typeClass}); color: white;">${typeText}</span></td>
+                    <td>${log.user}</td>
+                    <td>${log.message}</td>
+                </tr>
+            `;
+        });
+    }
+    
+    html += `
+            </tbody>
+        </table>
+    </div>`;
+    
+    logsList.innerHTML = html;
+}
+
+function refreshLogs() {
+    loadLogs();
+}
+
+function clearLogs() {
+    if (currentUser.role !== 'admin') {
+        showToast('غير مصرح لك', 'error');
+        return;
+    }
+    
+    if (confirm('هل أنت متأكد من مسح جميع سجلات النظام؟ لا يمكن التراجع عن هذا الإجراء.')) {
+        systemLogs = [];
+        db.ref('systemLogs').set([])
+            .then(() => {
+                showToast('تم مسح جميع السجلات', 'warning');
+                loadLogs();
+            })
+            .catch(error => {
+                console.error('Error clearing logs:', error);
+                showToast('خطأ في مسح السجلات', 'error');
+            });
+    }
+}
+
+// صفحة الملف الشخصي
+async function loadProfilePage() {
+    let html = `
+        <div class="fade-in">
+            <div class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-user-circle"></i>
+                        <span>الملف الشخصي</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; gap: 30px; margin-bottom: 30px;">
+                    <div class="user-avatar" style="width: 100px; height: 100px; font-size: 2.5rem;">
+                        ${currentUser.displayName.charAt(0)}
+                    </div>
+                    <div>
+                        <h2 style="color: var(--text); margin-bottom: 10px;">${currentUser.displayName}</h2>
+                        <div id="userRoleBadgeProfile" class="user-role ${currentUser.role}" style="font-size: 1rem;">${getRoleName(currentUser.role)}</div>
+                    </div>
+                </div>
+                
+                <div class="cards-grid">
+                    <div class="card-item">
+                        <div class="card-header">
+                            <div class="card-title">معلومات الحساب</div>
+                            <i class="fas fa-user" style="color: var(--primary);"></i>
+                        </div>
+                        <div class="card-body">
+                            <div><strong>اسم المستخدم:</strong> ${currentUser.username}</div>
+                            <div><strong>البريد الإلكتروني:</strong> ${currentUser.email || 'غير محدد'}</div>
+                            <div><strong>آخر تسجيل دخول:</strong> ${formatDate(currentUser.loginTime)}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-item">
+                        <div class="card-header">
+                            <div class="card-title">إحصائياتي</div>
+                            <i class="fas fa-chart-bar" style="color: var(--primary);"></i>
+                        </div>
+                        <div class="card-body">
+                            <div><strong>عدد مركباتي في VIP:</strong> <span id="myVIPCount">0</span></div>
+                            <div><strong>عدد المركبات المضافة:</strong> <span id="myAddedVehicles">0</span></div>
+                            <div><strong>العضو منذ:</strong> ${formatDate(usersData[currentUser.username]?.createdAt || currentUser.loginTime)}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 30px;">
+                    <button class="btn btn-primary" onclick="showChangePasswordForm()">
+                        <i class="fas fa-key"></i> تغيير كلمة المرور
+                    </button>
+                </div>
+                
+                <div id="changePasswordForm" style="display: none; margin-top: 20px; padding: 20px; background: var(--card-light); border-radius: var(--radius);">
+                    <h4 style="margin-bottom: 20px; color: var(--primary);"><i class="fas fa-key"></i> تغيير كلمة المرور</h4>
+                    
+                    <div class="form-group">
+                        <label class="form-label">كلمة المرور الحالية:</label>
+                        <input type="password" id="currentPassword" class="form-control" placeholder="كلمة المرور الحالية">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">كلمة المرور الجديدة:</label>
+                        <input type="password" id="newPassword" class="form-control" placeholder="كلمة المرور الجديدة">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">تأكيد كلمة المرور الجديدة:</label>
+                        <input type="password" id="confirmNewPassword" class="form-control" placeholder="تأكيد كلمة المرور الجديدة">
+                    </div>
+                    
+                    <div class="form-group">
+                        <button class="btn btn-success" onclick="changePassword()">
+                            <i class="fas fa-save"></i> حفظ التغييرات
+                        </button>
+                        <button class="btn btn-secondary" onclick="hideChangePasswordForm()" style="margin-right: 10px;">
+                            <i class="fas fa-times"></i> إلغاء
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('pageContent').innerHTML = html;
+    
+    // تحديث الإحصائيات
+    updateProfileStats();
+}
+
+function updateProfileStats() {
+    // عدد مركبات VIP الخاصة بالمستخدم
+    let vipCount = 0;
+    if (currentUser.role === 'vip' && vipData[currentUser.username] && vipData[currentUser.username].vehicles) {
+        vipCount = Object.keys(vipData[currentUser.username].vehicles).length;
+    }
+    
+    document.getElementById('myVIPCount').textContent = vipCount;
+    
+    // عدد المركبات المضافة (للمحررين والمديرين)
+    let addedVehicles = 0;
+    if (currentUser.role === 'admin' || currentUser.role === 'editor') {
+        // يمكن حساب هذا من سجلات النظام لاحقاً
+        addedVehicles = 'يتم التطوير';
+    }
+    
+    document.getElementById('myAddedVehicles').textContent = addedVehicles;
+}
+
+function showChangePasswordForm() {
+    document.getElementById('changePasswordForm').style.display = 'block';
+}
+
+function hideChangePasswordForm() {
+    document.getElementById('changePasswordForm').style.display = 'none';
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmNewPassword').value = '';
+}
+
+function changePassword() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+    
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+        showToast('املأ جميع الحقول', 'error');
+        return;
+    }
+    
+    if (newPassword !== confirmNewPassword) {
+        showToast('كلمات المرور غير متطابقة', 'error');
+        return;
+    }
+    
+    // التحقق من كلمة المرور الحالية
+    const user = usersData[currentUser.username];
+    if (!verifyPassword(currentPassword, user.password)) {
+        showToast('كلمة المرور الحالية غير صحيحة', 'error');
+        return;
+    }
+    
+    // تحديث كلمة المرور
+    usersData[currentUser.username].password = btoa(newPassword + firebaseConfig.apiKey);
+    
+    db.ref('users').set(usersData)
+        .then(() => {
+            showToast('تم تغيير كلمة المرور بنجاح', 'success');
+            hideChangePasswordForm();
+            
+            // إضافة سجل للنشاط
+            addSystemLog('edit', `${currentUser.username} غير كلمة المرور`);
+        })
+        .catch(error => {
+            console.error('Error changing password:', error);
+            showToast('خطأ في تغيير كلمة المرور', 'error');
+        });
+}
+
+// صفحة الإعدادات
+async function loadSettingsPage() {
+    let html = `
+        <div class="fade-in">
+            <div class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-cog"></i>
+                        <span>إعدادات النظام</span>
+                    </div>
+                </div>
+                
+                <div class="cards-grid">
+                    <div class="card-item">
+                        <div class="card-header">
+                            <div class="card-title">إعدادات الواجهة</div>
+                            <i class="fas fa-palette" style="color: var(--primary);"></i>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">وضع العرض:</label>
+                                <select class="form-control" onchange="changeTheme(this.value)">
+                                    <option value="dark" selected>مظلم (افتراضي)</option>
+                                    <option value="light">فاتح</option>
+                                    <option value="auto">تلقائي</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <input type="checkbox" id="animations" checked> تفعيل الحركات
+                                </label>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <input type="checkbox" id="notifications" checked> تفعيل الإشعارات
+                                </label>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="saveUISettings()">
+                                <i class="fas fa-save"></i> حفظ
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-item">
+                        <div class="card-header">
+                            <div class="card-title">إعدادات الحساب</div>
+                            <i class="fas fa-user-cog" style="color: var(--primary);"></i>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="form-label">اللغة:</label>
+                                <select class="form-control">
+                                    <option value="ar" selected>العربية</option>
+                                    <option value="en">الإنجليزية</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">تنسيق التاريخ:</label>
+                                <select class="form-control">
+                                    <option value="ar-SA" selected>هجري (افتراضي)</option>
+                                    <option value="en-US">ميلادي</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">المنطقة الزمنية:</label>
+                                <select class="form-control">
+                                    <option value="Asia/Riyadh" selected>الرياض (UTC+3)</option>
+                                    <option value="UTC">توقيت عالمي</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary" onclick="saveAccountSettings()">
+                                <i class="fas fa-save"></i> حفظ
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="card-item">
+                        <div class="card-header">
+                            <div class="card-title">معلومات النظام</div>
+                            <i class="fas fa-info-circle" style="color: var(--primary);"></i>
+                        </div>
+                        <div class="card-body">
+                            <div><strong>إصدار النظام:</strong> 2.0.0</div>
+                            <div><strong>تاريخ الإصدار:</strong> ${formatDate(new Date().toISOString())}</div>
+                            <div><strong>عدد المستخدمين:</strong> ${Object.keys(usersData).length}</div>
+                            <div><strong>عدد المركبات:</strong> <span id="totalVehiclesSettings">0</span></div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-info" onclick="showSystemInfo()">
+                                <i class="fas fa-info"></i> تفاصيل
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('pageContent').innerHTML = html;
+    
+    // تحديث الإحصائيات
+    updateSettingsStats();
+}
+
+function updateSettingsStats() {
+    // حساب إجمالي المركبات
+    let totalVehicles = 0;
+    for (let sectorId in siteData) {
+        if (sectorId !== 'sectors' && siteData[sectorId] && siteData[sectorId].vehicles) {
+            totalVehicles += siteData[sectorId].vehicles.length;
+        }
+    }
+    
+    // إضافة مركبات VIP
+    for (let username in vipData) {
+        if (vipData[username].vehicles) {
+            totalVehicles += Object.keys(vipData[username].vehicles).length;
+        }
+    }
+    
+    document.getElementById('totalVehiclesSettings').textContent = totalVehicles;
+}
+
+function changeTheme(theme) {
+    // يمكن إضافة منطق لتغيير السمة هنا
+    showToast(`تم تغيير السمة إلى ${theme}`, 'info');
+}
+
+function saveUISettings() {
+    showToast('تم حفظ إعدادات الواجهة', 'success');
+}
+
+function saveAccountSettings() {
+    showToast('تم حفظ إعدادات الحساب', 'success');
+}
+
+function showSystemInfo() {
+    let info = `
+        <strong>نظام ميكانيكي فيرج</strong><br>
+        الإصدار: 2.0.0<br>
+        المطور: فريق ميكانيكي فيرج<br>
+        الرخصة: MIT<br>
+        Firebase: ${firebaseConfig.projectId}<br>
+        آخر تحديث: ${formatDate(new Date().toISOString())}
+    `;
+    
+    alert(info);
+}
 
 // ============================================
 // تهيئة النظام
@@ -2046,7 +4216,8 @@ window.addEventListener('DOMContentLoaded', function() {
         const menuToggle = document.querySelector('.menu-toggle');
         
         if (window.innerWidth < 992 && 
-            sidebar.classList.contains('active') && 
+            sidebar && sidebar.classList.contains('active') && 
+            menuToggle && 
             !sidebar.contains(event.target) && 
             !menuToggle.contains(event.target)) {
             toggleSidebar();
