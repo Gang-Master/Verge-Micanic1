@@ -791,22 +791,30 @@ const firebaseConfig = {
 };
 
 // تهيئة Firebase
+let firebaseInitialized = false;
 try {
     firebase.initializeApp(firebaseConfig);
+    firebaseInitialized = true;
     console.log('✅ Firebase initialized');
 } catch (error) {
     console.error('❌ Firebase error:', error);
     showToast('خطأ في تهيئة قاعدة البيانات', 'error');
 }
 
-const db = firebase.database();
+const db = firebaseInitialized ? firebase.database() : null;
 
 // ============================================
 // متغيرات عامة
 // ============================================
 let currentUser = null;
 let usersData = {};
-let siteData = {};
+let siteData = {
+    sectors: { 's_default': 'القطاع العام' },
+    s_default: {
+        colors: ["#4ecca3", "#1e293b"],
+        vehicles: []
+    }
+};
 let systemLogs = [];
 let systemSettings = {};
 let currentPage = 'dashboard';
@@ -960,7 +968,10 @@ async function addSystemLog(type, message, details = null) {
         systemLogs.unshift(logData);
         systemLogs = systemLogs.slice(0, 1000);
         
-        await db.ref('systemLogs').set(systemLogs);
+        if (db) {
+            await db.ref('systemLogs').set(systemLogs);
+        }
+        
         await sendDiscordWebhook(logData);
         
     } catch (error) {
@@ -972,6 +983,11 @@ async function addSystemLog(type, message, details = null) {
 // تحميل البيانات
 // ============================================
 function loadAllData() {
+    if (!db) {
+        console.error('Firebase not initialized');
+        return;
+    }
+    
     loadUsersData();
     loadSiteData();
     loadSystemLogs();
@@ -979,20 +995,26 @@ function loadAllData() {
 }
 
 function loadUsersData() {
+    if (!db) return;
+    
     db.ref('users').on('value', snapshot => {
         usersData = snapshot.val() || {};
+        console.log('Users loaded:', usersData);
         initializeDefaultUsers();
         restoreUserSession();
     });
 }
 
 function loadSiteData() {
+    if (!db) return;
+    
     db.ref('siteData').on('value', snapshot => {
         const data = snapshot.val();
         
         if (data) {
             siteData = data;
         } else {
+            // Create default data
             siteData = {
                 sectors: { 's_default': 'القطاع العام' },
                 s_default: {
@@ -1003,11 +1025,14 @@ function loadSiteData() {
             db.ref('siteData').set(siteData);
         }
         
+        console.log('Site data loaded');
         updateDashboardStats();
     });
 }
 
 function loadSystemLogs() {
+    if (!db) return;
+    
     db.ref('systemLogs').limitToLast(1000).on('value', snapshot => {
         const logs = snapshot.val() || [];
         systemLogs = Array.isArray(logs) ? logs : Object.values(logs);
@@ -1015,6 +1040,8 @@ function loadSystemLogs() {
 }
 
 function loadSystemSettings() {
+    if (!db) return;
+    
     db.ref('systemSettings').on('value', snapshot => {
         const settings = snapshot.val();
         
@@ -1080,10 +1107,11 @@ function initializeDefaultUsers() {
         if (!usersData[username]) {
             usersData[username] = defaultUsers[username];
             needsUpdate = true;
+            console.log(`Added default user: ${username}`);
         }
     }
     
-    if (needsUpdate) {
+    if (needsUpdate && db) {
         db.ref('users').set(usersData);
     }
 }
@@ -1100,9 +1128,16 @@ function verifyPassword(inputPassword, storedHash) {
 // نظام تسجيل الدخول
 // ============================================
 async function performLogin() {
+    console.log('Login button clicked');
+    
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value;
     const errorElement = document.getElementById('loginError');
+    
+    if (!errorElement) {
+        console.error('Error element not found');
+        return;
+    }
     
     errorElement.style.display = 'none';
     errorElement.textContent = '';
@@ -1113,11 +1148,15 @@ async function performLogin() {
         return;
     }
     
+    console.log('Looking for user:', username);
+    console.log('Users data:', usersData);
+    
     const user = usersData[username];
     
     if (!user) {
         errorElement.textContent = 'اسم المستخدم غير صحيح';
         errorElement.style.display = 'block';
+        console.log('User not found:', username);
         return;
     }
     
@@ -1126,6 +1165,10 @@ async function performLogin() {
         errorElement.style.display = 'block';
         return;
     }
+    
+    const hashedInput = hashPassword(password);
+    console.log('Hashed input:', hashedInput);
+    console.log('Stored hash:', user.password);
     
     if (!verifyPassword(password, user.password)) {
         errorElement.textContent = 'كلمة المرور غير صحيحة';
@@ -1136,7 +1179,9 @@ async function performLogin() {
     try {
         // تحديث وقت آخر دخول
         usersData[username].lastLogin = new Date().toISOString();
-        await db.ref('users').set(usersData);
+        if (db) {
+            await db.ref('users').set(usersData);
+        }
         
         // تسجيل الدخول
         currentUser = {
@@ -1176,7 +1221,7 @@ async function performLogin() {
         
     } catch (error) {
         console.error('❌ Error during login:', error);
-        errorElement.textContent = 'حدث خطأ أثناء تسجيل الدخول';
+        errorElement.textContent = 'حدث خطأ أثناء تسجيل الدخول: ' + error.message;
         errorElement.style.display = 'block';
     }
 }
@@ -1186,6 +1231,8 @@ function restoreUserSession() {
     if (session) {
         try {
             const sessionData = JSON.parse(session);
+            console.log('Restoring session for:', sessionData.username);
+            
             const user = usersData[sessionData.username];
             
             if (user && user.isActive) {
@@ -1207,7 +1254,9 @@ function restoreUserSession() {
                     updateUserInterface();
                     
                     usersData[sessionData.username].lastLogin = new Date().toISOString();
-                    db.ref('users').set(usersData);
+                    if (db) {
+                        db.ref('users').set(usersData);
+                    }
                     
                     updateCurrentTime();
                     setInterval(updateCurrentTime, 60000);
@@ -1220,11 +1269,15 @@ function restoreUserSession() {
                         displayName: user.displayName || sessionData.username,
                         timestamp: Date.now()
                     }));
+                    
+                    console.log('Session restored successfully');
                 } else {
+                    console.log('Session expired');
                     localStorage.removeItem('verg_user_session');
                 }
             }
         } catch (error) {
+            console.error('Error restoring session:', error);
             localStorage.removeItem('verg_user_session');
         }
     }
@@ -1233,10 +1286,16 @@ function restoreUserSession() {
 function updateUserInterface() {
     if (!currentUser) return;
     
-    document.getElementById('userDisplayName').textContent = currentUser.displayName;
-    document.getElementById('userAvatar').textContent = currentUser.displayName.charAt(0);
-    document.getElementById('userRoleBadge').textContent = getRoleName(currentUser.role);
-    document.getElementById('userRoleBadge').className = `user-role ${currentUser.role}`;
+    const userDisplayName = document.getElementById('userDisplayName');
+    const userAvatar = document.getElementById('userAvatar');
+    const userRoleBadge = document.getElementById('userRoleBadge');
+    
+    if (userDisplayName) userDisplayName.textContent = currentUser.displayName;
+    if (userAvatar) userAvatar.textContent = currentUser.displayName.charAt(0);
+    if (userRoleBadge) {
+        userRoleBadge.textContent = getRoleName(currentUser.role);
+        userRoleBadge.className = `user-role ${currentUser.role}`;
+    }
     
     const vipNavSection = document.getElementById('vipNavSection');
     const adminNavSection = document.getElementById('adminNavSection');
@@ -1268,7 +1327,10 @@ function logout() {
     
     document.getElementById('loginUsername').value = '';
     document.getElementById('loginPassword').value = '';
-    document.getElementById('loginError').style.display = 'none';
+    const errorElement = document.getElementById('loginError');
+    if (errorElement) {
+        errorElement.style.display = 'none';
+    }
     
     showToast('تم تسجيل الخروج بنجاح', 'info');
 }
@@ -1574,127 +1636,43 @@ async function loadSearchPage() {
     
     pageContent.innerHTML = html;
     
-    const sectorSelect = document.getElementById('searchSector');
-    if (!sectorSelect) return;
-    
-    sectorSelect.innerHTML = '<option value="">-- اختر القطاع --</option>';
-    for (let sectorId in siteData.sectors) {
-        sectorSelect.innerHTML += `<option value="${sectorId}">${siteData.sectors[sectorId]}</option>`;
-    }
-    
-    sectorSelect.onchange = function() {
-        const sectorId = this.value;
-        const rankSelect = document.getElementById('searchRank');
-        const vehicleSelect = document.getElementById('searchVehicle');
-        const searchResult = document.getElementById('searchResult');
-        
-        if (!rankSelect || !vehicleSelect || !searchResult) return;
-        
-        rankSelect.innerHTML = '<option value="">-- اختر الرتبة --</option>';
-        rankSelect.disabled = true;
-        vehicleSelect.disabled = true;
-        vehicleSelect.innerHTML = '<option value="">-- اختر المركبة --</option>';
-        searchResult.style.display = 'none';
-        
-        if (sectorId && siteData[sectorId] && siteData[sectorId].vehicles) {
-            const ranksSet = new Set();
-            siteData[sectorId].vehicles.forEach(vehicle => ranksSet.add(vehicle.rank || "عام"));
-            const ranks = Array.from(ranksSet).sort();
-            ranks.forEach(rank => rankSelect.innerHTML += `<option value="${rank}">${rank}</option>`);
-            rankSelect.disabled = false;
-        }
-    };
-    
-    const rankSelect = document.getElementById('searchRank');
-    if (rankSelect) {
-        rankSelect.onchange = function() {
-            const sectorId = document.getElementById('searchSector').value;
-            const rankValue = this.value;
-            const vehicleSelect = document.getElementById('searchVehicle');
-            const searchResult = document.getElementById('searchResult');
+    // إضافة القطاعات إلى القائمة
+    setTimeout(() => {
+        const sectorSelect = document.getElementById('searchSector');
+        if (sectorSelect) {
+            sectorSelect.innerHTML = '<option value="">-- اختر القطاع --</option>';
+            for (let sectorId in siteData.sectors) {
+                sectorSelect.innerHTML += `<option value="${sectorId}">${siteData.sectors[sectorId]}</option>`;
+            }
             
-            if (!vehicleSelect || !searchResult) return;
-            
-            vehicleSelect.innerHTML = '<option value="">-- اختر المركبة --</option>';
-            vehicleSelect.disabled = true;
-            searchResult.style.display = 'none';
-            
-            if (sectorId && rankValue && siteData[sectorId] && siteData[sectorId].vehicles) {
-                let hasVehicles = false;
-                siteData[sectorId].vehicles.forEach((vehicle, index) => {
-                    if ((vehicle.rank || "عام") === rankValue) {
-                        vehicleSelect.innerHTML += `<option value="${index}">${vehicle.name}</option>`;
-                        hasVehicles = true;
+            sectorSelect.onchange = function() {
+                const sectorId = this.value;
+                const rankSelect = document.getElementById('searchRank');
+                const vehicleSelect = document.getElementById('searchVehicle');
+                const searchResult = document.getElementById('searchResult');
+                
+                if (rankSelect && vehicleSelect && searchResult) {
+                    rankSelect.innerHTML = '<option value="">-- اختر الرتبة --</option>';
+                    rankSelect.disabled = true;
+                    vehicleSelect.disabled = true;
+                    vehicleSelect.innerHTML = '<option value="">-- اختر المركبة --</option>';
+                    searchResult.style.display = 'none';
+                    
+                    if (sectorId && siteData[sectorId] && siteData[sectorId].vehicles) {
+                        const ranksSet = new Set();
+                        siteData[sectorId].vehicles.forEach(vehicle => {
+                            ranksSet.add(vehicle.rank || "عام");
+                        });
+                        const ranks = Array.from(ranksSet).sort();
+                        ranks.forEach(rank => {
+                            rankSelect.innerHTML += `<option value="${rank}">${rank}</option>`;
+                        });
+                        rankSelect.disabled = false;
                     }
-                });
-                if (hasVehicles) vehicleSelect.disabled = false;
-            }
-        };
-    }
-    
-    const vehicleSelect = document.getElementById('searchVehicle');
-    if (vehicleSelect) {
-        vehicleSelect.onchange = function() {
-            const sectorId = document.getElementById('searchSector').value;
-            const vehicleIndex = this.value;
-            const resultSection = document.getElementById('searchResult');
-            
-            if (!resultSection) return;
-            
-            if (vehicleIndex === "" || !sectorId) {
-                resultSection.style.display = 'none';
-                return;
-            }
-            
-            try {
-                const vehicle = siteData[sectorId].vehicles[parseInt(vehicleIndex)];
-                const colors = siteData[sectorId].colors || ["#FFFFFF", "#000000"];
-                
-                let resultHtml = `
-                    <h3 style="text-align:center; margin-bottom:20px; color: var(--primary);">${vehicle.name || "غير معروف"}</h3>
-                    
-                    <div style="display:flex; gap:15px; margin:15px 0;">
-                        <div style="flex:1; background: ${colors[0]}; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-family: monospace; font-weight: bold;">
-                            ${colors[0]}
-                        </div>
-                        <div style="flex:1; background: ${colors[1]}; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-family: monospace; font-weight: bold;">
-                            ${colors[1]}
-                        </div>
-                    </div>
-                    
-                    <div style="margin: 15px 0;">
-                        <div style="font-weight: 600; margin-bottom: 5px;">كود الوشم:</div>
-                        <div style="background: var(--bg); padding: 15px; border-radius: 8px; font-family: monospace;">
-                            ${vehicle.sign || "لا يوجد كود"}
-                        </div>
-                    </div>
-                `;
-                
-                if (vehicle.link && vehicle.link.startsWith('http')) {
-                    resultHtml += `
-                        <div style="margin: 15px 0;">
-                            <div style="font-weight: 600; margin-bottom: 5px;">معاينة الوشم:</div>
-                            <img src="${vehicle.link}" style="width:100%; max-height:300px; object-fit:contain; border-radius:10px; border:2px solid var(--primary);">
-                        </div>
-                    `;
                 }
-                
-                const resultContent = document.getElementById('resultContent');
-                const resultTitle = document.getElementById('resultTitle');
-                
-                if (resultContent && resultTitle) {
-                    resultContent.innerHTML = resultHtml;
-                    resultTitle.textContent = vehicle.name;
-                }
-                
-                resultSection.style.display = 'block';
-                
-            } catch (error) {
-                console.error('Error showing result:', error);
-                showToast('خطأ في عرض النتيجة', 'error');
-            }
-        };
-    }
+            };
+        }
+    }, 100);
 }
 
 async function loadSystemSettingsPage() {
@@ -1738,60 +1716,38 @@ async function loadSystemSettingsPage() {
                     <i class="fas fa-save"></i> حفظ الإعدادات
                 </button>
             </div>
-            
-            <div class="content-section">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-database"></i>
-                        <span>إحصائيات قاعدة البيانات</span>
-                    </div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                    <div style="background: var(--card-light); padding: 20px; border-radius: var(--radius); text-align: center;">
-                        <div style="font-size: 2rem; font-weight: 800; color: var(--primary);">${Object.keys(usersData).length}</div>
-                        <div style="color: var(--text-secondary);">عدد المستخدمين</div>
-                    </div>
-                    
-                    <div style="background: var(--card-light); padding: 20px; border-radius: var(--radius); text-align: center;">
-                        <div style="font-size: 2rem; font-weight: 800; color: var(--primary);">${systemLogs.length}</div>
-                        <div style="color: var(--text-secondary);">عدد السجلات</div>
-                    </div>
-                    
-                    <div style="background: var(--card-light); padding: 20px; border-radius: var(--radius); text-align: center;">
-                        <div style="font-size: 2rem; font-weight: 800; color: var(--primary);">${Object.keys(siteData.sectors || {}).length}</div>
-                        <div style="color: var(--text-secondary);">عدد القطاعات</div>
-                    </div>
-                </div>
-            </div>
         </div>
     `;
     
     pageContent.innerHTML = html;
     
-    const saveSettingsBtn = document.getElementById('saveSettings');
-    if (saveSettingsBtn) {
-        saveSettingsBtn.onclick = async function() {
-            try {
-                const updatedSettings = {
-                    ...systemSettings,
-                    siteName: document.getElementById('siteName').value,
-                    discordWebhook: document.getElementById('discordWebhook').value,
-                    maintenanceMode: document.getElementById('maintenanceMode').checked
-                };
-                
-                await db.ref('systemSettings').set(updatedSettings);
-                systemSettings = updatedSettings;
-                
-                await addSystemLog('edit', 'تم تحديث إعدادات النظام');
-                showToast('تم حفظ الإعدادات بنجاح', 'success');
-                
-            } catch (error) {
-                console.error('❌ Error saving settings:', error);
-                showToast('خطأ في حفظ الإعدادات', 'error');
-            }
-        };
-    }
+    setTimeout(() => {
+        const saveSettingsBtn = document.getElementById('saveSettings');
+        if (saveSettingsBtn) {
+            saveSettingsBtn.onclick = async function() {
+                try {
+                    const updatedSettings = {
+                        ...systemSettings,
+                        siteName: document.getElementById('siteName').value,
+                        discordWebhook: document.getElementById('discordWebhook').value,
+                        maintenanceMode: document.getElementById('maintenanceMode').checked
+                    };
+                    
+                    if (db) {
+                        await db.ref('systemSettings').set(updatedSettings);
+                        systemSettings = updatedSettings;
+                        
+                        await addSystemLog('edit', 'تم تحديث إعدادات النظام');
+                        showToast('تم حفظ الإعدادات بنجاح', 'success');
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error saving settings:', error);
+                    showToast('خطأ في حفظ الإعدادات', 'error');
+                }
+            };
+        }
+    }, 100);
 }
 
 // ============================================
@@ -1800,29 +1756,30 @@ async function loadSystemSettingsPage() {
 window.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 بدء تحميل النظام...');
     
-    // تحميل البيانات
-    loadAllData();
-    
-    // إعداد الأحداث
+    // إضافة معالج حدث لزر تسجيل الدخول
     const loginButton = document.getElementById('loginButton');
-    const loginPassword = document.getElementById('loginPassword');
-    const menuToggle = document.getElementById('menuToggle');
-    const logoutButton = document.getElementById('logoutButton');
-    
     if (loginButton) {
         loginButton.addEventListener('click', performLogin);
+        console.log('Login button event listener added');
+    } else {
+        console.error('Login button not found!');
     }
     
+    // إضافة معالج حدث لكلمة المرور (Enter)
+    const loginPassword = document.getElementById('loginPassword');
     if (loginPassword) {
         loginPassword.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') performLogin();
         });
     }
     
+    // إعداد الأحداث الأخرى
+    const menuToggle = document.getElementById('menuToggle');
     if (menuToggle) {
         menuToggle.addEventListener('click', toggleSidebar);
     }
     
+    const logoutButton = document.getElementById('logoutButton');
     if (logoutButton) {
         logoutButton.addEventListener('click', logout);
     }
@@ -1834,6 +1791,16 @@ window.addEventListener('DOMContentLoaded', function() {
             if (page) navigateTo(page);
         });
     });
+    
+    // تحميل البيانات من Firebase
+    if (firebaseInitialized) {
+        loadAllData();
+    } else {
+        console.log('Firebase not initialized, using local data');
+        // استخدام بيانات محلية للاختبار
+        initializeDefaultUsers();
+        restoreUserSession();
+    }
     
     // إضافة اللوجو المحلي
     const logoContainer = document.getElementById('logoContainer');
