@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        /* كل الأنماط كما هي بدون تغيير */
         :root {
             --primary: #4ecca3;
             --primary-dark: #3daa8a;
@@ -889,11 +890,17 @@ async function addSystemLog(type, message, details = null) {
 function loadAllData() {
     console.log('📊 Loading data in simulated mode...');
     
+    // تنظيف localStorage للبدء من جديد (فقط للاختبار)
+    // localStorage.clear();
+    
     // تحميل بيانات المستخدمين من localStorage أو إنشاء بيانات افتراضية
     const savedUsers = localStorage.getItem('verg_users');
     if (savedUsers) {
         usersData = JSON.parse(savedUsers);
         console.log('👥 Loaded users from localStorage:', Object.keys(usersData));
+        
+        // التحقق من تنسيق كلمات المرور وتحويلها إذا لزم الأمر
+        fixPasswordsIfNeeded();
     } else {
         initializeDefaultUsers();
     }
@@ -937,15 +944,36 @@ function loadAllData() {
 }
 
 // ============================================
+// إصلاح كلمات المرور إذا كانت بتنسيق خاطئ
+// ============================================
+function fixPasswordsIfNeeded() {
+    let needsFix = false;
+    const passwordsToFix = ['admin123', 'editor123', 'vip123', 'user123'];
+    
+    for (let username in usersData) {
+        const user = usersData[username];
+        if (user.password && passwordsToFix.includes(user.password)) {
+            console.log(`🔧 Fixing password for ${username}: "${user.password}" -> "${btoa(user.password)}"`);
+            user.password = btoa(user.password);
+            needsFix = true;
+        }
+    }
+    
+    if (needsFix) {
+        localStorage.setItem('verg_users', JSON.stringify(usersData));
+        console.log('✅ Passwords fixed and saved');
+    }
+}
+
+// ============================================
 // إدارة المستخدمين (محاكاة)
 // ============================================
 function initializeDefaultUsers() {
-    console.log('🔄 Initializing default users...');
+    console.log('🔄 Initializing default users with base64 encrypted passwords...');
     
-    // إنشاء كلمات مرور مشفرة بسيطة (base64)
     const defaultUsers = {
         'admin': {
-            password: btoa('admin123'), // base64 encoding
+            password: btoa('admin123'), // مشفرة بـ base64
             email: 'admin@verg.com',
             role: 'admin',
             displayName: 'المدير العام',
@@ -994,8 +1022,20 @@ function hashPassword(password) {
 }
 
 function verifyPassword(inputPassword, storedHash) {
-    // مقارنة كلمات المرور المشفرة
-    return hashPassword(inputPassword) === storedHash;
+    try {
+        // محاولة فك التشفير أولاً لمعرفة التنسيق
+        try {
+            const decoded = atob(storedHash);
+            // إذا نجح فك التشفير، فهذا يعني أن كلمة المرور مشفرة
+            return hashPassword(inputPassword) === storedHash;
+        } catch {
+            // إذا فشل فك التشفير، فقد تكون كلمة المرور غير مشفرة
+            return inputPassword === storedHash;
+        }
+    } catch (error) {
+        console.error('❌ Error verifying password:', error);
+        return false;
+    }
 }
 
 // ============================================
@@ -1769,9 +1809,6 @@ window.addEventListener('DOMContentLoaded', function() {
     console.log('✅ تم تهيئة النظام بنجاح');
     console.log('👥 المستخدمون المتاحون: admin, editor, vip, user');
     console.log('🔑 كلمة المرور لجميع الحسابات: admin123, editor123, vip123, user123');
-    
-    // تنظيف أي جلسة سابقة للاختبار
-    // localStorage.removeItem('verg_user_session');
 });
 </script>
 </body>
