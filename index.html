@@ -796,6 +796,7 @@ try {
     console.log('✅ Firebase initialized');
 } catch (error) {
     console.error('❌ Firebase error:', error);
+    showToast('خطأ في تهيئة قاعدة البيانات', 'error');
 }
 
 const db = firebase.database();
@@ -815,6 +816,8 @@ let currentPage = 'dashboard';
 // ============================================
 function showToast(message, type = 'success', duration = 3000) {
     const toast = document.getElementById('toast');
+    if (!toast) return;
+    
     toast.textContent = message;
     toast.className = `toast toast-${type}`;
     toast.style.display = 'flex';
@@ -845,12 +848,17 @@ function updateCurrentTime() {
         hour: '2-digit',
         minute: '2-digit'
     });
-    document.getElementById('currentTime').textContent = timeString;
+    const timeElement = document.getElementById('currentTime');
+    if (timeElement) {
+        timeElement.textContent = timeString;
+    }
 }
 
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('active');
+    if (sidebar) {
+        sidebar.classList.toggle('active');
+    }
 }
 
 function getRoleName(role) {
@@ -1234,22 +1242,16 @@ function updateUserInterface() {
     const adminNavSection = document.getElementById('adminNavSection');
     const superAdminNavSection = document.getElementById('superAdminNavSection');
     
-    if (currentUser.role === 'vip') {
-        vipNavSection.style.display = 'block';
-    } else {
-        vipNavSection.style.display = 'none';
+    if (vipNavSection) {
+        vipNavSection.style.display = (currentUser.role === 'vip') ? 'block' : 'none';
     }
     
-    if (currentUser.role === 'admin' || currentUser.role === 'editor') {
-        adminNavSection.style.display = 'block';
-    } else {
-        adminNavSection.style.display = 'none';
+    if (adminNavSection) {
+        adminNavSection.style.display = (currentUser.role === 'admin' || currentUser.role === 'editor') ? 'block' : 'none';
     }
     
-    if (currentUser.role === 'admin') {
-        superAdminNavSection.style.display = 'block';
-    } else {
-        superAdminNavSection.style.display = 'none';
+    if (superAdminNavSection) {
+        superAdminNavSection.style.display = (currentUser.role === 'admin') ? 'block' : 'none';
     }
 }
 
@@ -1282,13 +1284,25 @@ function updateDashboardStats() {
         }
     }
     
-    document.getElementById('totalVehicles').textContent = totalVehicles;
-    document.getElementById('totalUsers').textContent = Object.keys(usersData).length;
+    const totalVehiclesElement = document.getElementById('totalVehicles');
+    const totalUsersElement = document.getElementById('totalUsers');
+    
+    if (totalVehiclesElement) {
+        totalVehiclesElement.textContent = totalVehicles;
+    }
+    
+    if (totalUsersElement) {
+        totalUsersElement.textContent = Object.keys(usersData).length;
+    }
     
     if (currentPage === 'dashboard') {
-        document.getElementById('dashboardVehicles')?.textContent = totalVehicles;
-        document.getElementById('dashboardUsers')?.textContent = Object.keys(usersData).length;
-        document.getElementById('dashboardSectors')?.textContent = Object.keys(siteData.sectors || {}).length;
+        const dashboardVehicles = document.getElementById('dashboardVehicles');
+        const dashboardUsers = document.getElementById('dashboardUsers');
+        const dashboardSectors = document.getElementById('dashboardSectors');
+        
+        if (dashboardVehicles) dashboardVehicles.textContent = totalVehicles;
+        if (dashboardUsers) dashboardUsers.textContent = Object.keys(usersData).length;
+        if (dashboardSectors) dashboardSectors.textContent = Object.keys(siteData.sectors || {}).length;
     }
 }
 
@@ -1312,13 +1326,19 @@ function navigateTo(page) {
         'system-settings': 'إعدادات النظام'
     };
     
-    document.getElementById('pageTitle').textContent = pageTitles[page] || 'صفحة';
+    const pageTitleElement = document.getElementById('pageTitle');
+    if (pageTitleElement) {
+        pageTitleElement.textContent = pageTitles[page] || 'صفحة';
+    }
     
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
     });
     
-    document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
+    const activeNavItem = document.querySelector(`.nav-item[data-page="${page}"]`);
+    if (activeNavItem) {
+        activeNavItem.classList.add('active');
+    }
     
     loadPageContent(page);
     
@@ -1347,6 +1367,8 @@ function checkPagePermission(page) {
 
 async function loadPageContent(page) {
     const pageContent = document.getElementById('pageContent');
+    if (!pageContent) return;
+    
     pageContent.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>جاري تحميل الصفحة...</p></div>';
     
     if (!checkPagePermission(page)) {
@@ -1369,6 +1391,7 @@ async function loadPageContent(page) {
                 pageContent.innerHTML = `<div class="content-section"><p>صفحة ${page} قيد التطوير...</p></div>`;
         }
     } catch (error) {
+        console.error('❌ Error loading page:', error);
         pageContent.innerHTML = '<div class="content-section"><p>حدث خطأ أثناء تحميل الصفحة</p></div>';
     }
 }
@@ -1377,6 +1400,9 @@ async function loadPageContent(page) {
 // الصفحات
 // ============================================
 async function loadDashboard() {
+    const pageContent = document.getElementById('pageContent');
+    if (!pageContent) return;
+    
     let html = `
         <div class="fade-in">
             <div class="stats-grid">
@@ -1499,11 +1525,14 @@ async function loadDashboard() {
         </div>
     `;
     
-    document.getElementById('pageContent').innerHTML = html;
+    pageContent.innerHTML = html;
     updateDashboardStats();
 }
 
 async function loadSearchPage() {
+    const pageContent = document.getElementById('pageContent');
+    if (!pageContent) return;
+    
     let html = `
         <div class="fade-in">
             <div class="content-section">
@@ -1543,9 +1572,11 @@ async function loadSearchPage() {
         </div>
     `;
     
-    document.getElementById('pageContent').innerHTML = html;
+    pageContent.innerHTML = html;
     
     const sectorSelect = document.getElementById('searchSector');
+    if (!sectorSelect) return;
+    
     sectorSelect.innerHTML = '<option value="">-- اختر القطاع --</option>';
     for (let sectorId in siteData.sectors) {
         sectorSelect.innerHTML += `<option value="${sectorId}">${siteData.sectors[sectorId]}</option>`;
@@ -1554,11 +1585,16 @@ async function loadSearchPage() {
     sectorSelect.onchange = function() {
         const sectorId = this.value;
         const rankSelect = document.getElementById('searchRank');
+        const vehicleSelect = document.getElementById('searchVehicle');
+        const searchResult = document.getElementById('searchResult');
+        
+        if (!rankSelect || !vehicleSelect || !searchResult) return;
         
         rankSelect.innerHTML = '<option value="">-- اختر الرتبة --</option>';
         rankSelect.disabled = true;
-        document.getElementById('searchVehicle').disabled = true;
-        document.getElementById('searchResult').style.display = 'none';
+        vehicleSelect.disabled = true;
+        vehicleSelect.innerHTML = '<option value="">-- اختر المركبة --</option>';
+        searchResult.style.display = 'none';
         
         if (sectorId && siteData[sectorId] && siteData[sectorId].vehicles) {
             const ranksSet = new Set();
@@ -1569,82 +1605,102 @@ async function loadSearchPage() {
         }
     };
     
-    document.getElementById('searchRank').onchange = function() {
-        const sectorId = document.getElementById('searchSector').value;
-        const rankValue = this.value;
-        const vehicleSelect = document.getElementById('searchVehicle');
-        
-        vehicleSelect.innerHTML = '<option value="">-- اختر المركبة --</option>';
-        vehicleSelect.disabled = true;
-        document.getElementById('searchResult').style.display = 'none';
-        
-        if (sectorId && rankValue && siteData[sectorId] && siteData[sectorId].vehicles) {
-            let hasVehicles = false;
-            siteData[sectorId].vehicles.forEach((vehicle, index) => {
-                if ((vehicle.rank || "عام") === rankValue) {
-                    vehicleSelect.innerHTML += `<option value="${index}">${vehicle.name}</option>`;
-                    hasVehicles = true;
-                }
-            });
-            if (hasVehicles) vehicleSelect.disabled = false;
-        }
-    };
+    const rankSelect = document.getElementById('searchRank');
+    if (rankSelect) {
+        rankSelect.onchange = function() {
+            const sectorId = document.getElementById('searchSector').value;
+            const rankValue = this.value;
+            const vehicleSelect = document.getElementById('searchVehicle');
+            const searchResult = document.getElementById('searchResult');
+            
+            if (!vehicleSelect || !searchResult) return;
+            
+            vehicleSelect.innerHTML = '<option value="">-- اختر المركبة --</option>';
+            vehicleSelect.disabled = true;
+            searchResult.style.display = 'none';
+            
+            if (sectorId && rankValue && siteData[sectorId] && siteData[sectorId].vehicles) {
+                let hasVehicles = false;
+                siteData[sectorId].vehicles.forEach((vehicle, index) => {
+                    if ((vehicle.rank || "عام") === rankValue) {
+                        vehicleSelect.innerHTML += `<option value="${index}">${vehicle.name}</option>`;
+                        hasVehicles = true;
+                    }
+                });
+                if (hasVehicles) vehicleSelect.disabled = false;
+            }
+        };
+    }
     
-    document.getElementById('searchVehicle').onchange = function() {
-        const sectorId = document.getElementById('searchSector').value;
-        const vehicleIndex = this.value;
-        const resultSection = document.getElementById('searchResult');
-        
-        if (vehicleIndex === "" || !sectorId) {
-            resultSection.style.display = 'none';
-            return;
-        }
-        
-        try {
-            const vehicle = siteData[sectorId].vehicles[parseInt(vehicleIndex)];
-            const colors = siteData[sectorId].colors || ["#FFFFFF", "#000000"];
+    const vehicleSelect = document.getElementById('searchVehicle');
+    if (vehicleSelect) {
+        vehicleSelect.onchange = function() {
+            const sectorId = document.getElementById('searchSector').value;
+            const vehicleIndex = this.value;
+            const resultSection = document.getElementById('searchResult');
             
-            let resultHtml = `
-                <h3 style="text-align:center; margin-bottom:20px; color: var(--primary);">${vehicle.name || "غير معروف"}</h3>
-                
-                <div style="display:flex; gap:15px; margin:15px 0;">
-                    <div style="flex:1; background: ${colors[0]}; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-family: monospace; font-weight: bold;">
-                        ${colors[0]}
-                    </div>
-                    <div style="flex:1; background: ${colors[1]}; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-family: monospace; font-weight: bold;">
-                        ${colors[1]}
-                    </div>
-                </div>
-                
-                <div style="margin: 15px 0;">
-                    <div style="font-weight: 600; margin-bottom: 5px;">كود الوشم:</div>
-                    <div style="background: var(--bg); padding: 15px; border-radius: 8px; font-family: monospace;">
-                        ${vehicle.sign || "لا يوجد كود"}
-                    </div>
-                </div>
-            `;
+            if (!resultSection) return;
             
-            if (vehicle.link && vehicle.link.startsWith('http')) {
-                resultHtml += `
-                    <div style="margin: 15px 0;">
-                        <div style="font-weight: 600; margin-bottom: 5px;">معاينة الوشم:</div>
-                        <img src="${vehicle.link}" style="width:100%; max-height:300px; object-fit:contain; border-radius:10px; border:2px solid var(--primary);">
-                    </div>
-                `;
+            if (vehicleIndex === "" || !sectorId) {
+                resultSection.style.display = 'none';
+                return;
             }
             
-            document.getElementById('resultContent').innerHTML = resultHtml;
-            document.getElementById('resultTitle').textContent = vehicle.name;
-            resultSection.style.display = 'block';
-            
-        } catch (error) {
-            console.error('Error showing result:', error);
-            showToast('خطأ في عرض النتيجة', 'error');
-        }
-    };
+            try {
+                const vehicle = siteData[sectorId].vehicles[parseInt(vehicleIndex)];
+                const colors = siteData[sectorId].colors || ["#FFFFFF", "#000000"];
+                
+                let resultHtml = `
+                    <h3 style="text-align:center; margin-bottom:20px; color: var(--primary);">${vehicle.name || "غير معروف"}</h3>
+                    
+                    <div style="display:flex; gap:15px; margin:15px 0;">
+                        <div style="flex:1; background: ${colors[0]}; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-family: monospace; font-weight: bold;">
+                            ${colors[0]}
+                        </div>
+                        <div style="flex:1; background: ${colors[1]}; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-family: monospace; font-weight: bold;">
+                            ${colors[1]}
+                        </div>
+                    </div>
+                    
+                    <div style="margin: 15px 0;">
+                        <div style="font-weight: 600; margin-bottom: 5px;">كود الوشم:</div>
+                        <div style="background: var(--bg); padding: 15px; border-radius: 8px; font-family: monospace;">
+                            ${vehicle.sign || "لا يوجد كود"}
+                        </div>
+                    </div>
+                `;
+                
+                if (vehicle.link && vehicle.link.startsWith('http')) {
+                    resultHtml += `
+                        <div style="margin: 15px 0;">
+                            <div style="font-weight: 600; margin-bottom: 5px;">معاينة الوشم:</div>
+                            <img src="${vehicle.link}" style="width:100%; max-height:300px; object-fit:contain; border-radius:10px; border:2px solid var(--primary);">
+                        </div>
+                    `;
+                }
+                
+                const resultContent = document.getElementById('resultContent');
+                const resultTitle = document.getElementById('resultTitle');
+                
+                if (resultContent && resultTitle) {
+                    resultContent.innerHTML = resultHtml;
+                    resultTitle.textContent = vehicle.name;
+                }
+                
+                resultSection.style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error showing result:', error);
+                showToast('خطأ في عرض النتيجة', 'error');
+            }
+        };
+    }
 }
 
 async function loadSystemSettingsPage() {
+    const pageContent = document.getElementById('pageContent');
+    if (!pageContent) return;
+    
     if (currentUser.role !== 'admin') {
         showToast('غير مصرح لك', 'error');
         navigateTo('dashboard');
@@ -1711,28 +1767,31 @@ async function loadSystemSettingsPage() {
         </div>
     `;
     
-    document.getElementById('pageContent').innerHTML = html;
+    pageContent.innerHTML = html;
     
-    document.getElementById('saveSettings').onclick = async function() {
-        try {
-            const updatedSettings = {
-                ...systemSettings,
-                siteName: document.getElementById('siteName').value,
-                discordWebhook: document.getElementById('discordWebhook').value,
-                maintenanceMode: document.getElementById('maintenanceMode').checked
-            };
-            
-            await db.ref('systemSettings').set(updatedSettings);
-            systemSettings = updatedSettings;
-            
-            await addSystemLog('edit', 'تم تحديث إعدادات النظام');
-            showToast('تم حفظ الإعدادات بنجاح', 'success');
-            
-        } catch (error) {
-            console.error('❌ Error saving settings:', error);
-            showToast('خطأ في حفظ الإعدادات', 'error');
-        }
-    };
+    const saveSettingsBtn = document.getElementById('saveSettings');
+    if (saveSettingsBtn) {
+        saveSettingsBtn.onclick = async function() {
+            try {
+                const updatedSettings = {
+                    ...systemSettings,
+                    siteName: document.getElementById('siteName').value,
+                    discordWebhook: document.getElementById('discordWebhook').value,
+                    maintenanceMode: document.getElementById('maintenanceMode').checked
+                };
+                
+                await db.ref('systemSettings').set(updatedSettings);
+                systemSettings = updatedSettings;
+                
+                await addSystemLog('edit', 'تم تحديث إعدادات النظام');
+                showToast('تم حفظ الإعدادات بنجاح', 'success');
+                
+            } catch (error) {
+                console.error('❌ Error saving settings:', error);
+                showToast('خطأ في حفظ الإعدادات', 'error');
+            }
+        };
+    }
 }
 
 // ============================================
@@ -1745,14 +1804,30 @@ window.addEventListener('DOMContentLoaded', function() {
     loadAllData();
     
     // إعداد الأحداث
-    document.getElementById('loginButton').addEventListener('click', performLogin);
-    document.getElementById('loginPassword').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') performLogin();
-    });
+    const loginButton = document.getElementById('loginButton');
+    const loginPassword = document.getElementById('loginPassword');
+    const menuToggle = document.getElementById('menuToggle');
+    const logoutButton = document.getElementById('logoutButton');
     
-    document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
-    document.getElementById('logoutButton').addEventListener('click', logout);
+    if (loginButton) {
+        loginButton.addEventListener('click', performLogin);
+    }
     
+    if (loginPassword) {
+        loginPassword.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') performLogin();
+        });
+    }
+    
+    if (menuToggle) {
+        menuToggle.addEventListener('click', toggleSidebar);
+    }
+    
+    if (logoutButton) {
+        logoutButton.addEventListener('click', logout);
+    }
+    
+    // إضافة حدث للعناصر التنقلية
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function() {
             const page = this.getAttribute('data-page');
@@ -1767,8 +1842,12 @@ window.addEventListener('DOMContentLoaded', function() {
     // محاولة تحميل اللوجو المحلي
     const localLogo = localStorage.getItem('verg_logo');
     if (localLogo) {
-        logoContainer.innerHTML = `<img src="${localLogo}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-        sidebarLogo.innerHTML = `<img src="${localLogo}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+        if (logoContainer) {
+            logoContainer.innerHTML = `<img src="${localLogo}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+        }
+        if (sidebarLogo) {
+            sidebarLogo.innerHTML = `<img src="${localLogo}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+        }
     }
     
     console.log('✅ تم تهيئة النظام');
