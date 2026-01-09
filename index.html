@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام ميكانيكي فيرج - النسخة المحسنة</title>
+    <title>نظام ميكانيكي فيرج</title>
     
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -11,7 +11,6 @@
     
     <!-- الخطوط -->
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -57,10 +56,228 @@
             overflow-x: hidden;
         }
 
-        /* تصميم الهيكل العام */
-        .app-container {
+        /* صفحة تسجيل الدخول */
+        .auth-page {
             display: flex;
+            justify-content: center;
+            align-items: center;
             min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--bg) 0%, #1e293b 100%);
+        }
+
+        .auth-container {
+            background: var(--card);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 450px;
+            border: 3px solid var(--primary);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .auth-header img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 3px solid var(--primary);
+            margin-bottom: 20px;
+            object-fit: cover;
+        }
+
+        .auth-header h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .auth-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text);
+            font-family: 'Tajawal';
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(78, 204, 163, 0.2);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border-radius: var(--radius);
+            border: none;
+            font-family: 'Tajawal';
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #000;
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            border-radius: 50px;
+            z-index: 2000;
+            font-weight: 600;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideInUp 0.3s ease-out;
+            min-width: 300px;
+            max-width: 500px;
+            text-align: center;
+            display: none;
+        }
+
+        @keyframes slideInUp {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+
+        .toast-success { background: var(--success); color: white; }
+        .toast-error { background: var(--danger); color: white; }
+        .toast-warning { background: var(--warning); color: #000; }
+        .toast-info { background: var(--info); color: white; }
+        
+        /* محتوى التطبيق */
+        .app-container {
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .top-header {
+            background: var(--card);
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            border-bottom: 2px solid var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .menu-toggle:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .page-title .page-icon {
+            color: var(--primary);
+            margin-left: 10px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .quick-stats {
+            display: flex;
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 15px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-box i {
+            color: var(--primary);
+        }
+
+        .stat-box span {
+            font-weight: 600;
+            font-size: 0.9rem;
         }
 
         /* الشريط الجانبي */
@@ -70,17 +287,16 @@
             border-left: 3px solid var(--primary);
             position: fixed;
             top: 0;
-            right: 0;
+            right: -100%;
             bottom: 0;
             z-index: 1000;
-            transform: translateX(100%);
             transition: var(--transition);
             overflow-y: auto;
             box-shadow: -5px 0 25px rgba(0, 0, 0, 0.4);
         }
 
         .sidebar.active {
-            transform: translateX(0);
+            right: 0;
         }
 
         .sidebar-header {
@@ -215,15 +431,6 @@
             flex: 1;
         }
 
-        .nav-item .nav-badge {
-            background: var(--danger);
-            color: white;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-weight: bold;
-        }
-
         .logout-btn {
             margin: 20px;
             padding: 12px;
@@ -245,96 +452,6 @@
             color: white;
         }
 
-        /* المحتوى الرئيسي */
-        .main-content {
-            flex: 1;
-            margin-right: 0;
-            transition: var(--transition);
-            min-height: 100vh;
-        }
-
-        .main-content.sidebar-open {
-            margin-right: var(--sidebar-width);
-        }
-
-        /* الهيدر العلوي */
-        .top-header {
-            background: var(--card);
-            height: var(--header-height);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 25px;
-            position: sticky;
-            top: 0;
-            z-index: 900;
-            border-bottom: 2px solid var(--primary);
-            box-shadow: var(--shadow);
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .menu-toggle {
-            background: none;
-            border: none;
-            color: var(--text);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 8px;
-            transition: var(--transition);
-        }
-
-        .menu-toggle:hover {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .page-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .page-title .page-icon {
-            color: var(--primary);
-            margin-left: 10px;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .quick-stats {
-            display: flex;
-            gap: 15px;
-        }
-
-        .stat-box {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 8px 15px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .stat-box i {
-            color: var(--primary);
-        }
-
-        .stat-box span {
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
         /* محتوى الصفحات */
         .page-content {
             padding: 30px;
@@ -343,12 +460,6 @@
             animation: fadeIn 0.4s ease-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* كروت الإحصائيات */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -399,7 +510,6 @@
             font-size: 0.9rem;
         }
 
-        /* أقسام المحتوى */
         .content-section {
             background: var(--card);
             border-radius: var(--radius);
@@ -431,431 +541,6 @@
             color: var(--primary);
         }
 
-        .section-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        /* الأزرار */
-        .btn {
-            padding: 10px 20px;
-            border-radius: var(--radius);
-            border: none;
-            font-family: 'Tajawal';
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            text-decoration: none;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: #000;
-        }
-
-        .btn-secondary {
-            background: var(--card-light);
-            color: var(--text);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, var(--danger), #dc2626);
-            color: white;
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, var(--success), #059669);
-            color: white;
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, var(--warning), #d97706);
-            color: #000;
-        }
-
-        .btn-info {
-            background: linear-gradient(135deg, var(--info), #2563eb);
-            color: white;
-        }
-
-        .btn-vip {
-            background: linear-gradient(135deg, var(--vip), var(--vip-dark));
-            color: #000;
-        }
-
-        /* نماذج الإدخال */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border-radius: 8px;
-            border: 2px solid var(--border);
-            background: rgba(0, 0, 0, 0.2);
-            color: var(--text);
-            font-family: 'Tajawal';
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(78, 204, 163, 0.2);
-        }
-
-        .form-control:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* الجداول والقوائم */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        .data-table th {
-            background: var(--bg);
-            color: var(--text-secondary);
-            font-weight: 600;
-            text-align: right;
-            padding: 15px;
-            border-bottom: 2px solid var(--border);
-            font-size: 0.9rem;
-        }
-
-        .data-table td {
-            padding: 15px;
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-        }
-
-        .data-table tr:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .data-table .actions {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-        }
-
-        .data-table .btn-icon {
-            width: 35px;
-            height: 35px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-        }
-
-        /* كروت العناصر */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .card-item {
-            background: var(--card-light);
-            border-radius: var(--radius);
-            padding: 20px;
-            border: 1px solid var(--border);
-            transition: var(--transition);
-            position: relative;
-        }
-
-        .card-item:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-            box-shadow: var(--shadow);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .card-badge {
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
-        .badge-vip { background: var(--vip-light); color: var(--vip); border: 1px solid var(--vip); }
-        .badge-admin { background: rgba(59, 130, 246, 0.2); color: var(--admin); border: 1px solid var(--admin); }
-        .badge-editor { background: rgba(139, 92, 246, 0.2); color: var(--editor); border: 1px solid var(--editor); }
-
-        .card-body {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-        }
-
-        .card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 15px;
-            border-top: 1px solid var(--border);
-        }
-
-        .card-meta {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        /* رسائل التنبيه */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 30px;
-            border-radius: 50px;
-            z-index: 2000;
-            font-weight: 600;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: slideInUp 0.3s ease-out;
-            min-width: 300px;
-            max-width: 500px;
-            text-align: center;
-        }
-
-        @keyframes slideInUp {
-            from { bottom: 0; opacity: 0; }
-            to { bottom: 30px; opacity: 1; }
-        }
-
-        .toast-success { background: var(--success); color: white; }
-        .toast-error { background: var(--danger); color: white; }
-        .toast-warning { background: var(--warning); color: #000; }
-        .toast-info { background: var(--info); color: white; }
-        .toast-vip { background: linear-gradient(135deg, var(--vip), var(--vip-dark)); color: #000; }
-
-        /* صفحة تسجيل الدخول */
-        .auth-page {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            background: linear-gradient(135deg, var(--bg) 0%, #1e293b 100%);
-        }
-
-        .auth-container {
-            background: var(--card);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 450px;
-            border: 3px solid var(--primary);
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        .auth-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .auth-header img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: 3px solid var(--primary);
-            margin-bottom: 20px;
-            object-fit: cover;
-        }
-
-        .auth-header h1 {
-            color: var(--primary);
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        .auth-header p {
-            color: var(--text-secondary);
-            font-size: 1rem;
-        }
-
-        .auth-footer {
-            text-align: center;
-            margin-top: 30px;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .auth-footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .auth-footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* صفحة 404 */
-        .not-found {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 70vh;
-            text-align: center;
-            padding: 40px;
-        }
-
-        .not-found h1 {
-            font-size: 8rem;
-            color: var(--primary);
-            margin-bottom: 20px;
-            font-weight: 800;
-        }
-
-        .not-found h2 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            color: var(--text);
-        }
-
-        .not-found p {
-            color: var(--text-secondary);
-            max-width: 500px;
-            margin-bottom: 30px;
-            line-height: 1.8;
-        }
-
-        /* تحسينات للجوال */
-        @media (max-width: 992px) {
-            .sidebar {
-                width: 280px;
-            }
-            
-            .main-content.sidebar-open {
-                margin-right: 0;
-            }
-            
-            .sidebar.active {
-                box-shadow: -5px 0 30px rgba(0, 0, 0, 0.5);
-            }
-            
-            .page-content {
-                padding: 20px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .cards-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .top-header {
-                padding: 0 15px;
-                flex-direction: column;
-                height: auto;
-                padding: 15px;
-            }
-            
-            .header-left, .header-right {
-                width: 100%;
-                justify-content: space-between;
-                margin-bottom: 10px;
-            }
-            
-            .quick-stats {
-                display: none;
-            }
-            
-            .section-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 15px;
-            }
-            
-            .section-actions {
-                width: 100%;
-                justify-content: flex-end;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .auth-container {
-                padding: 30px 20px;
-            }
-            
-            .data-table {
-                display: block;
-                overflow-x: auto;
-            }
-            
-            .btn {
-                padding: 8px 15px;
-                font-size: 0.9rem;
-            }
-        }
-
-        /* تأثيرات خاصة */
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(78, 204, 163, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(78, 204, 163, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(78, 204, 163, 0); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        /* شريط التحميل */
         .loading {
             display: flex;
             flex-direction: column;
@@ -878,221 +563,36 @@
             to { transform: rotate(360deg); }
         }
 
-        /* تلميحات */
-        [data-tooltip] {
-            position: relative;
-        }
-
-        [data-tooltip]:before {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 100%;
-            right: 50%;
-            transform: translateX(50%);
-            background: var(--bg);
-            color: var(--text);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--transition);
-            border: 1px solid var(--border);
-            z-index: 1000;
-        }
-
-        [data-tooltip]:hover:before {
-            opacity: 1;
-            visibility: visible;
-            bottom: calc(100% + 10px);
-        }
-
-        /* تحسينات للألوان */
-        .color-box {
-            height: 60px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: monospace;
-            font-weight: bold;
-            color: white;
-            text-shadow: 1px 1px 3px #000;
-            cursor: pointer;
-            margin: 8px 0;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s;
-        }
-
-        .color-box:hover {
-            transform: scale(1.05);
-            border-color: var(--primary);
-        }
-
-        .copy-card {
-            background: var(--bg);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border: 2px dashed var(--primary);
-            cursor: pointer;
-            font-family: monospace;
-            color: var(--primary);
-            text-align: center;
-            transition: all 0.3s;
-            word-break: break-all;
-        }
-
-        .copy-card:hover {
-            background: rgba(78, 204, 163, 0.1);
-        }
-
-        .result-image {
-            width: 100%;
-            max-height: 300px;
-            object-fit: contain;
-            border-radius: 10px;
-            margin-top: 15px;
-            border: 2px solid var(--primary);
-            background: var(--bg);
-            padding: 5px;
-            display: none;
-        }
-
-        .result-image.active {
-            display: block;
-        }
-
-        .vip-image {
-            border-color: var(--vip);
-        }
-
-        .vip-badge {
-            background: var(--vip);
-            color: #000;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            margin-right: 5px;
-        }
-
-        .help-text {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-top: 5px;
-            text-align: right;
-            font-style: italic;
-        }
-
-        .vip-help {
-            color: var(--vip);
-            border-right: 3px solid var(--vip);
-            padding-right: 10px;
-        }
-        
-        /* إضافة أنماط إضافية */
-        .badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-        
-        .badge-success { background: var(--success); color: white; }
-        .badge-warning { background: var(--warning); color: #000; }
-        .badge-primary { background: var(--primary); color: #000; }
-        .badge-info { background: var(--info); color: white; }
-        .badge-danger { background: var(--danger); color: white; }
-        .badge-secondary { background: var(--text-secondary); color: white; }
-        
-        .logs-table-container {
-            max-height: 500px;
-            overflow-y: auto;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-        }
-        
-        .logs-footer {
-            padding: 15px;
-            background: var(--card-light);
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logs-stats {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-        
-        .settings-tab {
-            padding: 20px;
-            background: var(--card-light);
-            border-radius: var(--radius);
-            margin-top: 20px;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 5px;
-            background: var(--bg);
-            padding: 10px;
-            border-radius: var(--radius);
-        }
-        
-        .tab-btn {
-            flex: 1;
-            padding: 12px;
-            background: var(--card);
-            border: 2px solid transparent;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            text-align: center;
-            transition: var(--transition);
-        }
-        
-        .tab-btn:hover {
-            background: var(--card-light);
-        }
-        
-        .tab-btn.active {
-            background: var(--primary);
-            color: #000;
-            border-color: var(--primary);
-        }
-        
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            padding: 20px;
-        }
-        
-        .modal-content {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 30px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            border: 3px solid var(--primary);
-        }
-        
-        .restore-backup-modal {
-            padding: 20px;
+        /* تحسينات للجوال */
+        @media (max-width: 768px) {
+            .auth-container {
+                padding: 30px 20px;
+            }
+            
+            .top-header {
+                padding: 0 15px;
+                flex-direction: column;
+                height: auto;
+                padding: 15px;
+            }
+            
+            .header-left, .header-right {
+                width: 100%;
+                justify-content: space-between;
+                margin-bottom: 10px;
+            }
+            
+            .quick-stats {
+                display: none;
+            }
+            
+            .page-content {
+                padding: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -1102,7 +602,7 @@
 <div id="authPage" class="auth-page">
     <div class="auth-container">
         <div class="auth-header">
-            <div style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary); margin: 0 auto 20px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+            <div id="logoContainer" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary); margin: 0 auto 20px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
                 <i class="fas fa-car"></i>
             </div>
             <h1>ميكانيكي فيرج</h1>
@@ -1125,7 +625,7 @@
         
         <div id="loginError" style="color: var(--danger); text-align: center; margin: 15px 0; display: none;"></div>
         
-        <button class="btn btn-primary" onclick="performLogin()" style="width: 100%; padding: 14px; font-size: 1.1rem;">
+        <button class="btn btn-primary" id="loginButton" style="width: 100%; padding: 14px; font-size: 1.1rem;">
             <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
         </button>
         
@@ -1140,17 +640,17 @@
 </div>
 
 <!-- الهيكل الرئيسي للتطبيق -->
-<div id="appContainer" class="app-container" style="display: none;">
+<div id="appContainer" class="app-container">
     <!-- الشريط الجانبي -->
     <div id="sidebar" class="sidebar">
         <div class="sidebar-header">
             <div class="logo">
-                <div style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--primary); background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                <div id="sidebarLogo" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--primary); background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white;">
                     <i class="fas fa-car"></i>
                 </div>
                 <div>
                     <h2>ميكانيكي فيرج</h2>
-                    <p>الإصدار المحسّن</p>
+                    <p id="siteVersion">v2.1.0</p>
                 </div>
             </div>
         </div>
@@ -1164,101 +664,70 @@
         </div>
         
         <div class="nav-menu">
-            <!-- قسم المشاهدات العامة -->
             <div class="nav-section">
                 <div class="nav-title">العامة</div>
-                <a class="nav-item active" onclick="navigateTo('dashboard')">
+                <a class="nav-item active" data-page="dashboard">
                     <div class="nav-icon"><i class="fas fa-home"></i></div>
                     <div class="nav-text">الرئيسية</div>
                 </a>
-                <a class="nav-item" onclick="navigateTo('search')">
+                <a class="nav-item" data-page="search">
                     <div class="nav-icon"><i class="fas fa-search"></i></div>
                     <div class="nav-text">البحث العام</div>
                 </a>
             </div>
             
-            <!-- قسم VIP (يظهر فقط للمستخدمين VIP) -->
             <div class="nav-section" id="vipNavSection" style="display: none;">
                 <div class="nav-title" style="color: var(--vip);">قسم VIP</div>
-                <a class="nav-item" onclick="navigateTo('vip-search')">
+                <a class="nav-item" data-page="vip-search">
                     <div class="nav-icon"><i class="fas fa-crown"></i></div>
                     <div class="nav-text">بحث VIP</div>
                 </a>
-                <a class="nav-item" onclick="navigateTo('vip-manage')">
+                <a class="nav-item" data-page="vip-manage">
                     <div class="nav-icon"><i class="fas fa-plus-circle"></i></div>
                     <div class="nav-text">إضافة مركبة VIP</div>
                 </a>
-                <a class="nav-item" onclick="navigateTo('vip-list')">
-                    <div class="nav-icon"><i class="fas fa-list"></i></div>
-                    <div class="nav-text">مركباتي في VIP</div>
-                </a>
             </div>
             
-            <!-- قسم الإدارة (يظهر للمديرين والمحررين) -->
             <div class="nav-section" id="adminNavSection" style="display: none;">
                 <div class="nav-title" style="color: var(--admin);">الإدارة</div>
-                <a class="nav-item" onclick="navigateTo('vehicles')">
+                <a class="nav-item" data-page="vehicles">
                     <div class="nav-icon"><i class="fas fa-car"></i></div>
                     <div class="nav-text">إدارة المركبات</div>
                 </a>
-                <a class="nav-item" onclick="navigateTo('sectors')">
+                <a class="nav-item" data-page="sectors">
                     <div class="nav-icon"><i class="fas fa-layer-group"></i></div>
                     <div class="nav-text">إدارة القطاعات</div>
                 </a>
-                <a class="nav-item" onclick="navigateTo('colors')">
-                    <div class="nav-icon"><i class="fas fa-palette"></i></div>
-                    <div class="nav-text">إدارة الألوان</div>
-                </a>
             </div>
             
-            <!-- قسم المدير العام فقط -->
             <div class="nav-section" id="superAdminNavSection" style="display: none;">
                 <div class="nav-title" style="color: var(--danger);">إدارة النظام</div>
-                <a class="nav-item" onclick="navigateTo('users')">
+                <a class="nav-item" data-page="users">
                     <div class="nav-icon"><i class="fas fa-users-cog"></i></div>
                     <div class="nav-text">إدارة المستخدمين</div>
-                    <div class="nav-badge" id="usersBadge">0</div>
                 </a>
-                <a class="nav-item" onclick="navigateTo('system-vip')">
-                    <div class="nav-icon"><i class="fas fa-crown"></i></div>
-                    <div class="nav-text">إدارة VIP</div>
-                </a>
-                <a class="nav-item" onclick="navigateTo('logs')">
+                <a class="nav-item" data-page="logs">
                     <div class="nav-icon"><i class="fas fa-history"></i></div>
                     <div class="nav-text">سجلات النظام</div>
                 </a>
-                <a class="nav-item" onclick="navigateTo('system-settings')">
+                <a class="nav-item" data-page="system-settings">
                     <div class="nav-icon"><i class="fas fa-cogs"></i></div>
                     <div class="nav-text">إعدادات النظام</div>
                 </a>
             </div>
-            
-            <!-- قسم الحساب -->
-            <div class="nav-section">
-                <div class="nav-title">الحساب</div>
-                <a class="nav-item" onclick="navigateTo('profile')">
-                    <div class="nav-icon"><i class="fas fa-user-circle"></i></div>
-                    <div class="nav-text">الملف الشخصي</div>
-                </a>
-                <a class="nav-item" onclick="navigateTo('settings')">
-                    <div class="nav-icon"><i class="fas fa-cog"></i></div>
-                    <div class="nav-text">الإعدادات</div>
-                </a>
-            </div>
         </div>
         
-        <div class="logout-btn" onclick="logout()">
+        <div class="logout-btn" id="logoutButton">
             <i class="fas fa-sign-out-alt"></i>
             <span>تسجيل الخروج</span>
         </div>
     </div>
     
     <!-- المحتوى الرئيسي -->
-    <div id="mainContent" class="main-content">
-        <!-- الهيدر العلوي -->
+    <div id="mainContent">
         <div class="top-header">
             <div class="header-left">
-                <button class="menu-toggle" onclick="toggleSidebar()">
+                <button class="menu-toggle" id="menuToggle">
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="page-title">
@@ -1277,10 +746,6 @@
                         <i class="fas fa-users"></i>
                         <span id="totalUsers">0</span>
                     </div>
-                    <div class="stat-box">
-                        <i class="fas fa-crown"></i>
-                        <span id="totalVip">0</span>
-                    </div>
                 </div>
                 
                 <div class="stat-box">
@@ -1290,18 +755,15 @@
             </div>
         </div>
         
-        <!-- محتوى الصفحات -->
         <div class="page-content">
-            <!-- سيتم تحميل محتوى الصفحات هنا ديناميكياً -->
             <div id="pageContent"></div>
         </div>
     </div>
 </div>
 
 <!-- رسائل التنبيه -->
-<div id="toast" class="toast" style="display: none;"></div>
+<div id="toast" class="toast"></div>
 
-<!-- الكود الرئيسي -->
 <script>
 // ============================================
 // إعدادات الموقع
@@ -1309,34 +771,31 @@
 const SITE_CONFIG = {
     SITE_NAME: "ميكانيكي فيرج",
     VERSION: "2.1.0",
-    DEFAULT_DISCORD_WEBHOOK: "",
+    DISCORD_WEBHOOK: "https://discord.com/api/webhooks/1458500452642459710/CdH2_1zjm_khy-CV_6MccOgA6GcE339W9t2KZ2kPVEa6j9ilfC6UMGzWYn15DuR6MKGF",
     LOG_RETENTION_DAYS: 30,
-    MAX_LOG_ENTRIES: 1000,
-    SESSION_TIMEOUT: 120 // دقيقة
+    SESSION_TIMEOUT: 120
 };
 
 // ============================================
 // تهيئة Firebase
 // ============================================
 const firebaseConfig = {
-    apiKey: "AIzaSyCg3Dmf_Odgfm2IL1IZXr_Kl16IaqiWqso",
-    authDomain: "verg-micanic.firebaseapp.com",
-    databaseURL: "https://verg-micanic-default-rtdb.firebaseio.com",
-    projectId: "verg-micanic",
-    storageBucket: "verg-micanic.firebasestorage.app",
-    messagingSenderId: "881689454596",
-    appId: "1:881689454596:web:e630ad9f555ba8feabed51"
+    apiKey: "AIzaSyB7M71r2TRprVxzABMILImHoylagdY74JY",
+    authDomain: "verg-micanic1.firebaseapp.com",
+    databaseURL: "https://verg-micanic1-default-rtdb.firebaseio.com",
+    projectId: "verg-micanic1",
+    storageBucket: "verg-micanic1.firebasestorage.app",
+    messagingSenderId: "796906815750",
+    appId: "1:796906815750:web:5315930336c6a851d95e87",
+    measurementId: "G-24QNS5X3FQ"
 };
 
 // تهيئة Firebase
 try {
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
+    firebase.initializeApp(firebaseConfig);
     console.log('✅ Firebase initialized');
 } catch (error) {
     console.error('❌ Firebase error:', error);
-    showToast('خطأ في تهيئة قاعدة البيانات', 'error');
 }
 
 const db = firebase.database();
@@ -1346,19 +805,10 @@ const db = firebase.database();
 // ============================================
 let currentUser = null;
 let usersData = {};
-let siteData = {
-    sectors: {},
-    s_default: {
-        colors: ["#4ecca3", "#1e293b"],
-        vehicles: []
-    }
-};
-let vipData = {};
+let siteData = {};
 let systemLogs = [];
 let systemSettings = {};
 let currentPage = 'dashboard';
-let editVehicleId = null;
-let editUserId = null;
 
 // ============================================
 // وظائف المساعدة
@@ -1372,25 +822,6 @@ function showToast(message, type = 'success', duration = 3000) {
     setTimeout(() => {
         toast.style.display = 'none';
     }, duration);
-}
-
-function copyToClipboard(text) {
-    if (!text || text === 'لا يوجد' || text === 'لا يوجد رابط') {
-        showToast('لا يوجد نص للنسخ', 'warning');
-        return;
-    }
-    
-    navigator.clipboard.writeText(text.trim())
-        .then(() => showToast('تم النسخ إلى الحافظة ✅'))
-        .catch(() => {
-            const textarea = document.createElement('textarea');
-            textarea.value = text.trim();
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            showToast('تم النسخ إلى الحافظة ✅');
-        });
 }
 
 function formatDate(dateString) {
@@ -1419,10 +850,7 @@ function updateCurrentTime() {
 
 function toggleSidebar() {
     const sidebar = document.getElementById('sidebar');
-    const mainContent = document.getElementById('mainContent');
-    
     sidebar.classList.toggle('active');
-    mainContent.classList.toggle('sidebar-open');
 }
 
 function getRoleName(role) {
@@ -1438,78 +866,31 @@ function getRoleName(role) {
 // ============================================
 // نظام إدارة السجلات وWebhook
 // ============================================
-
-/**
- * إرسال سجل إلى Discord عبر Webhook
- */
 async function sendDiscordWebhook(logData) {
     try {
-        // الحصول على إعدادات Webhook من قاعدة البيانات
-        const webhookUrl = systemSettings.discordWebhook || SITE_CONFIG.DEFAULT_DISCORD_WEBHOOK;
+        if (!SITE_CONFIG.DISCORD_WEBHOOK) return;
         
-        // إذا لم يكن هناك Webhook، توقف
-        if (!webhookUrl || webhookUrl === SITE_CONFIG.DEFAULT_DISCORD_WEBHOOK) {
-            console.log('⚠️ No Discord webhook configured');
-            return;
-        }
-        
-        // تحديد لون حسب نوع السجل
-        let color = 0;
+        let color = 0x808080;
         switch(logData.type) {
-            case 'login':
-                color = 0x00ff00; // أخضر
-                break;
-            case 'logout':
-                color = 0xffa500; // برتقالي
-                break;
-            case 'add':
-                color = 0x0099ff; // أزرق
-                break;
-            case 'edit':
-                color = 0xffff00; // أصفر
-                break;
-            case 'delete':
-                color = 0xff0000; // أحمر
-                break;
-            case 'warning':
-                color = 0xff9900; // برتقالي فاتح
-                break;
-            case 'error':
-                color = 0xff0000; // أحمر
-                break;
-            default:
-                color = 0x808080; // رمادي
+            case 'login': color = 0x00ff00; break;
+            case 'logout': color = 0xffa500; break;
+            case 'add': color = 0x0099ff; break;
+            case 'edit': color = 0xffff00; break;
+            case 'delete': color = 0xff0000; break;
+            case 'error': color = 0xff0000; break;
         }
         
-        // إعداد نص السجل العربي
         let actionText = '';
         switch(logData.type) {
-            case 'login':
-                actionText = 'تسجيل دخول';
-                break;
-            case 'logout':
-                actionText = 'تسجيل خروج';
-                break;
-            case 'add':
-                actionText = 'إضافة';
-                break;
-            case 'edit':
-                actionText = 'تعديل';
-                break;
-            case 'delete':
-                actionText = 'حذف';
-                break;
-            case 'warning':
-                actionText = 'تحذير';
-                break;
-            case 'error':
-                actionText = 'خطأ';
-                break;
-            default:
-                actionText = logData.type;
+            case 'login': actionText = 'تسجيل دخول'; break;
+            case 'logout': actionText = 'تسجيل خروج'; break;
+            case 'add': actionText = 'إضافة'; break;
+            case 'edit': actionText = 'تعديل'; break;
+            case 'delete': actionText = 'حذف'; break;
+            case 'error': actionText = 'خطأ'; break;
+            default: actionText = logData.type;
         }
         
-        // إنشاء Embed للرسالة
         const embed = {
             title: `📝 ${actionText} - ${SITE_CONFIG.SITE_NAME}`,
             description: logData.message,
@@ -1524,11 +905,6 @@ async function sendDiscordWebhook(logData) {
                     name: "🕐 الوقت",
                     value: new Date().toLocaleString('ar-SA'),
                     inline: true
-                },
-                {
-                    name: "🌐 الصفحة",
-                    value: logData.page || currentPage || "غير معروف",
-                    inline: true
                 }
             ],
             timestamp: new Date().toISOString(),
@@ -1537,16 +913,6 @@ async function sendDiscordWebhook(logData) {
             }
         };
         
-        // إضافة IP إذا كان متاحاً
-        if (logData.ip) {
-            embed.fields.push({
-                name: "📍 IP",
-                value: logData.ip,
-                inline: true
-            });
-        }
-        
-        // إضافة معلومات إضافية
         if (logData.details) {
             embed.fields.push({
                 name: "📋 تفاصيل",
@@ -1555,464 +921,149 @@ async function sendDiscordWebhook(logData) {
             });
         }
         
-        // إعداد البيانات للإرسال
         const payload = {
             embeds: [embed],
-            username: `${SITE_CONFIG.SITE_NAME} Logger`,
-            avatar_url: "https://cdn.discordapp.com/attachments/1413292442098335864/1428431509299134514/logo.png"
+            username: `${SITE_CONFIG.SITE_NAME} Logger`
         };
         
-        // إرسال الطلب إلى Webhook
-        const response = await fetch(webhookUrl, {
+        await fetch(SITE_CONFIG.DISCORD_WEBHOOK, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-        
-        if (!response.ok) {
-            console.error('❌ Failed to send Discord webhook:', await response.text());
-        } else {
-            console.log('✅ Discord webhook sent successfully');
-        }
         
     } catch (error) {
         console.error('❌ Error sending Discord webhook:', error);
     }
 }
 
-/**
- * الحصول على IP المستخدم
- */
-async function getUserIP() {
-    try {
-        const response = await fetch('https://api.ipify.org?format=json');
-        const data = await response.json();
-        return data.ip;
-    } catch (error) {
-        console.error('Error getting IP:', error);
-        return 'غير معروف';
-    }
-}
-
-/**
- * إضافة سجل للنظام مع إرسال إلى Discord
- */
 async function addSystemLog(type, message, details = null) {
     try {
-        const userIP = await getUserIP();
         const logData = {
-            id: 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            id: 'log_' + Date.now(),
             type: type,
             message: message,
             user: currentUser ? currentUser.username : 'system',
-            ip: userIP,
-            page: currentPage,
             details: details,
             timestamp: new Date().toISOString(),
             timestampReadable: new Date().toLocaleString('ar-SA')
         };
         
-        // إضافة السجل إلى المصفوفة المحلية
-        systemLogs.unshift(logData); // إضافة في البداية
-        systemLogs = systemLogs.slice(0, SITE_CONFIG.MAX_LOG_ENTRIES); // الحفاظ على الحد الأقصى
+        systemLogs.unshift(logData);
+        systemLogs = systemLogs.slice(0, 1000);
         
-        // حفظ السجل في Firebase
         await db.ref('systemLogs').set(systemLogs);
-        
-        // إرسال إلى Discord Webhook
         await sendDiscordWebhook(logData);
-        
-        // تحديث واجهة المستخدم إذا كانت صفحة السجلات مفتوحة
-        if (currentPage === 'logs') {
-            updateLogsDisplay();
-        }
-        
-        return logData.id;
         
     } catch (error) {
         console.error('❌ Error adding system log:', error);
     }
 }
 
-/**
- * تحديث عرض السجلات في الواجهة
- */
-function updateLogsDisplay() {
-    if (currentPage !== 'logs') return;
-    
-    const logsContainer = document.getElementById('logsContainer');
-    if (!logsContainer) return;
-    
-    // تصفية السجلات حسب الإعدادات
-    const filteredLogs = filterLogs();
-    
-    let html = `
-        <div class="logs-table-container">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>التاريخ</th>
-                        <th>النوع</th>
-                        <th>المستخدم</th>
-                        <th>IP</th>
-                        <th>الصفحة</th>
-                        <th>الوصف</th>
-                        <th>التفاصيل</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
-    
-    if (filteredLogs.length === 0) {
-        html += `
-            <tr>
-                <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                    لا توجد سجلات تطابق الفلتر المحدد
-                </td>
-            </tr>
-        `;
-    } else {
-        filteredLogs.forEach(log => {
-            const typeBadge = getLogTypeBadge(log.type);
-            
-            html += `
-                <tr>
-                    <td>${log.timestampReadable}</td>
-                    <td>${typeBadge}</td>
-                    <td>${log.user}</td>
-                    <td><code>${log.ip}</code></td>
-                    <td>${log.page || '-'}</td>
-                    <td>${log.message}</td>
-                    <td>${log.details ? `<small>${log.details}</small>` : '-'}</td>
-                </tr>
-            `;
-        });
-    }
-    
-    html += `
-                </tbody>
-            </table>
-            <div class="logs-footer">
-                <div class="logs-stats">
-                    <span>عرض ${filteredLogs.length} من ${systemLogs.length} سجل</span>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    logsContainer.innerHTML = html;
-}
-
-/**
- * إنشاء بادج للسجلات حسب النوع
- */
-function getLogTypeBadge(type) {
-    const badges = {
-        'login': '<span class="badge badge-success">تسجيل دخول</span>',
-        'logout': '<span class="badge badge-warning">تسجيل خروج</span>',
-        'add': '<span class="badge badge-primary">إضافة</span>',
-        'edit': '<span class="badge badge-info">تعديل</span>',
-        'delete': '<span class="badge badge-danger">حذف</span>',
-        'warning': '<span class="badge badge-warning">تحذير</span>',
-        'error': '<span class="badge badge-danger">خطأ</span>',
-        'system': '<span class="badge badge-secondary">نظام</span>'
-    };
-    
-    return badges[type] || `<span class="badge badge-secondary">${type}</span>`;
-}
-
-/**
- * تصفية السجلات حسب الإعدادات
- */
-function filterLogs() {
-    const typeFilter = document.getElementById('logTypeFilter')?.value || '';
-    const userFilter = document.getElementById('logUserFilter')?.value || '';
-    const dateFilter = document.getElementById('logDateFilter')?.value || '';
-    const searchFilter = document.getElementById('logSearchFilter')?.value || '';
-    
-    return systemLogs.filter(log => {
-        // فلتر النوع
-        if (typeFilter && log.type !== typeFilter) return false;
-        
-        // فلتر المستخدم
-        if (userFilter && log.user !== userFilter) return false;
-        
-        // فلتر التاريخ
-        if (dateFilter) {
-            const logDate = new Date(log.timestamp).toDateString();
-            const filterDate = new Date(dateFilter).toDateString();
-            if (logDate !== filterDate) return false;
-        }
-        
-        // فلتر البحث
-        if (searchFilter) {
-            const searchText = searchFilter.toLowerCase();
-            const logText = `${log.message} ${log.details || ''} ${log.page || ''}`.toLowerCase();
-            if (!logText.includes(searchText)) return false;
-        }
-        
-        return true;
-    });
-}
-
 // ============================================
-// تحديث الإحصائيات
+// تحميل البيانات
 // ============================================
-function updateDashboardStats() {
-    // إحصاء المركبات العامة
-    let totalVehicles = 0;
-    for (let sectorId in siteData) {
-        if (sectorId !== 'sectors' && siteData[sectorId] && siteData[sectorId].vehicles) {
-            totalVehicles += siteData[sectorId].vehicles.length;
-        }
-    }
-    
-    // إحصاء مركبات VIP
-    let totalVIPVehicles = 0;
-    for (let username in vipData) {
-        if (vipData[username]?.vehicles) {
-            totalVIPVehicles += Object.keys(vipData[username].vehicles).length;
-        }
-    }
-    
-    // إحصاء المستخدمين
-    const totalUsers = Object.keys(usersData).length;
-    const totalSectors = Object.keys(siteData.sectors || {}).length;
-    
-    // تحديث الشاشة
-    document.getElementById('totalVehicles').textContent = totalVehicles + totalVIPVehicles;
-    document.getElementById('totalUsers').textContent = totalUsers;
-    document.getElementById('totalVip').textContent = totalVIPVehicles;
-    
-    // تحديث لوحة التحكم إذا كانت مفتوحة
-    if (currentPage === 'dashboard') {
-        document.getElementById('dashboardVehicles')?.textContent = totalVehicles + totalVIPVehicles;
-        document.getElementById('dashboardVipVehicles')?.textContent = totalVIPVehicles;
-        document.getElementById('dashboardUsers')?.textContent = totalUsers;
-        document.getElementById('dashboardSectors')?.textContent = totalSectors;
-    }
-}
-
-function updateUsersCount() {
-    const totalUsers = Object.keys(usersData).length;
-    document.getElementById('usersBadge').textContent = totalUsers;
-}
-
-function updateSiteName() {
-    if (systemSettings.siteName) {
-        document.title = systemSettings.siteName + ' - النسخة المحسنة';
-        document.querySelectorAll('.site-name').forEach(el => {
-            el.textContent = systemSettings.siteName;
-        });
-    }
-}
-
-// ============================================
-// تحميل البيانات من Firebase
-// ============================================
-
-/**
- * تحميل جميع بيانات النظام
- */
 function loadAllData() {
     loadUsersData();
     loadSiteData();
-    loadVIPData();
     loadSystemLogs();
     loadSystemSettings();
 }
 
-/**
- * تحميل بيانات المستخدمين
- */
 function loadUsersData() {
     db.ref('users').on('value', snapshot => {
-        try {
-            usersData = snapshot.val() || {};
-            initializeDefaultUsers();
-            updateUsersCount();
-            restoreUserSession();
-        } catch (error) {
-            console.error('❌ Error loading users data:', error);
-            addSystemLog('error', 'خطأ في تحميل بيانات المستخدمين', error.message);
-        }
+        usersData = snapshot.val() || {};
+        initializeDefaultUsers();
+        restoreUserSession();
     });
 }
 
-/**
- * تحميل بيانات الموقع
- */
 function loadSiteData() {
     db.ref('siteData').on('value', snapshot => {
-        try {
-            const data = snapshot.val();
-            
-            if (data) {
-                siteData = data;
-            } else {
-                // إنشاء بيانات افتراضية
-                siteData = {
-                    sectors: { 's_default': 'القطاع العام' },
-                    s_default: {
-                        colors: ["#4ecca3", "#1e293b"],
-                        vehicles: []
-                    }
-                };
-                db.ref('siteData').set(siteData);
-                addSystemLog('system', 'تم إنشاء بيانات الموقع الافتراضية');
-            }
-            
-            updateDashboardStats();
-            
-        } catch (error) {
-            console.error('❌ Error loading site data:', error);
-            addSystemLog('error', 'خطأ في تحميل بيانات الموقع', error.message);
+        const data = snapshot.val();
+        
+        if (data) {
+            siteData = data;
+        } else {
+            siteData = {
+                sectors: { 's_default': 'القطاع العام' },
+                s_default: {
+                    colors: ["#4ecca3", "#1e293b"],
+                    vehicles: []
+                }
+            };
+            db.ref('siteData').set(siteData);
         }
+        
+        updateDashboardStats();
     });
 }
 
-/**
- * تحميل بيانات VIP
- */
-function loadVIPData() {
-    db.ref('vipData').on('value', snapshot => {
-        try {
-            vipData = snapshot.val() || {};
-            updateDashboardStats();
-        } catch (error) {
-            console.error('❌ Error loading VIP data:', error);
-            addSystemLog('error', 'خطأ في تحميل بيانات VIP', error.message);
-        }
-    });
-}
-
-/**
- * تحميل سجلات النظام
- */
 function loadSystemLogs() {
-    db.ref('systemLogs').limitToLast(SITE_CONFIG.MAX_LOG_ENTRIES).on('value', snapshot => {
-        try {
-            const logs = snapshot.val() || [];
-            systemLogs = Array.isArray(logs) ? logs : Object.values(logs);
-            systemLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // ترتيب تنازلي
-            
-            // تنظيف السجلات القديمة
-            cleanupOldLogs();
-            
-        } catch (error) {
-            console.error('❌ Error loading system logs:', error);
-        }
+    db.ref('systemLogs').limitToLast(1000).on('value', snapshot => {
+        const logs = snapshot.val() || [];
+        systemLogs = Array.isArray(logs) ? logs : Object.values(logs);
     });
 }
 
-/**
- * تحميل إعدادات النظام
- */
 function loadSystemSettings() {
     db.ref('systemSettings').on('value', snapshot => {
-        try {
-            const settings = snapshot.val();
-            
-            if (settings) {
-                systemSettings = settings;
-            } else {
-                // إنشاء إعدادات افتراضية
-                systemSettings = {
-                    siteName: SITE_CONFIG.SITE_NAME,
-                    discordWebhook: "",
-                    maintenanceMode: false,
-                    registrationEnabled: true,
-                    maxUsers: 100,
-                    maxVehiclesPerSector: 500,
-                    enableLogging: true,
-                    enableDiscordNotifications: false,
-                    autoBackup: true,
-                    backupInterval: 24 // ساعات
-                };
-                
-                db.ref('systemSettings').set(systemSettings);
-                addSystemLog('system', 'تم إنشاء إعدادات النظام الافتراضية');
-            }
-            
-            updateSiteName();
-            
-        } catch (error) {
-            console.error('❌ Error loading system settings:', error);
-            addSystemLog('error', 'خطأ في تحميل إعدادات النظام', error.message);
+        const settings = snapshot.val();
+        
+        if (settings) {
+            systemSettings = settings;
+        } else {
+            systemSettings = {
+                siteName: SITE_CONFIG.SITE_NAME,
+                discordWebhook: SITE_CONFIG.DISCORD_WEBHOOK,
+                maintenanceMode: false,
+                registrationEnabled: true
+            };
+            db.ref('systemSettings').set(systemSettings);
         }
     });
-}
-
-/**
- * تنظيف السجلات القديمة
- */
-function cleanupOldLogs() {
-    const retentionDays = systemSettings.logRetentionDays || SITE_CONFIG.LOG_RETENTION_DAYS;
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
-    
-    const filteredLogs = systemLogs.filter(log => {
-        const logDate = new Date(log.timestamp);
-        return logDate > cutoffDate;
-    });
-    
-    if (filteredLogs.length !== systemLogs.length) {
-        systemLogs = filteredLogs;
-        db.ref('systemLogs').set(systemLogs);
-        addSystemLog('system', `تم تنظيف السجلات القديمة، بقي ${systemLogs.length} سجل`);
-    }
 }
 
 // ============================================
 // إدارة المستخدمين
 // ============================================
-
-/**
- * تهيئة المستخدمين الافتراضيين
- */
 function initializeDefaultUsers() {
     const defaultUsers = {
         'admin': {
-            password: hashPassword('admin123'),
+            password: btoa('admin123' + firebaseConfig.apiKey),
             email: 'admin@verg.com',
             role: 'admin',
             displayName: 'المدير العام',
             createdAt: new Date().toISOString(),
             lastLogin: null,
-            isActive: true,
-            permissions: ['all']
+            isActive: true
         },
         'editor': {
-            password: hashPassword('editor123'),
+            password: btoa('editor123' + firebaseConfig.apiKey),
             email: 'editor@verg.com',
             role: 'editor',
             displayName: 'محرر النظام',
             createdAt: new Date().toISOString(),
             lastLogin: null,
-            isActive: true,
-            permissions: ['manage_vehicles', 'manage_sectors', 'manage_colors']
+            isActive: true
         },
         'vip': {
-            password: hashPassword('vip123'),
+            password: btoa('vip123' + firebaseConfig.apiKey),
             email: 'vip@verg.com',
             role: 'vip',
             displayName: 'عضو VIP',
             createdAt: new Date().toISOString(),
             lastLogin: null,
-            isActive: true,
-            permissions: ['vip_access', 'add_vip_vehicles']
+            isActive: true
         },
         'user': {
-            password: hashPassword('user123'),
+            password: btoa('user123' + firebaseConfig.apiKey),
             email: 'user@verg.com',
             role: 'viewer',
             displayName: 'مستخدم عادي',
             createdAt: new Date().toISOString(),
             lastLogin: null,
-            isActive: true,
-            permissions: ['view_vehicles']
+            isActive: true
         }
     };
     
@@ -2025,90 +1076,21 @@ function initializeDefaultUsers() {
     }
     
     if (needsUpdate) {
-        db.ref('users').set(usersData)
-            .then(() => {
-                console.log('✅ Default users created/updated');
-                addSystemLog('system', 'تم تحديث المستخدمين الافتراضيين');
-            })
-            .catch(error => {
-                console.error('❌ Error creating default users:', error);
-            });
+        db.ref('users').set(usersData);
     }
 }
 
-/**
- * تشفير كلمة المرور
- */
 function hashPassword(password) {
-    // تشفير بسيط باستخدام Base64 مع salt
-    const salt = firebaseConfig.apiKey;
-    return btoa(password + salt);
+    return btoa(password + firebaseConfig.apiKey);
 }
 
-/**
- * التحقق من كلمة المرور
- */
 function verifyPassword(inputPassword, storedHash) {
     return hashPassword(inputPassword) === storedHash;
 }
 
 // ============================================
-// نظام تسجيل الدخول والجلسة
+// نظام تسجيل الدخول
 // ============================================
-function restoreUserSession() {
-    const session = localStorage.getItem('verg_user_session');
-    if (session) {
-        try {
-            const sessionData = JSON.parse(session);
-            const user = usersData[sessionData.username];
-            
-            if (user && user.isActive) {
-                // التحقق من انتهاء صلاحية الجلسة
-                const sessionAge = Date.now() - sessionData.timestamp;
-                const sessionTimeout = (systemSettings.sessionTimeout || SITE_CONFIG.SESSION_TIMEOUT) * 60 * 1000;
-                
-                if (sessionAge < sessionTimeout) {
-                    currentUser = {
-                        username: sessionData.username,
-                        role: user.role,
-                        email: user.email,
-                        displayName: user.displayName || sessionData.username,
-                        loginTime: new Date(sessionData.timestamp).toISOString(),
-                        permissions: user.permissions || []
-                    };
-                    
-                    document.getElementById('authPage').style.display = 'none';
-                    document.getElementById('appContainer').style.display = 'flex';
-                    
-                    updateUserInterface();
-                    
-                    // تحديث وقت آخر دخول
-                    usersData[sessionData.username].lastLogin = new Date().toISOString();
-                    db.ref('users').set(usersData);
-                    
-                    updateCurrentTime();
-                    setInterval(updateCurrentTime, 60000);
-                    
-                    navigateTo('dashboard');
-                    
-                    // تحديث الجلسة
-                    localStorage.setItem('verg_user_session', JSON.stringify({
-                        username: sessionData.username,
-                        role: user.role,
-                        displayName: user.displayName || sessionData.username,
-                        timestamp: Date.now()
-                    }));
-                } else {
-                    localStorage.removeItem('verg_user_session');
-                }
-            }
-        } catch (error) {
-            console.error('Error restoring session:', error);
-            localStorage.removeItem('verg_user_session');
-        }
-    }
-}
-
 async function performLogin() {
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value;
@@ -2116,13 +1098,6 @@ async function performLogin() {
     
     errorElement.style.display = 'none';
     errorElement.textContent = '';
-    
-    // التحقق من وضع الصيانة
-    if (systemSettings.maintenanceMode && username !== 'admin') {
-        errorElement.textContent = 'النظام قيد الصيانة، يرجى المحاولة لاحقاً';
-        errorElement.style.display = 'block';
-        return;
-    }
     
     if (!username || !password) {
         errorElement.textContent = 'الرجاء إدخال اسم المستخدم وكلمة المرور';
@@ -2161,8 +1136,7 @@ async function performLogin() {
             role: user.role,
             email: user.email,
             displayName: user.displayName || username,
-            loginTime: new Date().toISOString(),
-            permissions: user.permissions || []
+            loginTime: new Date().toISOString()
         };
         
         // حفظ الجلسة
@@ -2199,35 +1173,79 @@ async function performLogin() {
     }
 }
 
+function restoreUserSession() {
+    const session = localStorage.getItem('verg_user_session');
+    if (session) {
+        try {
+            const sessionData = JSON.parse(session);
+            const user = usersData[sessionData.username];
+            
+            if (user && user.isActive) {
+                const sessionAge = Date.now() - sessionData.timestamp;
+                const sessionTimeout = SITE_CONFIG.SESSION_TIMEOUT * 60 * 1000;
+                
+                if (sessionAge < sessionTimeout) {
+                    currentUser = {
+                        username: sessionData.username,
+                        role: user.role,
+                        email: user.email,
+                        displayName: user.displayName || sessionData.username,
+                        loginTime: new Date(sessionData.timestamp).toISOString()
+                    };
+                    
+                    document.getElementById('authPage').style.display = 'none';
+                    document.getElementById('appContainer').style.display = 'flex';
+                    
+                    updateUserInterface();
+                    
+                    usersData[sessionData.username].lastLogin = new Date().toISOString();
+                    db.ref('users').set(usersData);
+                    
+                    updateCurrentTime();
+                    setInterval(updateCurrentTime, 60000);
+                    
+                    navigateTo('dashboard');
+                    
+                    localStorage.setItem('verg_user_session', JSON.stringify({
+                        username: sessionData.username,
+                        role: user.role,
+                        displayName: user.displayName || sessionData.username,
+                        timestamp: Date.now()
+                    }));
+                } else {
+                    localStorage.removeItem('verg_user_session');
+                }
+            }
+        } catch (error) {
+            localStorage.removeItem('verg_user_session');
+        }
+    }
+}
+
 function updateUserInterface() {
     if (!currentUser) return;
     
-    // تحديث معلومات المستخدم
     document.getElementById('userDisplayName').textContent = currentUser.displayName;
     document.getElementById('userAvatar').textContent = currentUser.displayName.charAt(0);
     document.getElementById('userRoleBadge').textContent = getRoleName(currentUser.role);
     document.getElementById('userRoleBadge').className = `user-role ${currentUser.role}`;
     
-    // إظهار/إخفاء الأقسام حسب الصلاحيات
     const vipNavSection = document.getElementById('vipNavSection');
     const adminNavSection = document.getElementById('adminNavSection');
     const superAdminNavSection = document.getElementById('superAdminNavSection');
     
-    // إظهار قسم VIP
     if (currentUser.role === 'vip') {
         vipNavSection.style.display = 'block';
     } else {
         vipNavSection.style.display = 'none';
     }
     
-    // إظهار قسم الإدارة
     if (currentUser.role === 'admin' || currentUser.role === 'editor') {
         adminNavSection.style.display = 'block';
     } else {
         adminNavSection.style.display = 'none';
     }
     
-    // إظهار قسم المدير العام
     if (currentUser.role === 'admin') {
         superAdminNavSection.style.display = 'block';
     } else {
@@ -2236,7 +1254,6 @@ function updateUserInterface() {
 }
 
 function logout() {
-    // إضافة سجل للنشاط
     if (currentUser) {
         addSystemLog('logout', `${currentUser.username} قام بتسجيل الخروج`);
     }
@@ -2255,52 +1272,56 @@ function logout() {
 }
 
 // ============================================
+// تحديث الإحصائيات
+// ============================================
+function updateDashboardStats() {
+    let totalVehicles = 0;
+    for (let sectorId in siteData) {
+        if (sectorId !== 'sectors' && siteData[sectorId] && siteData[sectorId].vehicles) {
+            totalVehicles += siteData[sectorId].vehicles.length;
+        }
+    }
+    
+    document.getElementById('totalVehicles').textContent = totalVehicles;
+    document.getElementById('totalUsers').textContent = Object.keys(usersData).length;
+    
+    if (currentPage === 'dashboard') {
+        document.getElementById('dashboardVehicles')?.textContent = totalVehicles;
+        document.getElementById('dashboardUsers')?.textContent = Object.keys(usersData).length;
+        document.getElementById('dashboardSectors')?.textContent = Object.keys(siteData.sectors || {}).length;
+    }
+}
+
+// ============================================
 // نظام التنقل
 // ============================================
 function navigateTo(page) {
-    // التحقق من الصلاحيات
-    if (!checkPagePermission(page)) {
-        showToast('غير مصرح لك بالوصول إلى هذه الصفحة', 'error');
-        return;
-    }
+    if (!currentUser) return;
     
     currentPage = page;
     
-    // تحديث العنوان
     const pageTitles = {
         'dashboard': 'الرئيسية',
         'search': 'البحث العام',
         'vip-search': 'بحث VIP',
         'vip-manage': 'إضافة مركبة VIP',
-        'vip-list': 'مركباتي في VIP',
         'vehicles': 'إدارة المركبات',
         'sectors': 'إدارة القطاعات',
-        'colors': 'إدارة الألوان',
         'users': 'إدارة المستخدمين',
-        'system-vip': 'إدارة VIP',
         'logs': 'سجلات النظام',
-        'system-settings': 'إعدادات النظام',
-        'profile': 'الملف الشخصي',
-        'settings': 'الإعدادات'
+        'system-settings': 'إعدادات النظام'
     };
     
     document.getElementById('pageTitle').textContent = pageTitles[page] || 'صفحة';
-    document.getElementById('pageTitle').innerHTML = `<i class="fas ${getPageIcon(page)} page-icon"></i> <span>${pageTitles[page] || 'صفحة'}</span>`;
     
-    // تحديث القائمة الجانبية
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
     });
     
-    const navItem = document.querySelector(`.nav-item[onclick*="${page}"]`);
-    if (navItem) {
-        navItem.classList.add('active');
-    }
+    document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
     
-    // تحميل المحتوى
     loadPageContent(page);
     
-    // إغلاق القائمة الجانبية على الجوال
     if (window.innerWidth < 992) {
         toggleSidebar();
     }
@@ -2312,47 +1333,26 @@ function checkPagePermission(page) {
     const permissions = {
         'dashboard': ['admin', 'editor', 'viewer', 'vip'],
         'search': ['admin', 'editor', 'viewer', 'vip'],
-        'profile': ['admin', 'editor', 'viewer', 'vip'],
-        'settings': ['admin', 'editor', 'viewer', 'vip'],
         'vip-search': ['vip'],
         'vip-manage': ['vip'],
-        'vip-list': ['vip'],
         'vehicles': ['admin', 'editor'],
         'sectors': ['admin', 'editor'],
-        'colors': ['admin', 'editor'],
         'users': ['admin'],
-        'system-vip': ['admin'],
         'logs': ['admin'],
         'system-settings': ['admin']
     };
     
-    return permissions[page] ? permissions[page].includes(currentUser.role) : false;
-}
-
-function getPageIcon(page) {
-    const icons = {
-        'dashboard': 'fa-home',
-        'search': 'fa-search',
-        'vip-search': 'fa-crown',
-        'vip-manage': 'fa-plus-circle',
-        'vip-list': 'fa-list',
-        'vehicles': 'fa-car',
-        'sectors': 'fa-layer-group',
-        'colors': 'fa-palette',
-        'users': 'fa-users-cog',
-        'system-vip': 'fa-crown',
-        'logs': 'fa-history',
-        'system-settings': 'fa-cogs',
-        'profile': 'fa-user-circle',
-        'settings': 'fa-cog'
-    };
-    
-    return icons[page] || 'fa-file';
+    return permissions[page] ? permissions[page].includes(currentUser.role) : true;
 }
 
 async function loadPageContent(page) {
     const pageContent = document.getElementById('pageContent');
     pageContent.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>جاري تحميل الصفحة...</p></div>';
+    
+    if (!checkPagePermission(page)) {
+        pageContent.innerHTML = '<div class="content-section"><p>غير مصرح لك بالوصول إلى هذه الصفحة</p></div>';
+        return;
+    }
     
     try {
         switch(page) {
@@ -2362,55 +1362,20 @@ async function loadPageContent(page) {
             case 'search':
                 await loadSearchPage();
                 break;
-            case 'vip-search':
-                await loadVIPSearchPage();
-                break;
-            case 'vip-manage':
-                await loadVIPManagePage();
-                break;
-            case 'vip-list':
-                await loadVIPListPage();
-                break;
-            case 'vehicles':
-                await loadVehiclesPage();
-                break;
-            case 'sectors':
-                await loadSectorsPage();
-                break;
-            case 'colors':
-                await loadColorsPage();
-                break;
-            case 'users':
-                await loadUsersPage();
-                break;
-            case 'system-vip':
-                await loadSystemVIPPage();
-                break;
-            case 'logs':
-                await loadLogsPage();
-                break;
             case 'system-settings':
                 await loadSystemSettingsPage();
                 break;
-            case 'profile':
-                await loadProfilePage();
-                break;
-            case 'settings':
-                await loadSettingsPage();
-                break;
             default:
-                pageContent.innerHTML = '<div class="not-found"><h1>404</h1><h2>الصفحة غير موجودة</h2><p>عذراً، الصفحة التي تبحث عنها غير موجودة.</p><button class="btn btn-primary" onclick="navigateTo(\'dashboard\')"><i class="fas fa-home"></i> العودة للرئيسية</button></div>';
+                pageContent.innerHTML = `<div class="content-section"><p>صفحة ${page} قيد التطوير...</p></div>`;
         }
     } catch (error) {
-        console.error('Error loading page:', error);
-        pageContent.innerHTML = '<div class="not-found"><h1>خطأ</h1><h2>حدث خطأ أثناء تحميل الصفحة</h2><p>يرجى المحاولة مرة أخرى لاحقاً.</p><button class="btn btn-primary" onclick="navigateTo(\'dashboard\')"><i class="fas fa-home"></i> العودة للرئيسية</button></div>';
+        pageContent.innerHTML = '<div class="content-section"><p>حدث خطأ أثناء تحميل الصفحة</p></div>';
     }
 }
 
 // ============================================
-// الصفحات الأساسية (مبسطة)
+// الصفحات
 // ============================================
-
 async function loadDashboard() {
     let html = `
         <div class="fade-in">
@@ -2422,16 +1387,6 @@ async function loadDashboard() {
                     <div class="stat-info">
                         <h3 id="dashboardVehicles">0</h3>
                         <p>إجمالي المركبات</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon vip">
-                        <i class="fas fa-crown"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="dashboardVipVehicles">0</h3>
-                        <p>مركبات VIP</p>
                     </div>
                 </div>
                 
@@ -2454,6 +1409,16 @@ async function loadDashboard() {
                         <p>عدد القطاعات</p>
                     </div>
                 </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon vip">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="dashboardLogs">${systemLogs.length}</h3>
+                        <p>عدد السجلات</p>
+                    </div>
+                </div>
             </div>
             
             <div class="content-section">
@@ -2464,54 +1429,40 @@ async function loadDashboard() {
                     </div>
                 </div>
                 
-                <div class="cards-grid">
-                    <div class="card-item" onclick="navigateTo('search')" style="cursor: pointer;">
-                        <div class="card-header">
-                            <div class="card-title">البحث العام</div>
-                            <div class="card-badge badge-admin">عام</div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                    <div class="card-item" onclick="navigateTo('search')" style="cursor: pointer; background: var(--card-light); padding: 20px; border-radius: var(--radius);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div style="font-size: 1.2rem; font-weight: 700;">البحث العام</div>
+                            <div style="padding: 4px 10px; border-radius: 12px; background: var(--admin); color: white; font-size: 0.75rem;">عام</div>
                         </div>
-                        <div class="card-body">
+                        <div style="color: var(--text-secondary); margin-bottom: 15px;">
                             ابحث في جميع المركبات المتاحة في النظام حسب القطاع والرتبة
                         </div>
-                        <div class="card-footer">
-                            <div class="card-meta">
-                                <i class="fas fa-search"></i> متاح للجميع
-                            </div>
-                            <i class="fas fa-arrow-left"></i>
-                        </div>
                     </div>
                     
-                    <div class="card-item" onclick="${currentUser.role === 'vip' ? "navigateTo('vip-search')" : 'showToast(\'غير مسموح لك\', \'error\')'}" style="cursor: pointer;">
-                        <div class="card-header">
-                            <div class="card-title">بحث VIP</div>
-                            <div class="card-badge badge-vip">VIP</div>
+                    ${currentUser.role === 'vip' ? `
+                    <div class="card-item" onclick="navigateTo('vip-search')" style="cursor: pointer; background: var(--card-light); padding: 20px; border-radius: var(--radius);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div style="font-size: 1.2rem; font-weight: 700;">بحث VIP</div>
+                            <div style="padding: 4px 10px; border-radius: 12px; background: var(--vip); color: #000; font-size: 0.75rem;">VIP</div>
                         </div>
-                        <div class="card-body">
+                        <div style="color: var(--text-secondary); margin-bottom: 15px;">
                             قم بالبحث في المركبات الخاصة بأعضاء VIP فقط
                         </div>
-                        <div class="card-footer">
-                            <div class="card-meta">
-                                <i class="fas fa-crown"></i> خاص بأعضاء VIP
-                            </div>
-                            <i class="fas fa-arrow-left"></i>
-                        </div>
                     </div>
+                    ` : ''}
                     
-                    <div class="card-item" onclick="${currentUser.role === 'admin' || currentUser.role === 'editor' ? "navigateTo('vehicles')" : 'showToast(\'غير مسموح لك\', \'error\')'}" style="cursor: pointer;">
-                        <div class="card-header">
-                            <div class="card-title">إدارة المركبات</div>
-                            <div class="card-badge badge-editor">محرر</div>
+                    ${currentUser.role === 'admin' || currentUser.role === 'editor' ? `
+                    <div class="card-item" onclick="navigateTo('vehicles')" style="cursor: pointer; background: var(--card-light); padding: 20px; border-radius: var(--radius);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                            <div style="font-size: 1.2rem; font-weight: 700;">إدارة المركبات</div>
+                            <div style="padding: 4px 10px; border-radius: 12px; background: var(--editor); color: white; font-size: 0.75rem;">محرر</div>
                         </div>
-                        <div class="card-body">
+                        <div style="color: var(--text-secondary); margin-bottom: 15px;">
                             أضف أو عدل أو احذف المركبات العامة في النظام
                         </div>
-                        <div class="card-footer">
-                            <div class="card-meta">
-                                <i class="fas fa-edit"></i> للمحررين والمديرين
-                            </div>
-                            <i class="fas fa-arrow-left"></i>
-                        </div>
                     </div>
+                    ` : ''}
                 </div>
             </div>
             
@@ -2521,92 +1472,36 @@ async function loadDashboard() {
                         <i class="fas fa-history"></i>
                         <span>آخر النشاطات</span>
                     </div>
-                    <button class="btn btn-secondary" onclick="loadRecentActivity()">
-                        <i class="fas fa-sync-alt"></i> تحديث
-                    </button>
                 </div>
                 
-                <div class="loading" id="activityLoading">
-                    <div class="loading-spinner"></div>
-                    <p>جاري تحميل النشاطات...</p>
+                <div id="recentActivity">
+                    ${systemLogs.slice(0, 5).map(log => `
+                        <div style="padding: 15px; background: var(--card-light); border-radius: 8px; margin-bottom: 10px; border-right: 4px solid ${
+                            log.type === 'login' ? 'var(--success)' :
+                            log.type === 'logout' ? 'var(--warning)' :
+                            log.type === 'add' ? 'var(--primary)' :
+                            log.type === 'edit' ? 'var(--info)' :
+                            log.type === 'delete' ? 'var(--danger)' : 'var(--border)'
+                        };">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                <div style="font-weight: 600;">${log.message}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-secondary);">${log.timestampReadable}</div>
+                            </div>
+                            <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                                <i class="fas fa-user"></i> ${log.user}
+                            </div>
+                        </div>
+                    `).join('')}
+                    
+                    ${systemLogs.length === 0 ? '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">لا توجد نشاطات مؤخراً</p>' : ''}
                 </div>
-                
-                <div id="recentActivity" style="display: none;"></div>
             </div>
         </div>
     `;
     
     document.getElementById('pageContent').innerHTML = html;
-    
-    // تحديث الإحصائيات
     updateDashboardStats();
-    
-    // تحميل النشاطات الأخيرة
-    loadRecentActivity();
 }
-
-async function loadRecentActivity() {
-    const activityContainer = document.getElementById('recentActivity');
-    const loading = document.getElementById('activityLoading');
-    
-    if (!activityContainer || !loading) return;
-    
-    loading.style.display = 'flex';
-    activityContainer.style.display = 'none';
-    activityContainer.innerHTML = '';
-    
-    setTimeout(() => {
-        let html = '<div class="cards-grid">';
-        
-        const recentLogs = systemLogs.slice(0, 6); // أول 6 سجلات (الأحدث)
-        
-        if (recentLogs.length === 0) {
-            html = '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">لا توجد نشاطات مؤخراً</p>';
-        } else {
-            recentLogs.forEach(log => {
-                const icon = log.type === 'login' ? 'fa-sign-in-alt' : 
-                            log.type === 'logout' ? 'fa-sign-out-alt' :
-                            log.type === 'add' ? 'fa-plus' :
-                            log.type === 'edit' ? 'fa-edit' :
-                            log.type === 'delete' ? 'fa-trash' : 'fa-info-circle';
-                
-                const color = log.type === 'login' ? 'success' : 
-                             log.type === 'logout' ? 'warning' :
-                             log.type === 'add' ? 'primary' :
-                             log.type === 'edit' ? 'info' :
-                             log.type === 'delete' ? 'danger' : 'secondary';
-                
-                html += `
-                    <div class="card-item">
-                        <div class="card-header">
-                            <div class="card-title" style="font-size: 1rem;">${log.message}</div>
-                            <div class="card-badge" style="background: var(--${color}); color: white;">${log.type}</div>
-                        </div>
-                        <div class="card-body">
-                            <i class="fas fa-user"></i> ${log.user}
-                        </div>
-                        <div class="card-footer">
-                            <div class="card-meta">
-                                <i class="fas fa-clock"></i> ${formatDate(log.timestamp)}
-                            </div>
-                            <i class="fas fa-${icon}"></i>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += '</div>';
-        }
-        
-        loading.style.display = 'none';
-        activityContainer.style.display = 'block';
-        activityContainer.innerHTML = html;
-    }, 500);
-}
-
-// ============================================
-// الصفحات الأخرى (يمكن إضافتها لاحقاً)
-// ============================================
 
 async function loadSearchPage() {
     let html = `
@@ -2619,41 +1514,134 @@ async function loadSearchPage() {
                     </div>
                 </div>
                 
-                <p style="text-align: center; color: var(--text-secondary); padding: 40px;">
-                    صفحة البحث قيد التطوير...
-                </p>
+                <div class="form-group">
+                    <label class="form-label">القطاع:</label>
+                    <select id="searchSector" class="form-control">
+                        <option value="">-- اختر القطاع --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">الرتبة:</label>
+                    <select id="searchRank" class="form-control" disabled>
+                        <option value="">-- اختر الرتبة --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">المركبة:</label>
+                    <select id="searchVehicle" class="form-control" disabled>
+                        <option value="">-- اختر المركبة --</option>
+                    </select>
+                </div>
+                
+                <div id="searchResult" style="display: none; margin-top: 30px; padding: 20px; background: var(--card-light); border-radius: var(--radius);">
+                    <h3 id="resultTitle" style="text-align: center; margin-bottom: 20px;"></h3>
+                    <div id="resultContent"></div>
+                </div>
             </div>
         </div>
     `;
     
     document.getElementById('pageContent').innerHTML = html;
-}
-
-async function loadVIPSearchPage() {
-    if (currentUser.role !== 'vip') {
-        showToast('غير مصرح لك', 'error');
-        navigateTo('dashboard');
-        return;
+    
+    const sectorSelect = document.getElementById('searchSector');
+    sectorSelect.innerHTML = '<option value="">-- اختر القطاع --</option>';
+    for (let sectorId in siteData.sectors) {
+        sectorSelect.innerHTML += `<option value="${sectorId}">${siteData.sectors[sectorId]}</option>`;
     }
     
-    let html = `
-        <div class="fade-in">
-            <div class="content-section">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-crown"></i>
-                        <span>بحث VIP في المركبات</span>
+    sectorSelect.onchange = function() {
+        const sectorId = this.value;
+        const rankSelect = document.getElementById('searchRank');
+        
+        rankSelect.innerHTML = '<option value="">-- اختر الرتبة --</option>';
+        rankSelect.disabled = true;
+        document.getElementById('searchVehicle').disabled = true;
+        document.getElementById('searchResult').style.display = 'none';
+        
+        if (sectorId && siteData[sectorId] && siteData[sectorId].vehicles) {
+            const ranksSet = new Set();
+            siteData[sectorId].vehicles.forEach(vehicle => ranksSet.add(vehicle.rank || "عام"));
+            const ranks = Array.from(ranksSet).sort();
+            ranks.forEach(rank => rankSelect.innerHTML += `<option value="${rank}">${rank}</option>`);
+            rankSelect.disabled = false;
+        }
+    };
+    
+    document.getElementById('searchRank').onchange = function() {
+        const sectorId = document.getElementById('searchSector').value;
+        const rankValue = this.value;
+        const vehicleSelect = document.getElementById('searchVehicle');
+        
+        vehicleSelect.innerHTML = '<option value="">-- اختر المركبة --</option>';
+        vehicleSelect.disabled = true;
+        document.getElementById('searchResult').style.display = 'none';
+        
+        if (sectorId && rankValue && siteData[sectorId] && siteData[sectorId].vehicles) {
+            let hasVehicles = false;
+            siteData[sectorId].vehicles.forEach((vehicle, index) => {
+                if ((vehicle.rank || "عام") === rankValue) {
+                    vehicleSelect.innerHTML += `<option value="${index}">${vehicle.name}</option>`;
+                    hasVehicles = true;
+                }
+            });
+            if (hasVehicles) vehicleSelect.disabled = false;
+        }
+    };
+    
+    document.getElementById('searchVehicle').onchange = function() {
+        const sectorId = document.getElementById('searchSector').value;
+        const vehicleIndex = this.value;
+        const resultSection = document.getElementById('searchResult');
+        
+        if (vehicleIndex === "" || !sectorId) {
+            resultSection.style.display = 'none';
+            return;
+        }
+        
+        try {
+            const vehicle = siteData[sectorId].vehicles[parseInt(vehicleIndex)];
+            const colors = siteData[sectorId].colors || ["#FFFFFF", "#000000"];
+            
+            let resultHtml = `
+                <h3 style="text-align:center; margin-bottom:20px; color: var(--primary);">${vehicle.name || "غير معروف"}</h3>
+                
+                <div style="display:flex; gap:15px; margin:15px 0;">
+                    <div style="flex:1; background: ${colors[0]}; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-family: monospace; font-weight: bold;">
+                        ${colors[0]}
+                    </div>
+                    <div style="flex:1; background: ${colors[1]}; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-family: monospace; font-weight: bold;">
+                        ${colors[1]}
                     </div>
                 </div>
                 
-                <p style="text-align: center; color: var(--text-secondary); padding: 40px;">
-                    صفحة بحث VIP قيد التطوير...
-                </p>
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('pageContent').innerHTML = html;
+                <div style="margin: 15px 0;">
+                    <div style="font-weight: 600; margin-bottom: 5px;">كود الوشم:</div>
+                    <div style="background: var(--bg); padding: 15px; border-radius: 8px; font-family: monospace;">
+                        ${vehicle.sign || "لا يوجد كود"}
+                    </div>
+                </div>
+            `;
+            
+            if (vehicle.link && vehicle.link.startsWith('http')) {
+                resultHtml += `
+                    <div style="margin: 15px 0;">
+                        <div style="font-weight: 600; margin-bottom: 5px;">معاينة الوشم:</div>
+                        <img src="${vehicle.link}" style="width:100%; max-height:300px; object-fit:contain; border-radius:10px; border:2px solid var(--primary);">
+                    </div>
+                `;
+            }
+            
+            document.getElementById('resultContent').innerHTML = resultHtml;
+            document.getElementById('resultTitle').textContent = vehicle.name;
+            resultSection.style.display = 'block';
+            
+        } catch (error) {
+            console.error('Error showing result:', error);
+            showToast('خطأ في عرض النتيجة', 'error');
+        }
+    };
 }
 
 async function loadSystemSettingsPage() {
@@ -2674,16 +1662,13 @@ async function loadSystemSettingsPage() {
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">رابط Discord Webhook:</label>
-                    <input type="text" id="discordWebhook" class="form-control" value="${systemSettings.discordWebhook || ''}" placeholder="https://discord.com/api/webhooks/...">
-                    <div class="help-text">أدخل رابط Webhook لإرسال السجلات إلى Discord</div>
+                    <label class="form-label">اسم الموقع:</label>
+                    <input type="text" id="siteName" class="form-control" value="${systemSettings.siteName || SITE_CONFIG.SITE_NAME}">
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">
-                        <input type="checkbox" id="enableDiscord" ${systemSettings.enableDiscordNotifications ? 'checked' : ''}>
-                        تفعيل إشعارات Discord
-                    </label>
+                    <label class="form-label">رابط Discord Webhook:</label>
+                    <input type="text" id="discordWebhook" class="form-control" value="${systemSettings.discordWebhook || SITE_CONFIG.DISCORD_WEBHOOK}">
                 </div>
                 
                 <div class="form-group">
@@ -2693,108 +1678,100 @@ async function loadSystemSettingsPage() {
                     </label>
                 </div>
                 
-                <button class="btn btn-primary" onclick="saveSystemSettings()">
+                <button class="btn btn-primary" id="saveSettings" style="width: 100%; padding: 15px; margin-top: 20px;">
                     <i class="fas fa-save"></i> حفظ الإعدادات
                 </button>
+            </div>
+            
+            <div class="content-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class="fas fa-database"></i>
+                        <span>إحصائيات قاعدة البيانات</span>
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+                    <div style="background: var(--card-light); padding: 20px; border-radius: var(--radius); text-align: center;">
+                        <div style="font-size: 2rem; font-weight: 800; color: var(--primary);">${Object.keys(usersData).length}</div>
+                        <div style="color: var(--text-secondary);">عدد المستخدمين</div>
+                    </div>
+                    
+                    <div style="background: var(--card-light); padding: 20px; border-radius: var(--radius); text-align: center;">
+                        <div style="font-size: 2rem; font-weight: 800; color: var(--primary);">${systemLogs.length}</div>
+                        <div style="color: var(--text-secondary);">عدد السجلات</div>
+                    </div>
+                    
+                    <div style="background: var(--card-light); padding: 20px; border-radius: var(--radius); text-align: center;">
+                        <div style="font-size: 2rem; font-weight: 800; color: var(--primary);">${Object.keys(siteData.sectors || {}).length}</div>
+                        <div style="color: var(--text-secondary);">عدد القطاعات</div>
+                    </div>
+                </div>
             </div>
         </div>
     `;
     
     document.getElementById('pageContent').innerHTML = html;
-}
-
-async function saveSystemSettings() {
-    try {
-        const updatedSettings = {
-            ...systemSettings,
-            discordWebhook: document.getElementById('discordWebhook').value,
-            enableDiscordNotifications: document.getElementById('enableDiscord').checked,
-            maintenanceMode: document.getElementById('maintenanceMode').checked
-        };
-        
-        await db.ref('systemSettings').set(updatedSettings);
-        systemSettings = updatedSettings;
-        
-        await addSystemLog('edit', 'تم تحديث إعدادات النظام');
-        showToast('تم حفظ الإعدادات بنجاح', 'success');
-        
-    } catch (error) {
-        console.error('❌ Error saving system settings:', error);
-        showToast('خطأ في حفظ الإعدادات', 'error');
-    }
-}
-
-// الصفحات الأخرى (مبسطة)
-async function loadVIPManagePage() {
-    document.getElementById('pageContent').innerHTML = '<div class="content-section"><p>صفحة إضافة مركبة VIP قيد التطوير...</p></div>';
-}
-
-async function loadVIPListPage() {
-    document.getElementById('pageContent').innerHTML = '<div class="content-section"><p>صفحة مركباتي في VIP قيد التطوير...</p></div>';
-}
-
-async function loadVehiclesPage() {
-    document.getElementById('pageContent').innerHTML = '<div class="content-section"><p>صفحة إدارة المركبات قيد التطوير...</p></div>';
-}
-
-async function loadSectorsPage() {
-    document.getElementById('pageContent').innerHTML = '<div class="content-section"><p>صفحة إدارة القطاعات قيد التطوير...</p></div>';
-}
-
-async function loadColorsPage() {
-    document.getElementById('pageContent').innerHTML = '<div class="content-section"><p>صفحة إدارة الألوان قيد التطوير...</p></div>';
-}
-
-async function loadUsersPage() {
-    document.getElementById('pageContent').innerHTML = '<div class="content-section"><p>صفحة إدارة المستخدمين قيد التطوير...</p></div>';
-}
-
-async function loadSystemVIPPage() {
-    document.getElementById('pageContent').innerHTML = '<div class="content-section"><p>صفحة إدارة VIP قيد التطوير...</p></div>';
-}
-
-async function loadLogsPage() {
-    document.getElementById('pageContent').innerHTML = '<div class="content-section"><p>صفحة سجلات النظام قيد التطوير...</p></div>';
-}
-
-async function loadProfilePage() {
-    document.getElementById('pageContent').innerHTML = '<div class="content-section"><p>صفحة الملف الشخصي قيد التطوير...</p></div>';
-}
-
-async function loadSettingsPage() {
-    document.getElementById('pageContent').innerHTML = '<div class="content-section"><p>صفحة الإعدادات قيد التطوير...</p></div>';
+    
+    document.getElementById('saveSettings').onclick = async function() {
+        try {
+            const updatedSettings = {
+                ...systemSettings,
+                siteName: document.getElementById('siteName').value,
+                discordWebhook: document.getElementById('discordWebhook').value,
+                maintenanceMode: document.getElementById('maintenanceMode').checked
+            };
+            
+            await db.ref('systemSettings').set(updatedSettings);
+            systemSettings = updatedSettings;
+            
+            await addSystemLog('edit', 'تم تحديث إعدادات النظام');
+            showToast('تم حفظ الإعدادات بنجاح', 'success');
+            
+        } catch (error) {
+            console.error('❌ Error saving settings:', error);
+            showToast('خطأ في حفظ الإعدادات', 'error');
+        }
+    };
 }
 
 // ============================================
 // تهيئة النظام
 // ============================================
 window.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 بدء تحميل النظام المتكامل...');
+    console.log('🚀 بدء تحميل النظام...');
     
-    // تحميل جميع البيانات
+    // تحميل البيانات
     loadAllData();
     
-    // إضافة حدث Enter في تسجيل الدخول
-    document.getElementById('loginPassword')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            performLogin();
-        }
+    // إعداد الأحداث
+    document.getElementById('loginButton').addEventListener('click', performLogin);
+    document.getElementById('loginPassword').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') performLogin();
     });
     
-    // إضافة حدث لإغلاق القائمة الجانبية عند النقر خارجها
-    document.addEventListener('click', function(event) {
-        const sidebar = document.getElementById('sidebar');
-        const menuToggle = document.querySelector('.menu-toggle');
-        
-        if (window.innerWidth < 992 && sidebar && menuToggle && 
-            sidebar.classList.contains('active') && 
-            !sidebar.contains(event.target) && 
-            !menuToggle.contains(event.target)) {
-            toggleSidebar();
-        }
+    document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
+    document.getElementById('logoutButton').addEventListener('click', logout);
+    
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const page = this.getAttribute('data-page');
+            if (page) navigateTo(page);
+        });
     });
     
-    console.log('✅ تم تهيئة النظام المتكامل');
+    // إضافة اللوجو المحلي
+    const logoContainer = document.getElementById('logoContainer');
+    const sidebarLogo = document.getElementById('sidebarLogo');
+    
+    // محاولة تحميل اللوجو المحلي
+    const localLogo = localStorage.getItem('verg_logo');
+    if (localLogo) {
+        logoContainer.innerHTML = `<img src="${localLogo}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+        sidebarLogo.innerHTML = `<img src="${localLogo}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+    }
+    
+    console.log('✅ تم تهيئة النظام');
 });
 </script>
 </body>
