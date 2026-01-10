@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - العضو</title>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <!-- الخطوط -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="css/viewer.css">
+</head>
+<body>
+    <div class="viewer-container">
+        <!-- الشريط الجانبي -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-car"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h2>ميكانيكي فيرج</h2>
+                        <p>لوحة العضو</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="user-profile">
+                <div class="user-avatar" id="userAvatar">ع</div>
+                <div class="user-details">
+                    <div class="user-name" id="userDisplayName">العضو</div>
+                    <div class="user-role viewer" id="userRole">عضو</div>
+                </div>
+            </div>
+            
+            <nav class="nav-menu">
+                <div class="nav-section">
+                    <div class="nav-title">الرئيسية</div>
+                    <a class="nav-item active" data-page="dashboard">
+                        <i class="fas fa-home"></i>
+                        <span>لوحة التحكم</span>
+                    </a>
+                    <a class="nav-item" data-page="search">
+                        <i class="fas fa-search"></i>
+                        <span>البحث العام</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-title">المركبات</div>
+                    <a class="nav-item" data-page="vehicles">
+                        <i class="fas fa-car"></i>
+                        <span>عرض المركبات</span>
+                    </a>
+                    <a class="nav-item" data-page="sectors">
+                        <i class="fas fa-layer-group"></i>
+                        <span>القطاعات</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-title">الحساب</div>
+                    <a class="nav-item" data-page="profile">
+                        <i class="fas fa-user"></i>
+                        <span>ملفي الشخصي</span>
+                    </a>
+                    <a class="nav-item" data-page="help">
+                        <i class="fas fa-question-circle"></i>
+                        <span>المساعدة</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="logout-btn" id="logoutButton">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>تسجيل الخروج</span>
+            </div>
+        </div>
+        
+        <!-- المحتوى الرئيسي -->
+        <div class="main-content">
+            <!-- الشريط العلوي -->
+            <div class="top-bar">
+                <div class="left-section">
+                    <button class="menu-toggle" id="menuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="page-title" id="pageTitle">
+                        <i class="fas fa-home"></i>
+                        <span>لوحة التحكم</span>
+                    </div>
+                </div>
+                
+                <div class="right-section">
+                    <div class="quick-stats">
+                        <div class="stat-badge">
+                            <i class="fas fa-car"></i>
+                            <span id="totalVehicles">0</span>
+                        </div>
+                        <div class="stat-badge">
+                            <i class="fas fa-layer-group"></i>
+                            <span id="totalSectors">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="time-display" id="currentTime">--:--</div>
+                </div>
+            </div>
+            
+            <!-- محتوى الصفحة -->
+            <div class="page-content" id="pageContent">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>جاري تحميل البيانات...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- رسائل التنبيه -->
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/viewer.js"></script>
+</body>
+</html>
