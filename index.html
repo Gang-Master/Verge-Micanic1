@@ -1,1597 +1,700 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام البحث المتقدم للمركبات سيرفر فيرج رول بلاى </title>
-    <title>قطاع كراج الميكانيكى </title>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Toastify للتنبيهات -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --admin-color: #e74c3c;
-            --editor-color: #f39c12;
-            --viewer-color: #27ae60;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
-        }
-        
-        .sidebar {
-            height: 100vh;
-            position: fixed;
-            right: 0;
-            top: 0;
-            background-color: var(--primary-color);
-            color: white;
-            padding-top: 20px;
-            width: 250px;
-            transition: all 0.3s;
-            z-index: 1000;
-        }
-        
-        .main-content {
-            margin-right: 250px;
-            padding: 20px;
-            transition: all 0.3s;
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                margin-right: -250px;
-            }
-            
-            .sidebar.active {
-                margin-right: 0;
-            }
-            
-            .main-content {
-                margin-right: 0;
-            }
-        }
-        
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            display: block;
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s;
-        }
-        
-        .sidebar a:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-        
-        .sidebar a.active {
-            background-color: var(--secondary-color);
-        }
-        
-        .user-badge {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .badge-admin {
-            background-color: var(--admin-color);
-        }
-        
-        .badge-editor {
-            background-color: var(--editor-color);
-        }
-        
-        .badge-viewer {
-            background-color: var(--viewer-color);
-        }
-        
-        .vehicle-card {
-            border-radius: 10px;
-            overflow: hidden;
-            transition: all 0.3s;
-            height: 100%;
-        }
-        
-        .vehicle-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        
-        .vehicle-img-container {
-            height: 200px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f5f5f5;
-        }
-        
-        .vehicle-img {
-            max-height: 100%;
-            max-width: 100%;
-            object-fit: cover;
-        }
-        
-        .color-preview {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: inline-block;
-            margin: 0 5px;
-            border: 1px solid #ddd;
-        }
-        
-        .login-container {
-            max-width: 500px;
-            margin: 100px auto;
-            padding: 30px;
-            border-radius: 10px;
-            background-color: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .logo {
-            font-weight: bold;
-            font-size: 24px;
-            color: var(--primary-color);
-        }
-        
-        .logo span {
-            color: var(--secondary-color);
-        }
-        
-        .section-title {
-            border-bottom: 2px solid var(--secondary-color);
-            padding-bottom: 10px;
-            margin-bottom: 30px;
-            color: var(--primary-color);
-        }
-        
-        .toggle-sidebar {
-            display: none;
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            z-index: 1001;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 10px 15px;
-        }
-        
-        @media (max-width: 768px) {
-            .toggle-sidebar {
-                display: block;
-            }
-        }
-        
-        .dashboard-card {
-            border-radius: 10px;
-            padding: 20px;
-            color: white;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .dashboard-card i {
-            font-size: 40px;
-            margin-bottom: 15px;
-        }
-        
-        .card-admin {
-            background-color: var(--admin-color);
-        }
-        
-        .card-editor {
-            background-color: var(--editor-color);
-        }
-        
-        .card-viewer {
-            background-color: var(--viewer-color);
-        }
-        
-        .card-vehicles {
-            background-color: #9b59b6;
-        }
-        
-        .card-sectors {
-            background-color: #1abc9c;
-        }
-        
-        .copy-btn {
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .copy-btn:hover {
-            transform: scale(1.1);
-        }
-        
-        .rank-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            background-color: #e3f2fd;
-            color: #1976d2;
-            margin: 2px;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 5px;
-            justify-content: flex-end;
-        }
-        
-        .action-buttons button {
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-    </style>
-</head>
-<body>
-    <!-- تسجيل الدخول -->
-    <div id="login-page" class="login-container">
-        <div class="text-center mb-4">
-            <h1 class="logo">نظام <span>البحث</span> المتقدم</h1>
-            <p class="text-muted">إدارة وتصفح المركبات الشرطية</p>
-        </div>
-        
-        <div class="mb-3">
-            <label for="login-email" class="form-label">البريد الإلكتروني</label>
-            <input type="email" class="form-control" id="login-email" placeholder="أدخل بريدك الإلكتروني">
-        </div>
-        
-        <div class="mb-3">
-            <label for="login-password" class="form-label">كلمة المرور</label>
-            <input type="password" class="form-control" id="login-password" placeholder="أدخل كلمة المرور">
-        </div>
-        
-        <div class="d-grid gap-2">
-            <button class="btn btn-primary" onclick="login()">تسجيل الدخول</button>
-        </div>
-        
-        <div id="login-error" class="alert alert-danger mt-3 d-none"></div>
-    </div>
+// أضف هذا الكود بعد تهيئة Firebase مباشرة
 
-    <!-- لوحة التحكم الرئيسية -->
-    <div id="dashboard" class="d-none">
-        <!-- شريط التنقل الجانبي -->
-        <button class="toggle-sidebar" onclick="toggleSidebar()">
-            <i class="fas fa-bars"></i>
-        </button>
-        
-        <div class="sidebar" id="sidebar">
-            <div class="text-center mb-4">
-                <h2 class="logo">نظام <span>البحث</span></h2>
-                <p class="text-muted small" id="user-info">مرحباً، محمد</p>
-                <span class="user-badge" id="user-role-badge">مدير</span>
-            </div>
-            
-            <a href="#" class="active" onclick="showSection('dashboard-home')">
-                <i class="fas fa-home me-2"></i> لوحة التحكم
-            </a>
-            
-            <a href="#" onclick="showSection('search-vehicles')">
-                <i class="fas fa-search me-2"></i> بحث المركبات
-            </a>
-            
-            <a href="#" onclick="showSection('add-vehicle')" id="add-vehicle-link">
-                <i class="fas fa-car me-2"></i> إضافة مركبة
-            </a>
-            
-            <a href="#" onclick="showSection('manage-sectors')" id="manage-sectors-link">
-                <i class="fas fa-list me-2"></i> إدارة القطاعات
-            </a>
-            
-            <a href="#" onclick="showSection('manage-ranks')" id="manage-ranks-link">
-                <i class="fas fa-user-tie me-2"></i> إدارة الرتب
-            </a>
-            
-            <a href="#" onclick="showSection('manage-colors')" id="manage-colors-link">
-                <i class="fas fa-palette me-2"></i> إدارة الألوان
-            </a>
-            
-            <a href="#" onclick="showSection('manage-users')" id="manage-users-link">
-                <i class="fas fa-users me-2"></i> إدارة المستخدمين
-            </a>
-            
-            <a href="#" onclick="showSection('add-user')" id="add-user-link">
-                <i class="fas fa-user-plus me-2"></i> إضافة مستخدم
-            </a>
-            
-            <a href="#" onclick="logout()" class="mt-5">
-                <i class="fas fa-sign-out-alt me-2"></i> تسجيل الخروج
-            </a>
-        </div>
-        
-        <!-- المحتوى الرئيسي -->
-        <div class="main-content" id="main-content">
-            <!-- لوحة التحكم الرئيسية -->
-            <div id="dashboard-home" class="dashboard-section">
-                <h2 class="section-title">لوحة التحكم</h2>
-                
-                <div class="row">
-                    <div class="col-md-3 col-sm-6">
-                        <div class="dashboard-card card-admin">
-                            <i class="fas fa-user-shield"></i>
-                            <h4>المديرون</h4>
-                            <h2 id="admin-count">0</h2>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3 col-sm-6">
-                        <div class="dashboard-card card-editor">
-                            <i class="fas fa-edit"></i>
-                            <h4>المحررون</h4>
-                            <h2 id="editor-count">0</h2>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3 col-sm-6">
-                        <div class="dashboard-card card-viewer">
-                            <i class="fas fa-eye"></i>
-                            <h4>المشاهدون</h4>
-                            <h2 id="viewer-count">0</h2>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-3 col-sm-6">
-                        <div class="dashboard-card card-vehicles">
-                            <i class="fas fa-car"></i>
-                            <h4>المركبات</h4>
-                            <h2 id="vehicle-count">0</h2>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">آخر المركبات المضافة</h5>
-                                <div id="recent-vehicles" class="mt-3">
-                                    <!-- سيتم ملؤها بالبيانات -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">إحصائيات النظام</h5>
-                                <canvas id="stats-chart" height="200"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- قسم البحث -->
-            <div id="search-vehicles" class="dashboard-section d-none">
-                <h2 class="section-title">بحث المركبات</h2>
-                
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">القطاع *</label>
-                                <select class="form-control" id="search-sector" required>
-                                    <option value="">اختر القطاع</option>
-                                    <!-- سيتم ملؤها بالبيانات -->
-                                </select>
-                            </div>
-                            
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">الرتبة *</label>
-                                <select class="form-control" id="search-rank" required>
-                                    <option value="">اختر الرتبة</option>
-                                    <!-- سيتم ملؤها بالبيانات -->
-                                </select>
-                            </div>
-                            
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">نوع المركبة</label>
-                                <select class="form-control" id="search-type" disabled>
-                                    <option value="">جميع الأنواع</option>
-                                    <option value="الفورد فكتوريا">الفورد فكتوريا</option>
-                                    <option value="الدودج تشارجر">الدودج تشارجر</option>
-                                    <option value="فورد اكسبلور">فورد اكسبلور</option>
-                                    <option value="تاهو">تاهو</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <button class="btn btn-primary" onclick="searchVehicles()">
-                                <i class="fas fa-search me-2"></i>بحث
-                            </button>
-                            <button class="btn btn-outline-secondary" onclick="resetSearch()">
-                                <i class="fas fa-redo me-2"></i>إعادة تعيين
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row" id="search-results">
-                    <!-- سيتم ملؤها بالبيانات -->
-                </div>
-            </div>
-            
-            <!-- إضافة مركبة جديدة -->
-            <div id="add-vehicle" class="dashboard-section d-none">
-                <h2 class="section-title" id="vehicle-form-title">إضافة مركبة جديدة</h2>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <form id="add-vehicle-form">
-                            <input type="hidden" id="edit-vehicle-id">
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">نوع المركبة *</label>
-                                    <select class="form-control" id="vehicle-type" required>
-                                        <option value="">اختر نوع المركبة</option>
-                                        <option value="الفورد فكتوريا">الفورد فكتوريا</option>
-                                        <option value="الدودج تشارجر">الدودج تشارجر</option>
-                                        <option value="فورد اكسبلور">فورد اكسبلور</option>
-                                        <option value="تاهو">تاهو</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">الكود الفني *</label>
-                                    <input type="text" class="form-control" id="vehicle-code" required>
-                                    <small class="text-muted">مثال: cvpi_sign_1 أو alphatexture</small>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">القطاع *</label>
-                                    <select class="form-control" id="vehicle-sector" required>
-                                        <option value="">اختر القطاع</option>
-                                        <!-- سيتم ملؤها بالبيانات -->
-                                    </select>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">الرتبة *</label>
-                                    <select class="form-control" id="vehicle-rank" required>
-                                        <option value="">اختر الرتبة</option>
-                                        <!-- سيتم ملؤها بالبيانات -->
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">اللون الأول *</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" id="primary-color" placeholder="مثال: 4c4c4c" required>
-                                        <span class="input-group-text color-preview" id="primary-color-preview"></span>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="openColorPicker('primary-color')">
-                                            <i class="fas fa-eye-dropper"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">اللون الثانوي *</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" id="secondary-color" placeholder="مثال: FFFFFF" required>
-                                        <span class="input-group-text color-preview" id="secondary-color-preview"></span>
-                                        <button type="button" class="btn btn-outline-secondary" onclick="openColorPicker('secondary-color')">
-                                            <i class="fas fa-eye-dropper"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-8 mb-3">
-                                    <label class="form-label">رابط الصورة *</label>
-                                    <input type="url" class="form-control" id="vehicle-image" required>
-                                </div>
-                                
-                                <div class="col-md-4 mb-3">
-                                    <label class="form-label">معاينة الصورة</label>
-                                    <button type="button" class="btn btn-outline-info w-100" onclick="previewImage()">
-                                        <i class="fas fa-image"></i> معاينة
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">ملاحظات إضافية</label>
-                                <textarea class="form-control" id="vehicle-notes" rows="3"></textarea>
-                            </div>
-                            
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <button type="submit" class="btn btn-primary" id="save-vehicle-btn">
-                                    <i class="fas fa-save me-2"></i>حفظ المركبة
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary" onclick="resetVehicleForm()">
-                                    <i class="fas fa-times me-2"></i>إلغاء
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- إدارة القطاعات -->
-            <div id="manage-sectors" class="dashboard-section d-none">
-                <h2 class="section-title">إدارة القطاعات</h2>
-                
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title">إضافة / تعديل قطاع</h5>
-                        <form id="sector-form">
-                            <input type="hidden" id="edit-sector-id">
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">اسم القطاع *</label>
-                                    <input type="text" class="form-control" id="sector-name" required>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">رمز القطاع *</label>
-                                    <input type="text" class="form-control" id="sector-code" required>
-                                    <small class="text-muted">يستخدم في البحث والتصفية</small>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">الوصف</label>
-                                <textarea class="form-control" id="sector-description" rows="2"></textarea>
-                            </div>
-                            
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <button type="submit" class="btn btn-primary" id="save-sector-btn">
-                                    <i class="fas fa-save me-2"></i>حفظ القطاع
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary" onclick="resetSectorForm()">
-                                    <i class="fas fa-times me-2"></i>إلغاء
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">القطاعات الحالية</h5>
-                        <div class="table-responsive">
-                            <table class="table table-hover" id="sectors-table">
-                                <thead>
-                                    <tr>
-                                        <th>اسم القطاع</th>
-                                        <th>الرمز</th>
-                                        <th>عدد المركبات</th>
-                                        <th>الإجراءات</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- سيتم ملؤها بالبيانات -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- إدارة الرتب -->
-            <div id="manage-ranks" class="dashboard-section d-none">
-                <h2 class="section-title">إدارة الرتب العسكرية</h2>
-                
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title">إضافة / تعديل رتبة</h5>
-                        <form id="rank-form">
-                            <input type="hidden" id="edit-rank-id">
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">اسم الرتبة *</label>
-                                    <input type="text" class="form-control" id="rank-name" required>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">رمز الرتبة *</label>
-                                    <input type="text" class="form-control" id="rank-code" required>
-                                    <small class="text-muted">يستخدم في البحث والتصفية</small>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">الوصف</label>
-                                <textarea class="form-control" id="rank-description" rows="2"></textarea>
-                            </div>
-                            
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <button type="submit" class="btn btn-primary" id="save-rank-btn">
-                                    <i class="fas fa-save me-2"></i>حفظ الرتبة
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary" onclick="resetRankForm()">
-                                    <i class="fas fa-times me-2"></i>إلغاء
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">الرتب الحالية</h5>
-                        <div class="table-responsive">
-                            <table class="table table-hover" id="ranks-table">
-                                <thead>
-                                    <tr>
-                                        <th>اسم الرتبة</th>
-                                        <th>الرمز</th>
-                                        <th>عدد المركبات</th>
-                                        <th>الإجراءات</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- سيتم ملؤها بالبيانات -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- إدارة الألوان -->
-            <div id="manage-colors" class="dashboard-section d-none">
-                <h2 class="section-title">إدارة الألوان</h2>
-                
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title">إضافة / تعديل لون</h5>
-                        <form id="color-form">
-                            <input type="hidden" id="edit-color-id">
-                            
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">كود اللون *</label>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" id="color-code" placeholder="مثال: 4c4c4c" required>
-                                        <span class="input-group-text color-preview" id="color-code-preview"></span>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">اسم اللون *</label>
-                                    <input type="text" class="form-control" id="color-name" required>
-                                </div>
-                            </div>
-                            
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <button type="submit" class="btn btn-primary" id="save-color-btn">
-                                    <i class="fas fa-save me-2"></i>حفظ اللون
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary" onclick="resetColorForm()">
-                                    <i class="fas fa-times me-2"></i>إلغاء
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">الألوان المستخدمة في النظام</h5>
-                        <div id="colors-list" class="row">
-                            <!-- سيتم ملؤها بالبيانات -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- إدارة المستخدمين -->
-            <div id="manage-users" class="dashboard-section d-none">
-                <h2 class="section-title">إدارة المستخدمين</h2>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover" id="users-table">
-                                <thead>
-                                    <tr>
-                                        <th>الاسم</th>
-                                        <th>البريد الإلكتروني</th>
-                                        <th>الدور</th>
-                                        <th>تاريخ التسجيل</th>
-                                        <th>الإجراءات</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- سيتم ملؤها بالبيانات -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- إضافة مستخدم جديد -->
-            <div id="add-user" class="dashboard-section d-none">
-                <h2 class="section-title">إضافة مستخدم جديد</h2>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <form id="add-user-form">
-                            <div class="mb-3">
-                                <label for="user-name" class="form-label">الاسم الكامل *</label>
-                                <input type="text" class="form-control" id="user-name" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="user-email" class="form-label">البريد الإلكتروني *</label>
-                                <input type="email" class="form-control" id="user-email" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="user-password" class="form-label">كلمة المرور *</label>
-                                <input type="password" class="form-control" id="user-password" required>
-                                <small class="text-muted">يجب أن تتكون من 6 أحرف على الأقل</small>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="user-role" class="form-label">دور المستخدم *</label>
-                                <select class="form-control" id="user-role" required>
-                                    <option value="">اختر الدور</option>
-                                    <option value="viewer">مشاهد</option>
-                                    <option value="editor">محرر</option>
-                                    <option value="admin">مدير</option>
-                                </select>
-                            </div>
-                            
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-user-plus me-2"></i>إضافة المستخدم
-                                </button>
-                                <button type="reset" class="btn btn-outline-secondary">
-                                    <i class="fas fa-times me-2"></i>إلغاء
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- معاينة الصورة -->
-    <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">معاينة الصورة</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <img id="preview-image" src="" class="img-fluid" alt="معاينة الصورة">
-                    <div class="mt-3">
-                        <button class="btn btn-sm btn-outline-primary" onclick="copyToClipboard(document.getElementById('vehicle-image').value)">
-                            <i class="fas fa-copy me-1"></i>نسخ الرابط
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- نافذة اختيار الألوان -->
-    <div class="modal fade" id="colorPickerModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">اختيار اللون</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="color" id="color-picker" class="w-100 mb-3" style="height: 50px;">
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="color-hex" placeholder="أدخل كود اللون">
-                        <button class="btn btn-primary" onclick="applyColor()">تطبيق</button>
-                    </div>
-                    <div class="mt-3">
-                        <h6>الألوان الشائعة:</h6>
-                        <div class="d-flex flex-wrap gap-2 mt-2" id="common-colors">
-                            <!-- سيتم ملؤها بالبيانات -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-<!-- إضافة هذا القسم بعد إدارة المستخدمين -->
-<div id="system-tools" class="dashboard-section d-none">
-    <h2 class="section-title">أدوات النظام</h2>
+// تهيئة التطبيق عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    // التحقق من حالة تسجيل الدخول
+    auth.onAuthStateChanged(function(user) {
+        if (user) {
+            currentUser = user;
+            loadUserData();
+        } else {
+            showLogin();
+        }
+    });
     
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-body text-center">
-                    <i class="fas fa-database fa-3x text-warning mb-3"></i>
-                    <h5 class="card-title">تحميل البيانات الافتراضية</h5>
-                    <p class="card-text">قم بتحميل جميع البيانات الأولية للنظام دفعة واحدة</p>
-                    <button class="btn btn-warning btn-lg" onclick="loadDefaultData()">
-                        <i class="fas fa-download me-2"></i>تحميل البيانات
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-body text-center">
-                    <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
-                    <h5 class="card-title">مسح جميع البيانات</h5>
-                    <p class="card-text">تحذير: هذه العملية ستزيل جميع البيانات ولا يمكن التراجع عنها</p>
-                    <button class="btn btn-outline-danger btn-lg" onclick="deleteAllData()">
-                        <i class="fas fa-trash me-2"></i>مسح الكل
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
+    // استعداد النماذج
+    setupForms();
     
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">البيانات التي سيتم تحميلها</h5>
-            <ul class="list-group">
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-list me-2 text-primary"></i> القطاعات</span>
-                    <span class="badge bg-primary rounded-pill">5</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-user-tie me-2 text-success"></i> الرتب العسكرية</span>
-                    <span class="badge bg-success rounded-pill">9</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-palette me-2 text-info"></i> الألوان</span>
-                    <span class="badge bg-info rounded-pill">11</span>
-                </li>
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-car me-2 text-warning"></i> المركبات</span>
-                    <span class="badge bg-warning rounded-pill">10</span>
-                </li>
-            </ul>
-        </div>
-    </div>
-</div>
-
-<!-- وأضف رابط في الشريط الجانبي -->
-<a href="#" onclick="showSection('system-tools')" id="system-tools-link">
-    <i class="fas fa-tools me-2"></i> أدوات النظام
-</a>
-    <!-- Chart.js for statistics -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Toastify للتنبيهات -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    // تحميل البيانات الأولية
+    loadInitialData();
     
-    <!-- التطبيق الرئيسي -->
-    <script>
-        // تهيئة Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyCg3Dmf_Odgfm2IL1IZXr_Kl16IaqiWqso",
-            authDomain: "verg-micanic.firebaseapp.com",
-            databaseURL: "https://verg-micanic-default-rtdb.firebaseio.com",
-            projectId: "verg-micanic",
-            storageBucket: "verg-micanic.firebasestorage.app",
-            messagingSenderId: "881689454596",
-            appId: "1:881689454596:web:e630ad9f555ba8feabed51",
-            measurementId: "G-B9JZ3CR9GS"
-        };
+    // إضافة مستخدم افتراضي إذا لم يكن هناك مستخدمين
+    createDefaultAdmin();
+});
 
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const database = firebase.database();
-        
-        // بيانات التطبيق
-        let currentUser = null;
-        let userRole = null;
-        let sectors = [];
-        let ranks = [];
-        let vehicles = [];
-        let users = [];
-        let colors = [];
-        let selectedColorField = '';
-        
-        // تهيئة التطبيق عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-            // التحقق من حالة تسجيل الدخول
-            auth.onAuthStateChanged(function(user) {
-                if (user) {
-                    currentUser = user;
-                    loadUserData();
-                } else {
-                    showLogin();
-                }
+// دالة إعداد النماذج
+function setupForms() {
+    // نموذج إضافة المركبة
+    document.getElementById('add-vehicle-form')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        addVehicle();
+    });
+    
+    // نموذج إضافة القطاع
+    document.getElementById('sector-form')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveSector();
+    });
+    
+    // نموذج إضافة الرتبة
+    document.getElementById('rank-form')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveRank();
+    });
+    
+    // نموذج إضافة اللون
+    document.getElementById('color-form')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveColor();
+    });
+    
+    // نموذج إضافة المستخدم
+    document.getElementById('add-user-form')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        addNewUser();
+    });
+    
+    // تحديث معاينة الألوان
+    document.getElementById('primary-color')?.addEventListener('input', function() {
+        updateColorPreview('primary-color-preview', this.value);
+    });
+    
+    document.getElementById('secondary-color')?.addEventListener('input', function() {
+        updateColorPreview('secondary-color-preview', this.value);
+    });
+    
+    document.getElementById('color-code')?.addEventListener('input', function() {
+        updateColorPreview('color-code-preview', this.value);
+    });
+    
+    // تحديث الفلاتر المتتالية
+    document.getElementById('search-sector')?.addEventListener('change', updateFilterDependencies);
+    document.getElementById('search-rank')?.addEventListener('change', updateFilterDependencies);
+}
+
+// دالة تحميل البيانات الأولية
+function loadInitialData() {
+    // هذه بيانات افتراضية للقطاعات (يمكن إضافتها يدوياً)
+    const initialSectors = [
+        { name: "إدارة الشرطة", code: "police" },
+        { name: "أمن الموانئ", code: "ports" },
+        { name: "وزارة الصحة", code: "health" }
+    ];
+    
+    // هذه بيانات افتراضية للرتب
+    const initialRanks = [
+        { name: "ملازم", code: "lieutenant" },
+        { name: "نقيب", code: "captain" },
+        { name: "رائد", code: "major" },
+        { name: "مقدم", code: "lieutenant_colonel" },
+        { name: "عقيد", code: "colonel" }
+    ];
+    
+    // التحقق مما إذا كانت القطاعات موجودة بالفعل
+    database.ref('sectors').once('value').then((snapshot) => {
+        if (!snapshot.exists()) {
+            // إضافة القطاعات الافتراضية
+            initialSectors.forEach((sector, index) => {
+                database.ref('sectors/initial-' + sector.code).set({
+                    name: sector.name,
+                    code: sector.code,
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'system'
+                });
             });
-            
-            // استعداد النماذج
-            setupForms();
-            
-            // تحميل البيانات الأولية
-            loadInitialData();
-            
-            // إضافة مستخدم افتراضي إذا لم يكن هناك مستخدمين
-            createDefaultAdmin();
+        }
+    });
+    
+    // التحقق مما إذا كانت الرتب موجودة بالفعل
+    database.ref('ranks').once('value').then((snapshot) => {
+        if (!snapshot.exists()) {
+            // إضافة الرتب الافتراضية
+            initialRanks.forEach((rank, index) => {
+                database.ref('ranks/initial-' + rank.code).set({
+                    name: rank.name,
+                    code: rank.code,
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'system'
+                });
+            });
+        }
+    });
+}
+
+// دالة الحصول على اسم الدور
+function getRoleName(roleCode) {
+    const roles = {
+        'admin': 'مدير',
+        'editor': 'محرر',
+        'viewer': 'مشاهد'
+    };
+    return roles[roleCode] || roleCode;
+}
+
+// دالة عرض الخطأ
+function showError(element, message) {
+    element.textContent = message;
+    element.classList.remove('d-none');
+}
+
+// دالة إخفاء الخطأ
+function hideError(element) {
+    element.classList.add('d-none');
+}
+
+// دالة تحويل رسالة خطأ Firebase
+function getAuthErrorMessage(errorCode) {
+    const messages = {
+        'auth/invalid-email': 'البريد الإلكتروني غير صالح',
+        'auth/user-disabled': 'هذا الحساب معطل',
+        'auth/user-not-found': 'لا يوجد حساب بهذا البريد الإلكتروني',
+        'auth/wrong-password': 'كلمة المرور غير صحيحة',
+        'auth/email-already-in-use': 'البريد الإلكتروني مستخدم بالفعل',
+        'auth/weak-password': 'كلمة المرور ضعيفة، يجب أن تتكون من 6 أحرف على الأقل',
+        'auth/operation-not-allowed': 'عملية التسجيل غير مسموحة حالياً',
+        'auth/too-many-requests': 'تم رفض الوصول بسبب محاولات متكررة، يرجى المحاولة لاحقاً'
+    };
+    
+    return messages[errorCode] || 'حدث خطأ غير معروف، يرجى المحاولة مرة أخرى';
+}
+
+// دالة تحديث الصلاحيات بناءً على دور المستخدم
+function updatePermissions(role) {
+    // إخفاء/إظهار العناصر بناءً على الدور
+    const adminOnly = [
+        'manage-users-link', 
+        'manage-sectors-link', 
+        'manage-ranks-link', 
+        'manage-colors-link', 
+        'add-vehicle-link',
+        'add-user-link',
+        'system-tools-link'
+    ];
+    const editorOnly = ['add-vehicle-link'];
+    
+    // إخفاء جميع العناصر أولاً
+    adminOnly.concat(editorOnly).forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.style.display = 'none';
+    });
+    
+    // إظهار العناصر بناءً على الدور
+    if (role === 'admin') {
+        adminOnly.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.style.display = 'block';
         });
+    } else if (role === 'editor') {
+        editorOnly.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) element.style.display = 'block';
+        });
+    }
+}
+
+// دالة إعادة تعيين نموذج المركبة
+function resetVehicleForm() {
+    document.getElementById('add-vehicle-form').reset();
+    document.getElementById('edit-vehicle-id').value = '';
+    document.getElementById('vehicle-form-title').textContent = 'إضافة مركبة جديدة';
+    document.getElementById('save-vehicle-btn').innerHTML = '<i class="fas fa-save me-2"></i>حفظ المركبة';
+    updateColorPreview('primary-color-preview', '');
+    updateColorPreview('secondary-color-preview', '');
+}
+
+// دالة إعادة تعيين نموذج القطاع
+function resetSectorForm() {
+    document.getElementById('sector-form').reset();
+    document.getElementById('edit-sector-id').value = '';
+    document.getElementById('save-sector-btn').innerHTML = '<i class="fas fa-save me-2"></i>حفظ القطاع';
+}
+
+// دالة إعادة تعيين نموذج الرتبة
+function resetRankForm() {
+    document.getElementById('rank-form').reset();
+    document.getElementById('edit-rank-id').value = '';
+    document.getElementById('save-rank-btn').innerHTML = '<i class="fas fa-save me-2"></i>حفظ الرتبة';
+}
+
+// دالة إعادة تعيين نموذج اللون
+function resetColorForm() {
+    document.getElementById('color-form').reset();
+    document.getElementById('edit-color-id').value = '';
+    document.getElementById('save-color-btn').innerHTML = '<i class="fas fa-save me-2"></i>حفظ اللون';
+    updateColorPreview('color-code-preview', '');
+}
+
+// دالة تحديث معاينة اللون
+function updateColorPreview(elementId, colorValue) {
+    const element = document.getElementById(elementId);
+    if (element && colorValue) {
+        element.style.backgroundColor = '#' + colorValue;
+    } else if (element) {
+        element.style.backgroundColor = '';
+    }
+}
+
+// دالة تحديث القوائم المنسدلة للقطاعات
+function updateSectorDropdowns() {
+    const searchSector = document.getElementById('search-sector');
+    const vehicleSector = document.getElementById('vehicle-sector');
+    
+    let searchOptions = '<option value="">اختر القطاع</option>';
+    let vehicleOptions = '<option value="">اختر القطاع</option>';
+    
+    sectors.forEach(sector => {
+        searchOptions += `<option value="${sector.id}">${sector.name}</option>`;
+        vehicleOptions += `<option value="${sector.id}">${sector.name}</option>`;
+    });
+    
+    if (searchSector) searchSector.innerHTML = searchOptions;
+    if (vehicleSector) vehicleSector.innerHTML = vehicleOptions;
+}
+
+// دالة تحديث القوائم المنسدلة للرتب
+function updateRankDropdowns() {
+    const searchRank = document.getElementById('search-rank');
+    const vehicleRank = document.getElementById('vehicle-rank');
+    
+    let searchOptions = '<option value="">اختر الرتبة</option>';
+    let vehicleOptions = '<option value="">اختر الرتبة</option>';
+    
+    ranks.forEach(rank => {
+        searchOptions += `<option value="${rank.id}">${rank.name}</option>`;
+        vehicleOptions += `<option value="${rank.id}">${rank.name}</option>`;
+    });
+    
+    if (searchRank) searchRank.innerHTML = searchOptions;
+    if (vehicleRank) vehicleRank.innerHTML = vehicleOptions;
+}
+
+// دالة تحديث جدول القطاعات
+function updateSectorsTable() {
+    const tbody = document.querySelector('#sectors-table tbody');
+    if (!tbody) return;
+    
+    if (sectors.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center">لا توجد قطاعات مضافة بعد</td>
+            </tr>
+        `;
+        return;
+    }
+    
+    let html = '';
+    
+    sectors.forEach(sector => {
+        const vehicleCount = vehicles.filter(v => v.sector === sector.id).length;
         
-        // تسجيل الدخول
-        function login() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const errorElement = document.getElementById('login-error');
-            
-            if (!email || !password) {
-                showError(errorElement, 'يرجى إدخال البريد الإلكتروني وكلمة المرور');
-                return;
-            }
-            
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    currentUser = userCredential.user;
-                    loadUserData();
-                    hideError(errorElement);
-                })
-                .catch((error) => {
-                    showError(errorElement, getAuthErrorMessage(error.code));
-                });
-        }
-        
-        // تحميل بيانات المستخدم
-        function loadUserData() {
-            const userRef = database.ref('users/' + currentUser.uid);
-            
-            userRef.once('value').then((snapshot) => {
-                const userData = snapshot.val();
-                if (userData) {
-                    userRole = userData.role;
-                    
-                    // تحديث واجهة المستخدم
-                    document.getElementById('user-info').textContent = `مرحباً، ${userData.name}`;
-                    
-                    // تحديث شارة الدور
-                    const roleBadge = document.getElementById('user-role-badge');
-                    roleBadge.textContent = getRoleName(userData.role);
-                    roleBadge.className = `user-badge badge-${userData.role}`;
-                    
-                    // التحكم في صلاحيات الوصول
-                    updatePermissions(userData.role);
-                    
-                    // إخفاء صفحة تسجيل الدخول وإظهار لوحة التحكم
-                    showDashboard();
-                    
-                    // تحميل البيانات
-                    loadAllData();
-                }
+        html += `
+            <tr>
+                <td>${sector.name}</td>
+                <td><code>${sector.code}</code></td>
+                <td>${vehicleCount}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-2" onclick="editSector('${sector.id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteSector('${sector.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+// دالة تعديل قطاع
+function editSector(sectorId) {
+    const sector = sectors.find(s => s.id === sectorId);
+    if (!sector) return;
+    
+    document.getElementById('edit-sector-id').value = sectorId;
+    document.getElementById('sector-name').value = sector.name;
+    document.getElementById('sector-code').value = sector.code;
+    document.getElementById('sector-description').value = sector.description || '';
+    
+    document.getElementById('save-sector-btn').innerHTML = '<i class="fas fa-save me-2"></i>تحديث القطاع';
+    
+    showSection('manage-sectors');
+}
+
+// دالة حذف قطاع
+function deleteSector(sectorId) {
+    if (confirm('هل أنت متأكد من حذف هذا القطاع؟')) {
+        database.ref('sectors/' + sectorId).remove()
+            .then(() => {
+                showToast('تم حذف القطاع بنجاح', 'success');
+                loadSectors();
+            })
+            .catch((error) => {
+                showToast('حدث خطأ أثناء الحذف: ' + error.message, 'error');
             });
-        }
+    }
+}
+
+// دالة تحديث جدول الرتب
+function updateRanksTable() {
+    const tbody = document.querySelector('#ranks-table tbody');
+    if (!tbody) return;
+    
+    if (ranks.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center">لا توجد رتب مضافة بعد</td>
+            </tr>
+        `;
+        return;
+    }
+    
+    let html = '';
+    
+    ranks.forEach(rank => {
+        const vehicleCount = vehicles.filter(v => v.rank === rank.id).length;
         
-        // تحميل جميع البيانات
-        function loadAllData() {
-            loadSectors();
-            loadRanks();
-            loadVehicles();
-            loadUsers();
-            loadColors();
-        }
-        
-        // إنشاء مستخدم افتراضي
-        function createDefaultAdmin() {
-            const defaultEmail = "admin@vehicles.com";
-            const defaultPassword = "Admin123";
-            
-            database.ref('users').once('value').then((snapshot) => {
-                if (!snapshot.exists()) {
-                    auth.createUserWithEmailAndPassword(defaultEmail, defaultPassword)
-                        .then((userCredential) => {
-                            const user = userCredential.user;
-                            const userData = {
-                                name: "المدير الرئيسي",
-                                email: defaultEmail,
-                                role: "admin",
-                                createdAt: new Date().toISOString()
-                            };
-                            
-                            return database.ref('users/' + user.uid).set(userData);
-                        })
-                        .then(() => {
-                            console.log("تم إنشاء المدير الافتراضي بنجاح");
-                        })
-                        .catch((error) => {
-                            console.log("المدير الافتراضي موجود بالفعل");
-                        });
-                }
+        html += `
+            <tr>
+                <td>${rank.name}</td>
+                <td><code>${rank.code}</code></td>
+                <td>${vehicleCount}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-2" onclick="editRank('${rank.id}')">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteRank('${rank.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+// دالة تعديل رتبة
+function editRank(rankId) {
+    const rank = ranks.find(r => r.id === rankId);
+    if (!rank) return;
+    
+    document.getElementById('edit-rank-id').value = rankId;
+    document.getElementById('rank-name').value = rank.name;
+    document.getElementById('rank-code').value = rank.code;
+    document.getElementById('rank-description').value = rank.description || '';
+    
+    document.getElementById('save-rank-btn').innerHTML = '<i class="fas fa-save me-2"></i>تحديث الرتبة';
+    
+    showSection('manage-ranks');
+}
+
+// دالة حذف رتبة
+function deleteRank(rankId) {
+    if (confirm('هل أنت متأكد من حذف هذه الرتبة؟')) {
+        database.ref('ranks/' + rankId).remove()
+            .then(() => {
+                showToast('تم حذف الرتبة بنجاح', 'success');
+                loadRanks();
+            })
+            .catch((error) => {
+                showToast('حدث خطأ أثناء الحذف: ' + error.message, 'error');
             });
-        }
-        
-        // إضافة مستخدم جديد (مدير فقط)
-        function addNewUser() {
-            const name = document.getElementById('user-name').value;
-            const email = document.getElementById('user-email').value;
-            const password = document.getElementById('user-password').value;
-            const role = document.getElementById('user-role').value;
-            
-            if (!name || !email || !password || !role) {
-                showToast('يرجى تعبئة جميع الحقول', 'error');
-                return;
-            }
-            
-            if (userRole !== 'admin') {
-                showToast('لا تملك صلاحية إضافة مستخدمين', 'error');
-                return;
-            }
-            
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    const userData = {
-                        name: name,
-                        email: email,
-                        role: role,
-                        createdAt: new Date().toISOString(),
-                        createdBy: currentUser.uid
-                    };
-                    
-                    return database.ref('users/' + user.uid).set(userData);
-                })
-                .then(() => {
-                    showToast('تم إضافة المستخدم بنجاح', 'success');
-                    document.getElementById('add-user-form').reset();
-                    loadUsers();
-                })
-                .catch((error) => {
-                    showToast(getAuthErrorMessage(error.code), 'error');
-                });
-        }
-        
-        // تحميل القطاعات
-        function loadSectors() {
-            database.ref('sectors').once('value').then((snapshot) => {
-                sectors = [];
-                snapshot.forEach((childSnapshot) => {
-                    sectors.push({
-                        id: childSnapshot.key,
-                        ...childSnapshot.val()
-                    });
-                });
-                
-                updateSectorDropdowns();
-                updateSectorsTable();
-            });
-        }
-        
-        // تحميل الرتب
-        function loadRanks() {
-            database.ref('ranks').once('value').then((snapshot) => {
-                ranks = [];
-                snapshot.forEach((childSnapshot) => {
-                    ranks.push({
-                        id: childSnapshot.key,
-                        ...childSnapshot.val()
-                    });
-                });
-                
-                updateRankDropdowns();
-                updateRanksTable();
-            });
-        }
-        
-        // تحميل المركبات
-        function loadVehicles() {
-            database.ref('vehicles').once('value').then((snapshot) => {
-                vehicles = [];
-                snapshot.forEach((childSnapshot) => {
-                    vehicles.push({
-                        id: childSnapshot.key,
-                        ...childSnapshot.val()
-                    });
-                });
-                
-                updateDashboardStats();
-                updateRecentVehicles();
-                displayVehicles(vehicles);
-            });
-        }
-        
-        // تحميل المستخدمين
-        function loadUsers() {
-            database.ref('users').once('value').then((snapshot) => {
-                users = [];
-                snapshot.forEach((childSnapshot) => {
-                    users.push({
-                        id: childSnapshot.key,
-                        ...childSnapshot.val()
-                    });
-                });
-                
-                updateUsersTable();
-            });
-        }
-        
-        // تحميل الألوان
-        function loadColors() {
-            database.ref('colors').once('value').then((snapshot) => {
-                colors = [];
-                if (snapshot.exists()) {
-                    snapshot.forEach((childSnapshot) => {
-                        colors.push({
-                            id: childSnapshot.key,
-                            ...childSnapshot.val()
-                        });
-                    });
-                }
-                
-                updateColorsList();
-                updateCommonColors();
-            });
-        }
-        
-        // البحث عن المركبات مع الفلتر الجديد
-        function searchVehicles() {
-            const sector = document.getElementById('search-sector').value;
-            const rank = document.getElementById('search-rank').value;
-            const type = document.getElementById('search-type').value;
-            
-            if (!sector) {
-                showToast('يرجى اختيار القطاع', 'error');
-                return;
-            }
-            
-            if (!rank) {
-                showToast('يرجى اختيار الرتبة', 'error');
-                return;
-            }
-            
-            let filteredVehicles = vehicles.filter(v => 
-                v.sector === sector && 
-                v.rank === rank
-            );
-            
-            if (type) {
-                filteredVehicles = filteredVehicles.filter(v => v.type === type);
-            }
-            
-            displayVehicles(filteredVehicles);
-        }
-        
-        // عرض المركبات مع أزرار النسخ
-        function displayVehicles(vehiclesToDisplay) {
-            const container = document.getElementById('search-results');
-            
-            if (vehiclesToDisplay.length === 0) {
-                container.innerHTML = `
-                    <div class="col-12 text-center py-5">
-                        <i class="fas fa-car fa-3x text-muted mb-3"></i>
-                        <h4 class="text-muted">لا توجد مركبات مطابقة للبحث</h4>
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            
-            vehiclesToDisplay.forEach(vehicle => {
-                const sectorName = getSectorName(vehicle.sector);
-                const rankName = getRankName(vehicle.rank);
-                
-                html += `
-                    <div class="col-md-4 col-sm-6 mb-4">
-                        <div class="card vehicle-card h-100">
-                            <div class="vehicle-img-container">
-                                <img src="${vehicle.image}" class="vehicle-img" alt="${vehicle.type}">
-                                <div class="position-absolute top-0 start-0 m-2">
-                                    <span class="rank-badge">${rankName}</span>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h5 class="card-title mb-0">${vehicle.type}</h5>
-                                    <div class="action-buttons">
-                                        ${userRole !== 'viewer' ? `
-                                            <button class="btn btn-sm btn-outline-primary" onclick="editVehicle('${vehicle.id}')">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger" onclick="deleteVehicle('${vehicle.id}')">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                                <p class="card-text">
-                                    <strong>القطاع:</strong> ${sectorName}<br>
-                                    <strong>الكود:</strong> ${vehicle.code}<br>
-                                    <strong>الألوان:</strong>
-                                    <span class="color-preview" style="background-color: #${vehicle.primaryColor};" 
-                                          title="اللون الأول: #${vehicle.primaryColor}">
-                                    </span>
-                                    <span class="color-preview" style="background-color: #${vehicle.secondaryColor};" 
-                                          title="اللون الثانوي: #${vehicle.secondaryColor}">
-                                    </span>
-                                    <button class="btn btn-sm btn-link p-0 copy-btn" onclick="copyColors('${vehicle.primaryColor}', '${vehicle.secondaryColor}')" 
-                                            title="نسخ الألوان">
-                                        <i class="fas fa-copy text-muted"></i>
-                                    </button>
-                                </p>
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <button class="btn btn-sm btn-outline-primary" onclick="copyToClipboard('${vehicle.code}')">
-                                        <i class="fas fa-copy me-1"></i>نسخ الكود
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-info" onclick="copyToClipboard('${vehicle.image}')">
-                                        <i class="fas fa-copy me-1"></i>نسخ الرابط
-                                    </button>
-                                </div>
-                                ${vehicle.notes ? `<p class="card-text mt-2"><small>${vehicle.notes}</small></p>` : ''}
-                            </div>
+    }
+}
+
+// دالة تحديث قائمة الألوان
+function updateColorsList() {
+    const container = document.getElementById('colors-list');
+    if (!container) return;
+    
+    if (colors.length === 0) {
+        container.innerHTML = '<p class="text-muted">لا توجد ألوان مسجلة بعد</p>';
+        return;
+    }
+    
+    let html = '';
+    
+    colors.forEach(color => {
+        html += `
+            <div class="col-md-3 col-sm-4 col-6 mb-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="color-preview mx-auto mb-2" style="background-color: #${color.code}; width: 50px; height: 50px;"></div>
+                        <h6>${color.name}</h6>
+                        <small>#${color.code}</small>
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editColor('${color.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteColor('${color.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
-                `;
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// دالة تعديل لون
+function editColor(colorId) {
+    const color = colors.find(c => c.id === colorId);
+    if (!color) return;
+    
+    document.getElementById('edit-color-id').value = colorId;
+    document.getElementById('color-code').value = color.code;
+    document.getElementById('color-name').value = color.name;
+    
+    updateColorPreview('color-code-preview', color.code);
+    
+    document.getElementById('save-color-btn').innerHTML = '<i class="fas fa-save me-2"></i>تحديث اللون';
+    
+    showSection('manage-colors');
+}
+
+// دالة حذف لون
+function deleteColor(colorId) {
+    if (confirm('هل أنت متأكد من حذف هذا اللون؟')) {
+        database.ref('colors/' + colorId).remove()
+            .then(() => {
+                showToast('تم حذف اللون بنجاح', 'success');
+                loadColors();
+            })
+            .catch((error) => {
+                showToast('حدث خطأ أثناء الحذف: ' + error.message, 'error');
             });
-            
-            container.innerHTML = html;
-        }
+    }
+}
+
+// دالة تحديث الألوان الشائعة
+function updateCommonColors() {
+    const container = document.getElementById('common-colors');
+    if (!container) return;
+    
+    const commonColors = [
+        { code: '4c4c4c', name: 'رمادي' },
+        { code: 'FFFFFF', name: 'أبيض' },
+        { code: '000000', name: 'أسود' },
+        { code: 'FF0000', name: 'أحمر' },
+        { code: '0000FF', name: 'أزرق' },
+        { code: '008000', name: 'أخضر' },
+        { code: '880000', name: 'أحمر غامق' },
+        { code: '99d24f', name: 'أخضر فاتح' }
+    ];
+    
+    let html = '';
+    
+    commonColors.forEach(color => {
+        html += `
+            <div class="color-option" style="cursor: pointer;" onclick="selectCommonColor('${color.code}')">
+                <div class="color-preview" style="background-color: #${color.code}; width: 30px; height: 30px;" title="${color.name}"></div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+// دالة اختيار لون شائع
+function selectCommonColor(colorCode) {
+    document.getElementById('color-hex').value = colorCode;
+    document.getElementById('color-picker').value = '#' + colorCode;
+}
+
+// دالة تحديث جدول المستخدمين
+function updateUsersTable() {
+    const tbody = document.querySelector('#users-table tbody');
+    if (!tbody) return;
+    
+    if (users.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center">لا توجد مستخدمين مسجلين</td>
+            </tr>
+        `;
+        return;
+    }
+    
+    let html = '';
+    
+    users.forEach(user => {
+        // تجنب عرض المستخدم الحالي في قائمة الحذف
+        const isCurrentUser = user.id === currentUser.uid;
         
-        // إضافة مركبة جديدة
-        function addVehicle() {
-            const vehicleId = document.getElementById('edit-vehicle-id').value;
-            const type = document.getElementById('vehicle-type').value;
-            const code = document.getElementById('vehicle-code').value;
-            const sector = document.getElementById('vehicle-sector').value;
-            const rank = document.getElementById('vehicle-rank').value;
-            const image = document.getElementById('vehicle-image').value;
-            const primaryColor = document.getElementById('primary-color').value;
-            const secondaryColor = document.getElementById('secondary-color').value;
-            const notes = document.getElementById('vehicle-notes').value;
-            
-            if (!type || !code || !sector || !rank || !image || !primaryColor || !secondaryColor) {
-                showToast('يرجى تعبئة جميع الحقول الإلزامية', 'error');
-                return;
-            }
-            
-            const vehicleData = {
-                type: type,
-                code: code,
-                sector: sector,
-                rank: rank,
-                image: image,
-                primaryColor: primaryColor,
-                secondaryColor: secondaryColor,
-                notes: notes,
-                updatedAt: new Date().toISOString(),
-                updatedBy: currentUser.uid
-            };
-            
-            if (vehicleId) {
-                // تعديل مركبة موجودة
-                vehicleData.createdAt = document.getElementById('vehicle-created-at').value;
-                vehicleData.createdBy = document.getElementById('vehicle-created-by').value;
-                
-                database.ref('vehicles/' + vehicleId).update(vehicleData)
-                    .then(() => {
-                        showToast('تم تعديل المركبة بنجاح', 'success');
-                        resetVehicleForm();
-                        loadVehicles();
-                    })
-                    .catch((error) => {
-                        showToast('حدث خطأ أثناء التعديل: ' + error.message, 'error');
-                    });
-            } else {
-                // إضافة مركبة جديدة
-                vehicleData.createdAt = new Date().toISOString();
-                vehicleData.createdBy = currentUser.uid;
-                
-                database.ref('vehicles').push(vehicleData)
-                    .then(() => {
-                        showToast('تم إضافة المركبة بنجاح', 'success');
-                        resetVehicleForm();
-                        loadVehicles();
-                    })
-                    .catch((error) => {
-                        showToast('حدث خطأ أثناء الإضافة: ' + error.message, 'error');
-                    });
-            }
-        }
+        html += `
+            <tr>
+                <td>${user.name}</td>
+                <td>${user.email}</td>
+                <td><span class="user-badge badge-${user.role}">${getRoleName(user.role)}</span></td>
+                <td>${formatDate(user.createdAt)}</td>
+                <td>
+                    ${!isCurrentUser ? `
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="editUser('${user.id}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    ` : '<span class="text-muted">المستخدم الحالي</span>'}
+                </td>
+            </tr>
+        `;
+    });
+    
+    tbody.innerHTML = html;
+}
+
+// دالة تنسيق التاريخ
+function formatDate(dateString) {
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ar-EG');
+    } catch (e) {
+        return 'غير معروف';
+    }
+}
+
+// دالة تحديث الإحصائيات
+function updateDashboardStats() {
+    // تعداد المستخدمين حسب الدور
+    const adminCount = users.filter(u => u.role === 'admin').length;
+    const editorCount = users.filter(u => u.role === 'editor').length;
+    const viewerCount = users.filter(u => u.role === 'viewer').length;
+    
+    const adminCountElement = document.getElementById('admin-count');
+    const editorCountElement = document.getElementById('editor-count');
+    const viewerCountElement = document.getElementById('viewer-count');
+    const vehicleCountElement = document.getElementById('vehicle-count');
+    
+    if (adminCountElement) adminCountElement.textContent = adminCount;
+    if (editorCountElement) editorCountElement.textContent = editorCount;
+    if (viewerCountElement) viewerCountElement.textContent = viewerCount;
+    if (vehicleCountElement) vehicleCountElement.textContent = vehicles.length;
+    
+    // تحديث الرسم البياني
+    updateChart();
+}
+
+// دالة تحديث المركبات الأخيرة
+function updateRecentVehicles() {
+    const container = document.getElementById('recent-vehicles');
+    if (!container) return;
+    
+    const recentVehicles = vehicles.slice(-5).reverse();
+    
+    if (recentVehicles.length === 0) {
+        container.innerHTML = '<p class="text-muted">لا توجد مركبات مضافة بعد</p>';
+        return;
+    }
+    
+    let html = '<div class="list-group">';
+    
+    recentVehicles.forEach(vehicle => {
+        const sectorName = getSectorName(vehicle.sector);
+        html += `
+            <a href="#" class="list-group-item list-group-item-action" onclick="editVehicle('${vehicle.id}')">
+                <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">${vehicle.type}</h6>
+                    <small>${formatDate(vehicle.createdAt)}</small>
+                </div>
+                <p class="mb-1">${sectorName} - ${vehicle.code}</p>
+            </a>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// دالة عرض صفحة تسجيل الدخول
+function showLogin() {
+    document.getElementById('login-page')?.classList.remove('d-none');
+    document.getElementById('register-page')?.classList.add('d-none');
+    document.getElementById('dashboard')?.classList.add('d-none');
+}
+
+// دالة عرض لوحة التحكم
+function showDashboard() {
+    document.getElementById('login-page')?.classList.add('d-none');
+    document.getElementById('register-page')?.classList.add('d-none');
+    document.getElementById('dashboard')?.classList.remove('d-none');
+    showSection('dashboard-home');
+}
+
+// دالة تبديل الشريط الجانبي
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar?.classList.toggle('active');
+}
+
+// دالة تغيير القسم
+function showSection(sectionId) {
+    // إخفاء جميع الأقسام
+    document.querySelectorAll('.dashboard-section').forEach(section => {
+        section.classList.add('d-none');
+    });
+    
+    // إزالة النشط من جميع عناصر القائمة
+    document.querySelectorAll('.sidebar a').forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // إظهار القسم المطلوب
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.classList.remove('d-none');
+    }
+    
+    // إضافة النشط إلى العنصر المناسب في القائمة الجانبية
+    const sectionNames = {
+        'dashboard-home': 'لوحة التحكم',
+        'search-vehicles': 'بحث المركبات',
+        'add-vehicle': 'إضافة مركبة',
+        'manage-sectors': 'إدارة القطاعات',
+        'manage-ranks': 'إدارة الرتب',
+        'manage-colors': 'إدارة الألوان',
+        'manage-users': 'إدارة المستخدمين',
+        'add-user': 'إضافة مستخدم',
+        'system-tools': 'أدوات النظام'
+    };
+    
+    const sectionName = sectionNames[sectionId];
+    if (sectionName) {
+        const activeLink = Array.from(document.querySelectorAll('.sidebar a')).find(link => 
+            link.textContent.includes(sectionName)
+        );
         
-        // تعديل مركبة
-        function editVehicle(vehicleId) {
-            const vehicle = vehicles.find(v => v.id === vehicleId);
-            if (!vehicle) return;
-            
-            document.getElementById('edit-vehicle-id').value = vehicleId;
-            document.getElementById('vehicle-type').value = vehicle.type;
-            document.getElementById('vehicle-code').value = vehicle.code;
-            document.getElementById('vehicle-sector').value = vehicle.sector;
-            document.getElementById('vehicle-rank').value = vehicle.rank;
-            document.getElementById('vehicle-image').value = vehicle.image;
-            document.getElementById('primary-color').value = vehicle.primaryColor;
-            document.getElementById('secondary-color').value = vehicle.secondaryColor;
-            document.getElementById('vehicle-notes').value = vehicle.notes || '';
-            
-            updateColorPreview('primary-color-preview', vehicle.primaryColor);
-            updateColorPreview('secondary-color-preview', vehicle.secondaryColor);
-            
-            document.getElementById('vehicle-form-title').textContent = 'تعديل المركبة';
-            document.getElementById('save-vehicle-btn').innerHTML = '<i class="fas fa-save me-2"></i>تحديث المركبة';
-            
-            showSection('add-vehicle');
+        if (activeLink) {
+            activeLink.classList.add('active');
         }
-        
-        // حذف مركبة
-        function deleteVehicle(vehicleId) {
-            if (confirm('هل أنت متأكد من حذف هذه المركبة؟')) {
-                database.ref('vehicles/' + vehicleId).remove()
-                    .then(() => {
-                        showToast('تم حذف المركبة بنجاح', 'success');
-                        loadVehicles();
-                    })
-                    .catch((error) => {
-                        showToast('حدث خطأ أثناء الحذف: ' + error.message, 'error');
-                    });
-            }
-        }
-        
-        // إضافة/تعديل قطاع
-        function saveSector() {
-            const sectorId = document.getElementById('edit-sector-id').value;
-            const name = document.getElementById('sector-name').value;
-            const code = document.getElementById('sector-code').value;
-            const description = document.getElementById('sector-description').value;
-            
-            if (!name || !code) {
-                showToast('يرجى تعبئة جميع الحقول الإلزامية', 'error');
-                return;
-            }
-            
-            const sectorData = {
-                name: name,
-                code: code,
-                description: description,
-                updatedAt: new Date().toISOString(),
-                updatedBy: currentUser.uid
-            };
-            
-            if (sectorId) {
-                database.ref('sectors/' + sectorId).update(sectorData)
-                    .then(() => {
-                        showToast('تم تعديل القطاع بنجاح', 'success');
-                        resetSectorForm();
-                        loadSectors();
-                    })
-                    .catch((error) => {
-                        showToast('حدث خطأ أثناء التعديل: ' + error.message, 'error');
-                    });
-            } else {
-                sectorData.createdAt = new Date().toISOString();
-                sectorData.createdBy = currentUser.uid;
-                
-                database.ref('sectors').push(sectorData)
-                    .then(() => {
-                        showToast('تم إضافة القطاع بنجاح', 'success');
-                        resetSectorForm();
-                        loadSectors();
-                    })
-                    .catch((error) => {
-                        showToast('حدث خطأ أثناء الإضافة: ' + error.message, 'error');
-                    });
-            }
-        }
-        
-        // إضافة/تعديل رتبة
-        function saveRank() {
-            const rankId = document.getElementById('edit-rank-id').value;
-            const name = document.getElementById('rank-name').value;
-            const code = document.getElementById('rank-code').value;
-            const description = document.getElementById('rank-description').value;
-            
-            if (!name || !code) {
-                showToast('يرجى تعبئة جميع الحقول الإلزامية', 'error');
-                return;
-            }
-            
-            const rankData = {
-                name: name,
-                code: code,
-                description: description,
-                updatedAt: new Date().toISOString(),
-                updatedBy: currentUser.uid
-            };
-            
-            if (rankId) {
-                database.ref('ranks/' + rankId).update(rankData)
-                    .then(() => {
-                        showToast('تم تعديل الرتبة بنجاح', 'success');
-                        resetRankForm();
-                        loadRanks();
-                    })
-                    .catch((error) => {
-                        showToast('حدث خطأ أثناء التعديل: ' + error.message, 'error');
-                    });
-            } else {
-                rankData.createdAt = new Date().toISOString();
-                rankData.createdBy = currentUser.uid;
-                
-                database.ref('ranks').push(rankData)
-                    .then(() => {
-                        showToast('تم إضافة الرتبة بنجاح', 'success');
-                        resetRankForm();
-                        loadRanks();
-                    })
-                    .catch((error) => {
-                        showToast('حدث خطأ أثناء الإضافة: ' + error.message, 'error');
-                    });
-            }
-        }
-        
-        // إضافة/تعديل لون
-        function saveColor() {
-            const colorId = document.getElementById('edit-color-id').value;
-            const code = document.getElementById('color-code').value;
-            const name = document.getElementById('color-name').value;
-            
-            if (!code || !name) {
-                showToast('يرجى تعبئة جميع الحقول الإلزامية', 'error');
-                return;
-            }
-            
-            const colorData = {
-                code: code,
-                name: name,
-                updatedAt: new Date().toISOString(),
-                updatedBy: currentUser.uid
-            };
-            
-            if (colorId) {
-                database.ref('colors/' + colorId).update(colorData)
-                    .then(() => {
-                        showToast('تم تعديل اللون بنجاح', 'success');
-                        resetColorForm();
-                        loadColors();
-                    })
-                    .catch((error) => {
-                        showToast('حدث خطأ أثناء التعديل: ' + error.message, 'error');
-                    });
-            } else {
-                colorData.createdAt = new Date().toISOString();
-                colorData.createdBy = currentUser.uid;
-                
-                database.ref('colors').push(colorData)
-                    .then(() => {
-                        showToast('تم إضافة اللون بنجاح', 'success');
-                        resetColorForm();
-                        loadColors();
-                    })
-                    .catch((error) => {
-                        showToast('حدث خطأ أثناء الإضافة: ' + error.message, 'error');
-                    });
-            }
-        }
-        
-        // نسخ الألوان
-        function copyColors(primary, secondary) {
-            const text = `اللون الأول: #${primary}\nاللون الثانوي: #${secondary}`;
-            copyToClipboard(text);
-            showToast('تم نسخ الألوان', 'success');
-        }
-        
-        // نسخ النص للحافظة
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text)
-                .then(() => {
-                    showToast('تم النسخ إلى الحافظة', 'success');
-                })
-                .catch(err => {
-                    showToast('حدث خطأ أثناء النسخ', 'error');
-                });
-        }
-        
-        // فتح نافذة اختيار اللون
-        function openColorPicker(fieldId) {
-            selectedColorField = fieldId;
-            const modal = new bootstrap.Modal(document.getElementById('colorPickerModal'));
-            modal.show();
-            
-            // تعيين اللون الحالي
-            const currentColor = document.getElementById(fieldId).value;
-            if (currentColor) {
-                document.getElementById('color-picker').value = '#' + currentColor;
-                document.getElementById('color-hex').value = currentColor;
-            }
-        }
-        
-        // تطبيق اللون المختار
-        function applyColor() {
-            let color = document.getElementById('color-hex').value;
-            if (color.startsWith('#')) color = color.substring(1);
-            
-            document.getElementById(selectedColorField).value = color;
-            updateColorPreview(selectedColorField + '-preview', color);
-            
-            const modal = bootstrap.Modal.getInstance(document.getElementById('colorPickerModal'));
-            modal.hide();
-        }
-        
-        // تحديث معاينة الصورة
-        function previewImage() {
-            const imageUrl = document.getElementById('vehicle-image').value;
-            if (!imageUrl) {
-                showToast('يرجى إدخال رابط الصورة أولاً', 'error');
-                return;
-            }
-            
-            document.getElementById('preview-image').src = imageUrl;
-            const modal = new bootstrap.Modal(document.getElementById('imagePreviewModal'));
-            modal.show();
-        }
-        
-        // مساعدة: الحصول على اسم القطاع
-        function getSectorName(sectorId) {
-            const sector = sectors.find(s => s.id === sectorId);
-            return sector ? sector.name : 'غير معروف';
-        }
-        
-        // مساعدة: الحصول على اسم الرتبة
-        function getRankName(rankId) {
-            const rank = ranks.find(r => r.id === rankId);
-            return rank ? rank.name : 'غير معروف';
-        }
-        
-        // مساعدة: تحديث الفلاتر المتتالية
-        function updateFilterDependencies() {
-            const sectorSelect = document.getElementById('search-sector');
-            const rankSelect = document.getElementById('search-rank');
-            const typeSelect = document.getElementById('search-type');
-            
-            // تفعيل/تعطيل القوائم بناءً على الاختيارات
-            rankSelect.disabled = !sectorSelect.value;
-            typeSelect.disabled = !rankSelect.value;
-            
-            // إذا تم اختيار قطاع، تصفية الرتب المتاحة فقط للقطاع المختار
-            if (sectorSelect.value) {
-                // يمكنك هنا تصفية الرتب بناءً على القطاع إذا كانت هناك علاقة بينهما
-                // حالياً نعرض جميع الرتب
-            }
-        }
-        
-        // تخصيص التحسينات الإضافية...
-        // [سيتم إضافة بقية الدوال المساعدة هنا...]
-        
-        // دالة تسجيل الخروج
-        function logout() {
-            auth.signOut().then(() => {
-                currentUser = null;
-                userRole = null;
-                showLogin();
-            });
-        }
-    </script>
-</body>
-</html>
+    }
+}
+
+// دالة إعادة تعيين البحث
+function resetSearch() {
+    document.getElementById('search-sector').value = '';
+    document.getElementById('search-rank').value = '';
+    document.getElementById('search-type').value = '';
+    
+    // تحديث حالة الفلاتر
+    updateFilterDependencies();
+    
+    // عرض جميع المركبات
+    displayVehicles(vehicles);
+}
+
+// دالة تسجيل الخروج
+function logout() {
+    auth.signOut().then(() => {
+        currentUser = null;
+        userRole = null;
+        showLogin();
+    }).catch((error) => {
+        console.error('خطأ في تسجيل الخروج:', error);
+    });
+}
