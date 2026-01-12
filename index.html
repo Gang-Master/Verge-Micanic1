@@ -369,7 +369,7 @@
             <label for="login-email" class="form-label">البريد الإلكتروني</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                <input type="email" class="form-control" id="login-email" placeholder="أدخل بريدك الإلكتروني">
+                <input type="email" class="form-control" id="login-email" placeholder="أدخل بريدك الإلكتروني" value="admin@test.com">
             </div>
         </div>
         
@@ -377,7 +377,7 @@
             <label for="login-password" class="form-label">كلمة المرور</label>
             <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                <input type="password" class="form-control" id="login-password" placeholder="أدخل كلمة المرور">
+                <input type="password" class="form-control" id="login-password" placeholder="أدخل كلمة المرور" value="123456">
             </div>
         </div>
         
@@ -1385,6 +1385,7 @@
                     
                     // إذا كان الخطأ بسبب عدم وجود مستخدم، إنشاء حساب جديد
                     if (error.code === 'auth/user-not-found') {
+                        showToast('⚠️ لا يوجد حساب بهذا البريد، جاري إنشاء حساب جديد...', 'warning');
                         createUser(email, password);
                     } else {
                         const errorMsg = getAuthErrorMessage(error.code);
@@ -1420,17 +1421,15 @@
                 })
                 .catch((error) => {
                     hideLoading();
+                    console.error('❌ خطأ في إنشاء المستخدم:', error);
                     const errorMsg = getAuthErrorMessage(error.code);
                     showError(errorMsg);
                 });
         }
 
         function loginAsDemoAdmin() {
-            const email = 'admin@test.com';
-            const password = '123456';
-            
-            document.getElementById('login-email').value = email;
-            document.getElementById('login-password').value = password;
+            document.getElementById('login-email').value = 'admin@test.com';
+            document.getElementById('login-password').value = '123456';
             login();
         }
 
@@ -1527,135 +1526,184 @@
                 setupUsersListener()
             ];
             
-            Promise.all(promises)
-                .then(() => {
+            // استخدام Promise.allSettled بدلاً من Promise.all لتحميل جميع البيانات حتى مع وجود أخطاء
+            Promise.allSettled(promises)
+                .then((results) => {
                     hideLoading();
-                    showToast('✅ تم تحميل جميع البيانات بنجاح', 'success');
-                    updateFirebaseStatus('connected');
+                    
+                    // التحقق من نتائج جميع الوعود
+                    const allSuccessful = results.every(result => result.status === 'fulfilled');
+                    
+                    if (allSuccessful) {
+                        showToast('✅ تم تحميل جميع البيانات بنجاح', 'success');
+                        updateFirebaseStatus('connected');
+                    } else {
+                        // عد النتائج الناجحة والفاشلة
+                        const successful = results.filter(r => r.status === 'fulfilled').length;
+                        const failed = results.filter(r => r.status === 'rejected').length;
+                        
+                        if (successful > 0) {
+                            showToast(`✅ تم تحميل ${successful} من ${results.length} مجموعة بيانات`, 'success');
+                        }
+                        
+                        if (failed > 0) {
+                            console.warn(`⚠️ فشل تحميل ${failed} مجموعة بيانات`);
+                        }
+                    }
+                    
                     updateDashboard();
                 })
                 .catch((error) => {
                     hideLoading();
                     console.error('❌ خطأ في تحميل البيانات:', error);
                     showToast('⚠️ هناك مشكلة في تحميل بعض البيانات', 'warning');
+                    updateDashboard();
                 });
         }
 
         function setupVehiclesListener() {
-            return new Promise((resolve) => {
-                const vehiclesRef = database.ref('vehicles');
-                
-                const listener = vehiclesRef.on('value', (snapshot) => {
-                    vehicles = [];
-                    if (snapshot.exists()) {
-                        snapshot.forEach((childSnapshot) => {
-                            vehicles.push({
-                                id: childSnapshot.key,
-                                ...childSnapshot.val()
+            return new Promise((resolve, reject) => {
+                try {
+                    const vehiclesRef = database.ref('vehicles');
+                    
+                    const listener = vehiclesRef.on('value', (snapshot) => {
+                        vehicles = [];
+                        if (snapshot.exists()) {
+                            snapshot.forEach((childSnapshot) => {
+                                vehicles.push({
+                                    id: childSnapshot.key,
+                                    ...childSnapshot.val()
+                                });
                             });
-                        });
-                    }
+                        }
+                        
+                        console.log(`📊 تم تحميل ${vehicles.length} مركبة من Firebase`);
+                        document.getElementById('vehicle-count').textContent = vehicles.length;
+                        document.getElementById('fb-vehicles-count').textContent = vehicles.length;
+                        document.getElementById('db-vehicles-status').textContent = `${vehicles.length} مركبة`;
+                        
+                        updateRecentVehicles();
+                        updateChart();
+                        
+                        resolve();
+                    }, (error) => {
+                        console.error('❌ خطأ في تحميل المركبات:', error);
+                        reject(error);
+                    });
                     
-                    console.log(`📊 تم تحميل ${vehicles.length} مركبة من Firebase`);
-                    document.getElementById('vehicle-count').textContent = vehicles.length;
-                    document.getElementById('fb-vehicles-count').textContent = vehicles.length;
-                    document.getElementById('db-vehicles-status').textContent = `${vehicles.length} مركبة`;
-                    
-                    updateRecentVehicles();
-                    updateChart();
-                    
-                    resolve();
-                });
-                
-                dataListeners.push(() => vehiclesRef.off('value', listener));
+                    dataListeners.push(() => vehiclesRef.off('value', listener));
+                } catch (error) {
+                    reject(error);
+                }
             });
         }
 
         function setupSectorsListener() {
-            return new Promise((resolve) => {
-                const sectorsRef = database.ref('sectors');
-                
-                const listener = sectorsRef.on('value', (snapshot) => {
-                    sectors = [];
-                    if (snapshot.exists()) {
-                        snapshot.forEach((childSnapshot) => {
-                            sectors.push({
-                                id: childSnapshot.key,
-                                ...childSnapshot.val()
+            return new Promise((resolve, reject) => {
+                try {
+                    const sectorsRef = database.ref('sectors');
+                    
+                    const listener = sectorsRef.on('value', (snapshot) => {
+                        sectors = [];
+                        if (snapshot.exists()) {
+                            snapshot.forEach((childSnapshot) => {
+                                sectors.push({
+                                    id: childSnapshot.key,
+                                    ...childSnapshot.val()
+                                });
                             });
-                        });
-                    }
+                        }
+                        
+                        console.log(`📊 تم تحميل ${sectors.length} قطاع من Firebase`);
+                        document.getElementById('fb-sectors-count').textContent = sectors.length;
+                        updateDropdowns();
+                        updateSectorsList();
+                        loadRanksForSectorManagement();
+                        loadSectorsForRankManagement();
+                        loadSectorsForUserManagement();
+                        
+                        resolve();
+                    }, (error) => {
+                        console.error('❌ خطأ في تحميل القطاعات:', error);
+                        reject(error);
+                    });
                     
-                    console.log(`📊 تم تحميل ${sectors.length} قطاع من Firebase`);
-                    document.getElementById('fb-sectors-count').textContent = sectors.length;
-                    updateDropdowns();
-                    updateSectorsList();
-                    loadRanksForSectorManagement();
-                    loadSectorsForRankManagement();
-                    loadSectorsForUserManagement();
-                    
-                    resolve();
-                });
-                
-                dataListeners.push(() => sectorsRef.off('value', listener));
+                    dataListeners.push(() => sectorsRef.off('value', listener));
+                } catch (error) {
+                    reject(error);
+                }
             });
         }
 
         function setupRanksListener() {
-            return new Promise((resolve) => {
-                const ranksRef = database.ref('ranks');
-                
-                const listener = ranksRef.on('value', (snapshot) => {
-                    ranks = [];
-                    if (snapshot.exists()) {
-                        snapshot.forEach((childSnapshot) => {
-                            ranks.push({
-                                id: childSnapshot.key,
-                                ...childSnapshot.val()
+            return new Promise((resolve, reject) => {
+                try {
+                    const ranksRef = database.ref('ranks');
+                    
+                    const listener = ranksRef.on('value', (snapshot) => {
+                        ranks = [];
+                        if (snapshot.exists()) {
+                            snapshot.forEach((childSnapshot) => {
+                                ranks.push({
+                                    id: childSnapshot.key,
+                                    ...childSnapshot.val()
+                                });
                             });
-                        });
-                    }
+                        }
+                        
+                        console.log(`📊 تم تحميل ${ranks.length} رتبة من Firebase`);
+                        document.getElementById('fb-ranks-count').textContent = ranks.length;
+                        updateDropdowns();
+                        loadRanksForSectorManagement();
+                        loadSectorsForRankManagement();
+                        updateRanksList();
+                        
+                        resolve();
+                    }, (error) => {
+                        console.error('❌ خطأ في تحميل الرتب:', error);
+                        reject(error);
+                    });
                     
-                    console.log(`📊 تم تحميل ${ranks.length} رتبة من Firebase`);
-                    document.getElementById('fb-ranks-count').textContent = ranks.length;
-                    updateDropdowns();
-                    loadRanksForSectorManagement();
-                    loadSectorsForRankManagement();
-                    updateRanksList();
-                    
-                    resolve();
-                });
-                
-                dataListeners.push(() => ranksRef.off('value', listener));
+                    dataListeners.push(() => ranksRef.off('value', listener));
+                } catch (error) {
+                    reject(error);
+                }
             });
         }
 
         function setupUsersListener() {
-            return new Promise((resolve) => {
-                const usersRef = database.ref('users');
-                
-                const listener = usersRef.on('value', (snapshot) => {
-                    users = [];
-                    if (snapshot.exists()) {
-                        snapshot.forEach((childSnapshot) => {
-                            users.push({
-                                id: childSnapshot.key,
-                                ...childSnapshot.val()
+            return new Promise((resolve, reject) => {
+                try {
+                    const usersRef = database.ref('users');
+                    
+                    const listener = usersRef.on('value', (snapshot) => {
+                        users = [];
+                        if (snapshot.exists()) {
+                            snapshot.forEach((childSnapshot) => {
+                                users.push({
+                                    id: childSnapshot.key,
+                                    ...childSnapshot.val()
+                                });
                             });
-                        });
-                    }
+                        }
+                        
+                        console.log(`📊 تم تحميل ${users.length} مستخدم من Firebase`);
+                        document.getElementById('fb-users-count').textContent = users.length;
+                        document.getElementById('db-users-status').textContent = `${users.length} مستخدم`;
+                        
+                        updateDashboardStats();
+                        updateUsersList();
+                        
+                        resolve();
+                    }, (error) => {
+                        console.error('❌ خطأ في تحميل المستخدمين:', error);
+                        reject(error);
+                    });
                     
-                    console.log(`📊 تم تحميل ${users.length} مستخدم من Firebase`);
-                    document.getElementById('fb-users-count').textContent = users.length;
-                    document.getElementById('db-users-status').textContent = `${users.length} مستخدم`;
-                    
-                    updateDashboardStats();
-                    updateUsersList();
-                    
-                    resolve();
-                });
-                
-                dataListeners.push(() => usersRef.off('value', listener));
+                    dataListeners.push(() => usersRef.off('value', listener));
+                } catch (error) {
+                    reject(error);
+                }
             });
         }
 
@@ -1700,8 +1748,8 @@
             
             if (vehicleId) {
                 // تعديل مركبة موجودة
-                vehicleData.createdAt = document.getElementById('vehicle-created-at')?.value || new Date().toISOString();
-                vehicleData.createdBy = document.getElementById('vehicle-created-by')?.value || currentUser.uid;
+                vehicleData.createdAt = new Date().toISOString();
+                vehicleData.createdBy = currentUser.uid;
                 
                 database.ref('vehicles/' + vehicleId).update(vehicleData)
                     .then(() => {
@@ -1771,6 +1819,9 @@
             showLoading('جاري حفظ القطاع في Firebase...');
             
             if (sectorId) {
+                sectorData.createdAt = new Date().toISOString();
+                sectorData.createdBy = currentUser.uid;
+                
                 database.ref('sectors/' + sectorId).update(sectorData)
                     .then(() => {
                         hideLoading();
@@ -1838,6 +1889,9 @@
             showLoading('جاري حفظ الرتبة في Firebase...');
             
             if (rankId) {
+                rankData.createdAt = new Date().toISOString();
+                rankData.createdBy = currentUser.uid;
+                
                 database.ref('ranks/' + rankId).update(rankData)
                     .then(() => {
                         hideLoading();
@@ -1912,20 +1966,10 @@
             
             if (userId) {
                 // تعديل مستخدم موجود
-                const promises = [];
+                userData.createdAt = new Date().toISOString();
+                userData.createdBy = currentUser.uid;
                 
-                // تحديث البيانات في Firebase Database
-                promises.push(database.ref('users/' + userId).update(userData));
-                
-                // إذا كانت هناك كلمة مرور جديدة، تحديثها في Authentication
-                if (password) {
-                    const user = auth.currentUser;
-                    if (user) {
-                        promises.push(user.updatePassword(password));
-                    }
-                }
-                
-                Promise.all(promises)
+                database.ref('users/' + userId).update(userData)
                     .then(() => {
                         hideLoading();
                         showToast('✅ تم تعديل المستخدم بنجاح', 'success');
@@ -2074,19 +2118,7 @@
             updateFirebaseStatus('syncing');
             
             // إعادة تحميل جميع البيانات
-            setTimeout(() => {
-                loadAllData()
-                    .then(() => {
-                        hideLoading();
-                        showToast('✅ تم تحديث البيانات بنجاح', 'success');
-                        updateFirebaseStatus('connected');
-                    })
-                    .catch((error) => {
-                        hideLoading();
-                        showToast('❌ حدث خطأ في تحديث البيانات', 'error');
-                        updateFirebaseStatus('error');
-                    });
-            }, 1000);
+            loadAllData();
         }
 
         function updateLastUpdateTime() {
@@ -2366,8 +2398,7 @@
             
             showLoading('جاري حذف المستخدم...');
             
-            // حذف من Authentication (يتطلب صلاحيات خاصة)
-            // حذف من Database
+            // حذف من Database فقط (لا يمكن حذف من Authentication بسهولة)
             database.ref('users/' + userId).remove()
                 .then(() => {
                     hideLoading();
@@ -2865,7 +2896,8 @@
                 'auth/email-already-in-use': 'البريد الإلكتروني مستخدم بالفعل',
                 'auth/weak-password': 'كلمة المرور ضعيفة، يجب أن تتكون من 6 أحرف على الأقل',
                 'auth/operation-not-allowed': 'عملية التسجيل غير مسموحة حالياً',
-                'auth/too-many-requests': 'تم رفض الوصول بسبب محاولات متكررة، يرجى المحاولة لاحقاً'
+                'auth/too-many-requests': 'تم رفض الوصول بسبب محاولات متكررة، يرجى المحاولة لاحقاً',
+                'auth/invalid-credential': 'بيانات تسجيل الدخول غير صحيحة'
             };
             
             return messages[errorCode] || 'حدث خطأ في تسجيل الدخول، يرجى المحاولة مرة أخرى';
@@ -3069,7 +3101,7 @@
             }
         }
 
-        // دالة updateDashboard المفقودة
+        // دالة updateDashboard
         function updateDashboard() {
             try {
                 // تحديث إحصائيات لوحة التحكم
