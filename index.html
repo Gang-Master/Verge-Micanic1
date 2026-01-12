@@ -2074,17 +2074,19 @@
             updateFirebaseStatus('syncing');
             
             // إعادة تحميل جميع البيانات
-            loadAllData()
-                .then(() => {
-                    hideLoading();
-                    showToast('✅ تم تحديث البيانات بنجاح', 'success');
-                    updateFirebaseStatus('connected');
-                })
-                .catch((error) => {
-                    hideLoading();
-                    showToast('❌ حدث خطأ في تحديث البيانات', 'error');
-                    updateFirebaseStatus('error');
-                });
+            setTimeout(() => {
+                loadAllData()
+                    .then(() => {
+                        hideLoading();
+                        showToast('✅ تم تحديث البيانات بنجاح', 'success');
+                        updateFirebaseStatus('connected');
+                    })
+                    .catch((error) => {
+                        hideLoading();
+                        showToast('❌ حدث خطأ في تحديث البيانات', 'error');
+                        updateFirebaseStatus('error');
+                    });
+            }, 1000);
         }
 
         function updateLastUpdateTime() {
@@ -3009,10 +3011,10 @@
         }
 
         function showToast(message, type = 'info') {
-            const bgColor = type === 'success' ? '#28a745' : 
-                            type === 'error' ? '#dc3545' : 
-                            type === 'warning' ? '#ffc107' : 
-                            '#17a2b8';
+            const bgColor = type === 'success' ? 'linear-gradient(to right, #00b09b, #96c93d)' : 
+                            type === 'error' ? 'linear-gradient(to right, #ff5f6d, #ffc371)' : 
+                            type === 'warning' ? 'linear-gradient(to right, #f7971e, #ffd200)' : 
+                            'linear-gradient(to right, #4facfe, #00f2fe)';
             
             Toastify({
                 text: message,
@@ -3020,7 +3022,9 @@
                 close: true,
                 gravity: "top",
                 position: "center",
-                backgroundColor: bgColor,
+                style: {
+                    background: bgColor,
+                },
                 stopOnFocus: true,
                 className: "text-end"
             }).showToast();
@@ -3062,6 +3066,27 @@
                 section.style.display = 'block';
             } else {
                 section.style.display = 'none';
+            }
+        }
+
+        // دالة updateDashboard المفقودة
+        function updateDashboard() {
+            try {
+                // تحديث إحصائيات لوحة التحكم
+                document.getElementById('vehicle-count').textContent = vehicles.length;
+                document.getElementById('fb-vehicles-count').textContent = vehicles.length;
+                document.getElementById('db-vehicles-status').textContent = `${vehicles.length} مركبة`;
+                
+                // تحديث إحصائيات المستخدمين
+                updateDashboardStats();
+                
+                // تحديث العناصر الأخرى
+                updateRecentVehicles();
+                updateChart();
+                
+                console.log('✅ تم تحديث لوحة التحكم بنجاح');
+            } catch (error) {
+                console.error('❌ خطأ في تحديث لوحة التحكم:', error);
             }
         }
 
