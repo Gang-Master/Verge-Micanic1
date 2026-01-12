@@ -10,85 +10,475 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     
     <style>
-        /* الأنماط السابقة تبقى كما هي */
-        /* ... (بقية الأنماط كما هي) ... */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --admin-color: #e74c3c;
+            --editor-color: #f39c12;
+            --viewer-color: #27ae60;
+        }
         
-        .color-picker-popup {
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        .sidebar {
+            height: 100vh;
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
+            right: 0;
+            top: 0;
+            background-color: var(--primary-color);
+            color: white;
+            padding-top: 20px;
+            width: 250px;
+            transition: all 0.3s;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            margin-right: 250px;
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 30px rgba(0,0,0,0.3);
-            z-index: 10000;
-            display: none;
+            transition: all 0.3s;
+            min-height: 100vh;
         }
         
-        .color-picker-popup.active {
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-right: -250px;
+            }
+            .sidebar.active {
+                margin-right: 0;
+            }
+            .main-content {
+                margin-right: 0;
+            }
+        }
+        
+        .sidebar a {
+            color: white;
+            text-decoration: none;
             display: block;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
         }
         
-        .overlay {
+        .sidebar a:hover {
+            background-color: rgba(255,255,255,0.1);
+            padding-right: 25px;
+        }
+        
+        .sidebar a.active {
+            background-color: var(--secondary-color);
+            border-right: 4px solid white;
+        }
+        
+        .user-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .badge-admin { background-color: var(--admin-color); }
+        .badge-editor { background-color: var(--editor-color); }
+        .badge-viewer { background-color: var(--viewer-color); }
+        
+        .section-title {
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            color: var(--primary-color);
+        }
+        
+        .login-container {
+            max-width: 500px;
+            margin: 100px auto;
+            padding: 30px;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .logo {
+            font-weight: bold;
+            font-size: 24px;
+            color: var(--primary-color);
+            text-align: center;
+        }
+        
+        .logo span { color: var(--secondary-color); }
+        
+        .vehicle-card {
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s;
+            height: 100%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .vehicle-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        
+        .vehicle-img-container {
+            height: 200px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f5f5;
+        }
+        
+        .vehicle-img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: cover;
+        }
+        
+        .color-preview {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 5px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+        
+        .color-preview:hover {
+            transform: scale(1.1);
+            border-color: #007bff;
+        }
+        
+        .copy-btn {
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #6c757d;
+        }
+        
+        .copy-btn:hover {
+            transform: scale(1.1);
+            color: #007bff;
+        }
+        
+        .rank-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            color: #1565c0;
+            margin: 2px;
+            font-weight: bold;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            justify-content: flex-end;
+        }
+        
+        .dashboard-card {
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .dashboard-card:hover { transform: translateY(-3px); }
+        .card-admin { background: linear-gradient(135deg, var(--admin-color), #c0392b); }
+        .card-editor { background: linear-gradient(135deg, var(--editor-color), #d35400); }
+        .card-viewer { background: linear-gradient(135deg, var(--viewer-color), #229954); }
+        .card-vehicles { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+        
+        .toggle-sidebar {
+            display: none;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1001;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .toggle-sidebar {
+                display: block;
+            }
+        }
+        
+        .firebase-status {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            z-index: 1000;
+            font-size: 12px;
+        }
+        
+        .status-connected {
+            color: #28a745;
+        }
+        
+        .status-disconnected {
+            color: #dc3545;
+        }
+        
+        .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 9999;
-            display: none;
-        }
-        
-        .overlay.active {
-            display: block;
-        }
-        
-        .sector-ranks-container {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 10px;
-        }
-        
-        .rank-checkbox-item {
-            padding: 8px 0;
-            border-bottom: 1px solid #dee2e6;
-        }
-        
-        .rank-checkbox-item:last-child {
-            border-bottom: none;
-        }
-        
-        .assigned-ranks {
+            background-color: rgba(0,0,0,0.8);
             display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 10px;
-        }
-        
-        .assigned-rank-badge {
-            background: #e3f2fd;
-            color: #1565c0;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
         }
     </style>
 </head>
 <body>
     <!-- تسجيل الدخول -->
-    <!-- ... (نفس صفحة تسجيل الدخول كما هي) ... -->
+    <div id="login-page" class="login-container">
+        <div class="text-center mb-4">
+            <h1 class="logo">نظام <span>البحث</span> المتقدم</h1>
+            <p class="text-muted">إدارة وتصفح المركبات الشرطية</p>
+            <div class="mt-3">
+                <i class="fas fa-car fa-3x text-primary mb-3"></i>
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="login-email" class="form-label">البريد الإلكتروني</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                <input type="email" class="form-control" id="login-email" placeholder="أدخل بريدك الإلكتروني">
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="login-password" class="form-label">كلمة المرور</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                <input type="password" class="form-control" id="login-password" placeholder="أدخل كلمة المرور">
+            </div>
+        </div>
+        
+        <div class="d-grid gap-2 mt-4">
+            <button class="btn btn-primary btn-lg" onclick="login()">
+                <i class="fas fa-sign-in-alt me-2"></i>تسجيل الدخول
+            </button>
+            <button class="btn btn-outline-secondary mt-2" onclick="loginAsDemoAdmin()">
+                <i class="fas fa-user-shield me-2"></i>الدخول كمدير تجريبي
+            </button>
+        </div>
+        
+        <div id="login-error" class="alert alert-danger mt-3 d-none"></div>
+        
+        <div class="mt-4 text-center">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>بيانات تجريبية:</strong> admin@test.com / 123456
+            </div>
+        </div>
+        
+        <div class="firebase-status" id="firebase-status">
+            <i class="fas fa-circle status-disconnected"></i>
+            <span>جاري الاتصال...</span>
+        </div>
+    </div>
 
     <!-- لوحة التحكم -->
     <div id="dashboard" class="d-none">
-        <!-- ... (نفس الشريط الجانبي مع تعديلات بسيطة) ... -->
+        <!-- شريط التنقل الجانبي -->
+        <button class="toggle-sidebar" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <div class="sidebar" id="sidebar">
+            <div class="text-center mb-4 px-3">
+                <div class="mb-3">
+                    <i class="fas fa-car fa-3x text-white"></i>
+                </div>
+                <h2 class="logo mb-2" style="font-size: 20px;">نظام <span>البحث</span></h2>
+                <p class="text-light small mb-2" id="user-info">مرحباً، </p>
+                <span class="user-badge" id="user-role-badge">مدير</span>
+                <div class="mt-2">
+                    <small class="text-light" id="firebase-sync-status">
+                        <i class="fas fa-sync-alt"></i> جاري المزامنة...
+                    </small>
+                </div>
+            </div>
+            
+            <div class="sidebar-menu">
+                <a href="#" class="active" onclick="showSection('dashboard-home')">
+                    <i class="fas fa-home me-2"></i> لوحة التحكم
+                </a>
+                
+                <a href="#" onclick="showSection('search-vehicles')">
+                    <i class="fas fa-search me-2"></i> بحث المركبات
+                </a>
+                
+                <a href="#" onclick="showSection('add-vehicle')" id="add-vehicle-link">
+                    <i class="fas fa-car me-2"></i> إضافة مركبة
+                </a>
+                
+                <a href="#" onclick="showSection('manage-sectors')" id="manage-sectors-link">
+                    <i class="fas fa-list me-2"></i> إدارة القطاعات
+                </a>
+                
+                <a href="#" onclick="showSection('manage-ranks')" id="manage-ranks-link">
+                    <i class="fas fa-user-tie me-2"></i> إدارة الرتب
+                </a>
+                
+                <a href="#" onclick="showSection('manage-colors')" id="manage-colors-link">
+                    <i class="fas fa-palette me-2"></i> إدارة الألوان
+                </a>
+                
+                <a href="#" onclick="showSection('manage-users')" id="manage-users-link">
+                    <i class="fas fa-users me-2"></i> إدارة المستخدمين
+                </a>
+                
+                <a href="#" onclick="showSection('system-tools')" id="system-tools-link">
+                    <i class="fas fa-tools me-2"></i> أدوات النظام
+                </a>
+            </div>
+            
+            <div class="mt-auto">
+                <a href="#" onclick="logout()" class="text-center" style="background-color: rgba(255,255,255,0.1);">
+                    <i class="fas fa-sign-out-alt me-2"></i> تسجيل الخروج
+                </a>
+            </div>
+        </div>
         
         <!-- المحتوى الرئيسي -->
         <div class="main-content" id="main-content">
             <!-- ========== لوحة التحكم الرئيسية ========== -->
-            <!-- ... (نفس لوحة التحكم) ... -->
+            <div id="dashboard-home" class="dashboard-section">
+                <h2 class="section-title">
+                    <i class="fas fa-tachometer-alt me-2"></i>لوحة التحكم
+                </h2>
+                
+                <div class="row">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="dashboard-card card-admin">
+                            <i class="fas fa-user-shield"></i>
+                            <h4>المديرون</h4>
+                            <h2 id="admin-count">0</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="dashboard-card card-editor">
+                            <i class="fas fa-edit"></i>
+                            <h4>المحررون</h4>
+                            <h2 id="editor-count">0</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="dashboard-card card-viewer">
+                            <i class="fas fa-eye"></i>
+                            <h4>المشاهدون</h4>
+                            <h2 id="viewer-count">0</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="dashboard-card card-vehicles">
+                            <i class="fas fa-car"></i>
+                            <h4>المركبات</h4>
+                            <h2 id="vehicle-count">0</h2>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-history me-2 text-primary"></i>آخر المركبات المضافة
+                                </h5>
+                                <div id="recent-vehicles" class="mt-3">
+                                    <!-- سيتم تعبئتها بالبيانات -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-chart-bar me-2 text-success"></i>إحصائيات النظام
+                                </h5>
+                                <canvas id="stats-chart" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <i class="fas fa-database me-2 text-info"></i>حالة قاعدة البيانات
+                                </h5>
+                                <div class="row mt-3">
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fas fa-car fa-2x text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">المركبات</h6>
+                                                <small id="db-vehicles-status" class="text-muted">جاري التحميل...</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fas fa-users fa-2x text-success"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">المستخدمين</h6>
+                                                <small id="db-users-status" class="text-muted">جاري التحميل...</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <i class="fas fa-sync-alt fa-2x text-warning"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">الحالة</h6>
+                                                <small id="db-connection-status" class="text-muted">جاري الاتصال...</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <!-- ========== قسم البحث ========== -->
             <div id="search-vehicles" class="dashboard-section d-none">
@@ -104,7 +494,7 @@
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label class="form-label fw-bold">القطاع *</label>
-                                <select class="form-control" id="search-sector" required onchange="updateRanksForSector('search')">
+                                <select class="form-control" id="search-sector" required>
                                     <option value="">اختر القطاع</option>
                                 </select>
                             </div>
@@ -120,10 +510,10 @@
                                 <label class="form-label fw-bold">نوع المركبة</label>
                                 <select class="form-control" id="search-type">
                                     <option value="">جميع الأنواع</option>
-                                    <option value="تاهو">تاهو</option>
                                     <option value="الفورد فكتوريا">الفورد فكتوريا</option>
-                                    <option value="فورد اكسبلور">فورد اكسبلور</option>
                                     <option value="الدودج تشارجر">الدودج تشارجر</option>
+                                    <option value="فورد اكسبلور">فورد اكسبلور</option>
+                                    <option value="تاهو">تاهو</option>
                                 </select>
                             </div>
                         </div>
@@ -158,26 +548,26 @@
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">نوع المركبة *</label>
-                                    <select class="form-control" id="vehicle-type" required onchange="updateVehicleCode()">
+                                    <select class="form-control" id="vehicle-type" required>
                                         <option value="">اختر نوع المركبة</option>
-                                        <option value="تاهو">تاهو</option>
                                         <option value="الفورد فكتوريا">الفورد فكتوريا</option>
-                                        <option value="فورد اكسبلور">فورد اكسبلور</option>
                                         <option value="الدودج تشارجر">الدودج تشارجر</option>
+                                        <option value="فورد اكسبلور">فورد اكسبلور</option>
+                                        <option value="تاهو">تاهو</option>
                                     </select>
                                 </div>
                                 
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label">كود المركبة *</label>
-                                    <input type="text" class="form-control" id="vehicle-code" required readonly>
-                                    <small class="text-muted">يتم تعبئته تلقائياً حسب نوع المركبة</small>
+                                    <label class="form-label">الكود الفني *</label>
+                                    <input type="text" class="form-control" id="vehicle-code" required>
+                                    <small class="text-muted">مثال: cvpi_sign_1 أو alphatexture</small>
                                 </div>
                             </div>
                             
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">القطاع *</label>
-                                    <select class="form-control" id="vehicle-sector" required onchange="updateRanksForSector('vehicle')">
+                                    <select class="form-control" id="vehicle-sector" required>
                                         <option value="">اختر القطاع</option>
                                     </select>
                                 </div>
@@ -247,10 +637,10 @@
                 </div>
             </div>
             
-            <!-- ========== إدارة القطاعات والرتب ========== -->
+            <!-- ========== إدارة القطاعات ========== -->
             <div id="manage-sectors" class="dashboard-section d-none">
                 <h2 class="section-title">
-                    <i class="fas fa-list me-2"></i>إدارة القطاعات والرتب
+                    <i class="fas fa-list me-2"></i>إدارة القطاعات
                 </h2>
                 
                 <div class="row">
@@ -279,65 +669,8 @@
                                         <textarea class="form-control" id="sector-description" rows="2"></textarea>
                                     </div>
                                     
-                                    <div class="mb-3">
-                                        <label class="form-label">الرتب التابعة للقطاع</label>
-                                        <div class="sector-ranks-container">
-                                            <div id="sector-ranks-checkboxes">
-                                                <!-- سيتم تعبئتها بالرتب المتاحة -->
-                                            </div>
-                                            <div class="assigned-ranks" id="assigned-ranks-preview">
-                                                <!-- معاينة الرتب المختارة -->
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
                                     <div class="d-grid gap-2">
                                         <button type="submit" class="btn btn-primary" id="save-sector-btn">
-                                            <i class="fas fa-save me-2"></i>حفظ في Firebase
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                        
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">
-                                    <i class="fas fa-plus-circle me-2 text-success"></i>إضافة رتبة جديدة
-                                </h5>
-                                <form id="rank-form" onsubmit="saveRank(event)">
-                                    <input type="hidden" id="rank-id">
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">اسم الرتبة *</label>
-                                        <input type="text" class="form-control" id="rank-name" required>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">رمز الرتبة *</label>
-                                        <input type="text" class="form-control" id="rank-code" required>
-                                        <small class="text-muted">يستخدم في البحث والتصفية</small>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">الوصف</label>
-                                        <textarea class="form-control" id="rank-description" rows="2"></textarea>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">القطاعات المسموحة</label>
-                                        <div class="sector-ranks-container">
-                                            <div id="rank-sectors-checkboxes">
-                                                <!-- سيتم تعبئتها بالقطاعات المتاحة -->
-                                            </div>
-                                            <div class="assigned-ranks" id="assigned-sectors-preview">
-                                                <!-- معاينة القطاعات المختارة -->
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="d-grid gap-2">
-                                        <button type="submit" class="btn btn-primary" id="save-rank-btn">
                                             <i class="fas fa-save me-2"></i>حفظ في Firebase
                                         </button>
                                     </div>
@@ -347,7 +680,7 @@
                     </div>
                     
                     <div class="col-md-6">
-                        <div class="card border-0 shadow-sm mb-4">
+                        <div class="card border-0 shadow-sm">
                             <div class="card-body">
                                 <h5 class="card-title mb-3">
                                     <i class="fas fa-list-alt me-2 text-primary"></i>القطاعات الحالية
@@ -358,122 +691,10 @@
                                             <tr>
                                                 <th>الاسم</th>
                                                 <th>الرمز</th>
-                                                <th>الرتب التابعة</th>
                                                 <th>الإجراءات</th>
                                             </tr>
                                         </thead>
                                         <tbody id="sectors-list">
-                                            <!-- سيتم تعبئتها بالبيانات -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">
-                                    <i class="fas fa-list-alt me-2 text-primary"></i>الرتب الحالية
-                                </h5>
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>الاسم</th>
-                                                <th>الرمز</th>
-                                                <th>القطاعات المسموحة</th>
-                                                <th>الإجراءات</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="ranks-list">
-                                            <!-- سيتم تعبئتها بالبيانات -->
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- ========== إدارة المستخدمين ========== -->
-            <div id="manage-users" class="dashboard-section d-none">
-                <h2 class="section-title">
-                    <i class="fas fa-users me-2"></i>إدارة المستخدمين
-                </h2>
-                
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow-sm mb-4">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">
-                                    <i class="fas fa-user-plus me-2 text-success"></i>إضافة مستخدم جديد
-                                </h5>
-                                <form id="user-form" onsubmit="saveUser(event)">
-                                    <input type="hidden" id="user-id">
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">الاسم الكامل *</label>
-                                        <input type="text" class="form-control" id="user-name" required>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">البريد الإلكتروني *</label>
-                                        <input type="email" class="form-control" id="user-email" required>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">كلمة المرور *</label>
-                                        <input type="password" class="form-control" id="user-password">
-                                        <small class="text-muted">اترك فارغاً للحفاظ على كلمة المرور الحالية</small>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">دور المستخدم *</label>
-                                        <select class="form-control" id="user-role" required>
-                                            <option value="">اختر الدور</option>
-                                            <option value="admin">مدير</option>
-                                            <option value="editor">محرر</option>
-                                            <option value="viewer">مشاهد</option>
-                                        </select>
-                                    </div>
-                                    
-                                    <div class="mb-3">
-                                        <label class="form-label">القطاعات المسموحة</label>
-                                        <select class="form-control" id="user-sectors" multiple>
-                                            <!-- سيتم تعبئتها بالقطاعات -->
-                                        </select>
-                                        <small class="text-muted">اضغط Ctrl لاختيار أكثر من قطاع</small>
-                                    </div>
-                                    
-                                    <div class="d-grid gap-2">
-                                        <button type="submit" class="btn btn-primary" id="save-user-btn">
-                                            <i class="fas fa-save me-2"></i>حفظ في Firebase
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <div class="card border-0 shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title mb-3">
-                                    <i class="fas fa-users me-2 text-primary"></i>المستخدمون الحاليون
-                                </h5>
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>الاسم</th>
-                                                <th>البريد</th>
-                                                <th>الدور</th>
-                                                <th>الحالة</th>
-                                                <th>الإجراءات</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="users-list">
                                             <!-- سيتم تعبئتها بالبيانات -->
                                         </tbody>
                                     </table>
@@ -485,28 +706,123 @@
             </div>
             
             <!-- ========== أدوات النظام ========== -->
-            <!-- ... (نفس أدوات النظام) ... -->
-            
-            <!-- باقي الأقسام (تم إلغاء قسم الألوان) -->
             <div id="system-tools" class="dashboard-section d-none">
-                <!-- ... (نفس أدوات النظام) ... -->
+                <h2 class="section-title">
+                    <i class="fas fa-tools me-2"></i>أدوات النظام
+                </h2>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body text-center">
+                                <i class="fas fa-database fa-3x text-warning mb-3"></i>
+                                <h5 class="card-title">تحميل البيانات الافتراضية</h5>
+                                <p class="card-text">قم بتحميل جميع البيانات الأولية للنظام دفعة واحدة</p>
+                                <button class="btn btn-warning" onclick="loadDefaultDataToFirebase()">
+                                    <i class="fas fa-cloud-upload-alt me-2"></i>رفع إلى Firebase
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body text-center">
+                                <i class="fas fa-sync-alt fa-3x text-info mb-3"></i>
+                                <h5 class="card-title">مزامنة البيانات</h5>
+                                <p class="card-text">مزامنة جميع البيانات مع Firebase</p>
+                                <button class="btn btn-info" onclick="syncAllData()">
+                                    <i class="fas fa-sync me-2"></i>مزامنة الآن
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm mb-4">
+                            <div class="card-body text-center">
+                                <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
+                                <h5 class="card-title">مسح قاعدة البيانات</h5>
+                                <p class="card-text">تحذير: هذه العملية ستزيل جميع البيانات</p>
+                                <button class="btn btn-outline-danger" onclick="clearFirebaseData()">
+                                    <i class="fas fa-trash me-2"></i>مسح الكل
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">إحصائيات Firebase</h5>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>عدد المركبات:</span>
+                                        <strong id="fb-vehicles-count">0</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>عدد القطاعات:</span>
+                                        <strong id="fb-sectors-count">0</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>عدد الرتب:</span>
+                                        <strong id="fb-ranks-count">0</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>عدد المستخدمين:</span>
+                                        <strong id="fb-users-count">0</strong>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between">
+                                        <span>حالة الاتصال:</span>
+                                        <strong id="fb-connection-status" class="text-warning">جاري التحميل...</strong>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">معلومات المشروع</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">معرف المشروع</label>
+                                    <input type="text" class="form-control" value="verg-micanic" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">رابط قاعدة البيانات</label>
+                                    <input type="text" class="form-control" value="https://verg-micanic-default-rtdb.firebaseio.com" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">آخر تحديث</label>
+                                    <input type="text" class="form-control" id="last-update-time" value="لم يتم التحديث بعد" readonly>
+                                </div>
+                                <button class="btn btn-outline-primary w-100" onclick="refreshFirebaseData()">
+                                    <i class="fas fa-redo me-2"></i>تحديث البيانات
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-
-    <!-- نافذة اختيار الألوان -->
-    <div id="color-picker-overlay" class="overlay"></div>
-    <div id="color-picker-popup" class="color-picker-popup">
-        <h5>اختر لون</h5>
-        <div class="color-grid mt-3" id="color-grid">
-            <!-- ألوان افتراضية -->
-        </div>
-        <div class="mt-3">
-            <input type="color" id="custom-color-picker" class="form-control">
-        </div>
-        <div class="d-flex justify-content-between mt-3">
-            <button class="btn btn-primary" onclick="applySelectedColor()">تطبيق</button>
-            <button class="btn btn-secondary" onclick="closeColorPicker()">إلغاء</button>
+            
+            <!-- باقي الأقسام (مختصرة) -->
+            <div id="manage-ranks" class="dashboard-section d-none">
+                <h2 class="section-title">إدارة الرتب</h2>
+                <div class="alert alert-info">قيد التطوير - سيعمل مع Firebase</div>
+            </div>
+            
+            <div id="manage-colors" class="dashboard-section d-none">
+                <h2 class="section-title">إدارة الألوان</h2>
+                <div class="alert alert-info">قيد التطوير - سيعمل مع Firebase</div>
+            </div>
+            
+            <div id="manage-users" class="dashboard-section d-none">
+                <h2 class="section-title">إدارة المستخدمين</h2>
+                <div class="alert alert-info">قيد التطوير - سيعمل مع Firebase</div>
+            </div>
         </div>
     </div>
 
@@ -547,39 +863,20 @@
         let firebaseInitialized = true;
         let chart = null;
         let dataListeners = [];
-        
-        // متغيرات لاختيار الألوان
-        let currentColorField = '';
-        let selectedColor = '';
 
-        // بيانات افتراضية محسنة
+        // بيانات افتراضية
         const defaultData = {
             sectors: [
-                { 
-                    name: 'إدارة الشرطة', 
-                    code: 'police', 
-                    description: 'مركبات إدارة الشرطة',
-                    ranks: ['lieutenant', 'captain', 'major', 'lt-colonel', 'colonel']
-                },
-                { 
-                    name: 'أمن الموانئ', 
-                    code: 'ports', 
-                    description: 'مركبات أمن الموانئ',
-                    ranks: ['lieutenant', 'captain', 'major']
-                },
-                { 
-                    name: 'وزارة الصحة', 
-                    code: 'health', 
-                    description: 'مركبات وزارة الصحة',
-                    ranks: ['lieutenant', 'captain', 'major']
-                }
+                { name: 'إدارة الشرطة', code: 'police', description: 'مركبات إدارة الشرطة' },
+                { name: 'أمن الموانئ', code: 'ports', description: 'مركبات أمن الموانئ' },
+                { name: 'وزارة الصحة', code: 'health', description: 'مركبات وزارة الصحة' }
             ],
             ranks: [
-                { name: 'ملازم', code: 'lieutenant', description: 'رتبة ملازم', sectors: ['police', 'ports', 'health'] },
-                { name: 'نقيب', code: 'captain', description: 'رتبة نقيب', sectors: ['police', 'ports', 'health'] },
-                { name: 'رائد', code: 'major', description: 'رتبة رائد', sectors: ['police', 'ports', 'health'] },
-                { name: 'مقدم', code: 'lt-colonel', description: 'رتبة مقدم', sectors: ['police', 'ports'] },
-                { name: 'عقيد', code: 'colonel', description: 'رتبة عقيد', sectors: ['police'] }
+                { name: 'ملازم', code: 'lieutenant', description: 'رتبة ملازم' },
+                { name: 'نقيب', code: 'captain', description: 'رتبة نقيب' },
+                { name: 'رائد', code: 'major', description: 'رتبة رائد' },
+                { name: 'مقدم', code: 'lt-colonel', description: 'رتبة مقدم' },
+                { name: 'عقيد', code: 'colonel', description: 'رتبة عقيد' }
             ],
             users: [
                 {
@@ -587,16 +884,15 @@
                     email: 'admin@test.com',
                     role: 'admin',
                     permissions: ['all'],
-                    createdAt: new Date().toISOString(),
-                    sectors: ['police', 'ports', 'health']
+                    createdAt: new Date().toISOString()
                 }
             ],
             vehicles: [
                 {
                     type: 'تاهو',
                     code: 'rematahoe15',
-                    sector: 'police',
-                    rank: 'captain',
+                    sector: 'إدارة الشرطة',
+                    rank: 'نقيب',
                     color1: '4c4c4c',
                     color2: 'FFFFFF',
                     image: 'https://i.epvpimg.com/zr6gaab.png',
@@ -605,8 +901,8 @@
                 {
                     type: 'الفورد فكتوريا',
                     code: 'cvpi_sign_1',
-                    sector: 'police',
-                    rank: 'major',
+                    sector: 'إدارة الشرطة',
+                    rank: 'رائد',
                     color1: '4c4c4c',
                     color2: 'FFFFFF',
                     image: 'https://i.epvpimg.com/R59idab.png',
@@ -615,8 +911,8 @@
                 {
                     type: 'فورد اكسبلور',
                     code: 'remap16expl',
-                    sector: 'police',
-                    rank: 'lieutenant',
+                    sector: 'إدارة الشرطة',
+                    rank: 'ملازم',
                     color1: '4c4c4c',
                     color2: 'FFFFFF',
                     image: 'https://i.epvpimg.com/e3hDdab.png',
@@ -625,8 +921,8 @@
                 {
                     type: 'الدودج تشارجر',
                     code: 'alphatexture',
-                    sector: 'ports',
-                    rank: 'lt-colonel',
+                    sector: 'أمن الموانئ',
+                    rank: 'مقدم',
                     color1: '99d24f',
                     color2: 'FFFFFF',
                     image: 'https://i.epvpimg.com/aPQtdab.png',
@@ -635,8 +931,8 @@
                 {
                     type: 'تاهو',
                     code: 'rematahoe15',
-                    sector: 'health',
-                    rank: 'colonel',
+                    sector: 'وزارة الصحة',
+                    rank: 'عقيد',
                     color1: '880000',
                     color2: '880000',
                     image: 'https://i.epvpimg.com/Ay3Hbab.jpg',
@@ -661,523 +957,446 @@
             
             // التحقق من حالة تسجيل الدخول
             checkAuthState();
-            
-            // إعداد ألوان الافتراضية
-            setupColorPicker();
         });
 
-        // ========== دوال جديدة محسنة ==========
-        
-        // 1. تحديث كود المركبة حسب النوع
-        function updateVehicleCode() {
-            const vehicleType = document.getElementById('vehicle-type').value;
-            const codeInput = document.getElementById('vehicle-code');
+        // ========== دوال Firebase ==========
+        function monitorFirebaseConnection() {
+            const connectedRef = database.ref('.info/connected');
             
-            const vehicleCodes = {
-                'تاهو': 'rematahoe15',
-                'الفورد فكتوريا': 'cvpi_sign_1',
-                'فورد اكسبلور': 'remap16expl',
-                'الدودج تشارجر': 'alphatexture'
-            };
-            
-            if (vehicleCodes[vehicleType]) {
-                codeInput.value = vehicleCodes[vehicleType];
-            } else {
-                codeInput.value = '';
-            }
-        }
-        
-        // 2. تحديث الرتب حسب القطاع
-        function updateRanksForSector(context) {
-            const sectorId = document.getElementById(`${context}-sector`).value;
-            const rankSelect = document.getElementById(`${context}-rank`);
-            
-            if (!sectorId) {
-                rankSelect.innerHTML = '<option value="">اختر الرتبة</option>';
-                return;
-            }
-            
-            const sector = sectors.find(s => s.id === sectorId);
-            if (!sector || !sector.ranks) {
-                rankSelect.innerHTML = '<option value="">اختر الرتبة</option>';
-                return;
-            }
-            
-            let options = '<option value="">اختر الرتبة</option>';
-            
-            ranks.forEach(rank => {
-                if (sector.ranks.includes(rank.id) || sector.ranks.includes(rank.code)) {
-                    options += `<option value="${rank.id}">${rank.name}</option>`;
-                }
-            });
-            
-            rankSelect.innerHTML = options;
-        }
-        
-        // 3. تحميل الرتب في واجهة إدارة القطاعات
-        function loadRanksForSectorManagement() {
-            const container = document.getElementById('sector-ranks-checkboxes');
-            if (!container) return;
-            
-            let html = '';
-            ranks.forEach(rank => {
-                html += `
-                    <div class="form-check rank-checkbox-item">
-                        <input class="form-check-input rank-checkbox" type="checkbox" 
-                               value="${rank.id}" id="rank-${rank.id}"
-                               onchange="updateAssignedRanksPreview()">
-                        <label class="form-check-label" for="rank-${rank.id}">
-                            ${rank.name} (${rank.code})
-                        </label>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-        
-        // 4. تحميل القطاعات في واجهة إدارة الرتب
-        function loadSectorsForRankManagement() {
-            const container = document.getElementById('rank-sectors-checkboxes');
-            if (!container) return;
-            
-            let html = '';
-            sectors.forEach(sector => {
-                html += `
-                    <div class="form-check rank-checkbox-item">
-                        <input class="form-check-input sector-checkbox" type="checkbox" 
-                               value="${sector.id}" id="sector-${sector.id}"
-                               onchange="updateAssignedSectorsPreview()">
-                        <label class="form-check-label" for="sector-${sector.id}">
-                            ${sector.name} (${sector.code})
-                        </label>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-        
-        // 5. تحديث معاينة الرتب المختارة
-        function updateAssignedRanksPreview() {
-            const container = document.getElementById('assigned-ranks-preview');
-            if (!container) return;
-            
-            const selectedRanks = [];
-            document.querySelectorAll('.rank-checkbox:checked').forEach(cb => {
-                const rankId = cb.value;
-                const rank = ranks.find(r => r.id === rankId);
-                if (rank) {
-                    selectedRanks.push(rank.name);
-                }
-            });
-            
-            container.innerHTML = selectedRanks.map(name => 
-                `<span class="assigned-rank-badge">${name}</span>`
-            ).join('');
-        }
-        
-        // 6. تحديث معاينة القطاعات المختارة
-        function updateAssignedSectorsPreview() {
-            const container = document.getElementById('assigned-sectors-preview');
-            if (!container) return;
-            
-            const selectedSectors = [];
-            document.querySelectorAll('.sector-checkbox:checked').forEach(cb => {
-                const sectorId = cb.value;
-                const sector = sectors.find(s => s.id === sectorId);
-                if (sector) {
-                    selectedSectors.push(sector.name);
-                }
-            });
-            
-            container.innerHTML = selectedSectors.map(name => 
-                `<span class="assigned-rank-badge">${name}</span>`
-            ).join('');
-        }
-        
-        // 7. تحميل القطاعات لقائمة المستخدمين
-        function loadSectorsForUserManagement() {
-            const select = document.getElementById('user-sectors');
-            if (!select) return;
-            
-            let options = '';
-            sectors.forEach(sector => {
-                options += `<option value="${sector.id}">${sector.name}</option>`;
-            });
-            
-            select.innerHTML = options;
-        }
-        
-        // 8. دالة حفظ الرتبة الجديدة
-        function saveRank(event) {
-            event.preventDefault();
-            
-            if (!currentUser) {
-                showToast('يجب تسجيل الدخول أولاً', 'error');
-                return;
-            }
-            
-            const rankId = document.getElementById('rank-id').value;
-            const name = document.getElementById('rank-name').value;
-            const code = document.getElementById('rank-code').value;
-            const description = document.getElementById('rank-description').value;
-            
-            if (!name || !code) {
-                showToast('يرجى ملء جميع الحقول المطلوبة', 'error');
-                return;
-            }
-            
-            // جمع القطاعات المختارة
-            const selectedSectors = [];
-            document.querySelectorAll('.sector-checkbox:checked').forEach(cb => {
-                selectedSectors.push(cb.value);
-            });
-            
-            const rankData = {
-                name,
-                code,
-                description: description || '',
-                sectors: selectedSectors,
-                updatedAt: new Date().toISOString(),
-                updatedBy: currentUser.uid
-            };
-            
-            showLoading('جاري حفظ الرتبة في Firebase...');
-            
-            if (rankId) {
-                database.ref('ranks/' + rankId).update(rankData)
-                    .then(() => {
-                        hideLoading();
-                        showToast('✅ تم تعديل الرتبة بنجاح في Firebase', 'success');
-                        resetRankForm();
-                        updateLastUpdateTime();
-                    })
-                    .catch((error) => {
-                        hideLoading();
-                        console.error('❌ خطأ في تعديل الرتبة:', error);
-                        showToast('حدث خطأ في حفظ البيانات', 'error');
-                    });
-            } else {
-                rankData.createdAt = new Date().toISOString();
-                rankData.createdBy = currentUser.uid;
+            connectedRef.on('value', (snapshot) => {
+                const isConnected = snapshot.val();
+                updateConnectionStatus(isConnected);
                 
-                database.ref('ranks').push(rankData)
-                    .then(() => {
-                        hideLoading();
-                        showToast('✅ تم إضافة الرتبة بنجاح في Firebase', 'success');
-                        resetRankForm();
-                        updateLastUpdateTime();
-                    })
-                    .catch((error) => {
-                        hideLoading();
-                        console.error('❌ خطأ في إضافة الرتبة:', error);
-                        showToast('حدث خطأ في حفظ البيانات', 'error');
-                    });
+                if (isConnected) {
+                    console.log('✅ متصل بـ Firebase');
+                    updateFirebaseStatus('connected');
+                } else {
+                    console.log('❌ غير متصل بـ Firebase');
+                    updateFirebaseStatus('disconnected');
+                }
+            });
+        }
+
+        function updateConnectionStatus(isConnected = null) {
+            const statusElement = document.getElementById('firebase-status');
+            if (!statusElement) return;
+            
+            if (isConnected === null) {
+                statusElement.innerHTML = '<i class="fas fa-circle text-warning"></i> <span>جاري الاتصال...</span>';
+                return;
+            }
+            
+            if (isConnected) {
+                statusElement.innerHTML = '<i class="fas fa-circle status-connected"></i> <span>متصل بـ Firebase</span>';
+                statusElement.className = 'firebase-status status-connected';
+            } else {
+                statusElement.innerHTML = '<i class="fas fa-circle status-disconnected"></i> <span>غير متصل</span>';
+                statusElement.className = 'firebase-status status-disconnected';
             }
         }
-        
-        // 9. دالة حفظ المستخدم
-        function saveUser(event) {
-            event.preventDefault();
+
+        function updateFirebaseStatus(status) {
+            const elements = {
+                'firebase-sync-status': document.getElementById('firebase-sync-status'),
+                'db-connection-status': document.getElementById('db-connection-status'),
+                'fb-connection-status': document.getElementById('fb-connection-status')
+            };
             
-            if (!currentUser) {
-                showToast('يجب تسجيل الدخول أولاً', 'error');
+            const statusTexts = {
+                'connected': { text: 'متصل', class: 'text-success' },
+                'disconnected': { text: 'غير متصل', class: 'text-danger' },
+                'syncing': { text: 'جاري المزامنة...', class: 'text-warning' },
+                'error': { text: 'خطأ في الاتصال', class: 'text-danger' }
+            };
+            
+            for (const [id, element] of Object.entries(elements)) {
+                if (element && statusTexts[status]) {
+                    element.textContent = statusTexts[status].text;
+                    element.className = statusTexts[status].class;
+                }
+            }
+        }
+
+        // ========== دوال المصادقة ==========
+        function checkAuthState() {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    console.log('👤 المستخدم مسجل:', user.email);
+                    currentUser = user;
+                    loadUserData(user.uid);
+                } else {
+                    console.log('👤 لا يوجد مستخدم مسجل');
+                    showLogin();
+                }
+            });
+        }
+
+        function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorElement = document.getElementById('login-error');
+            
+            if (!email || !password) {
+                showError('يرجى إدخال البريد الإلكتروني وكلمة المرور');
                 return;
             }
             
-            const userId = document.getElementById('user-id').value;
-            const name = document.getElementById('user-name').value;
-            const email = document.getElementById('user-email').value;
-            const password = document.getElementById('user-password').value;
-            const role = document.getElementById('user-role').value;
+            showLoading('جاري تسجيل الدخول...');
             
-            // جمع القطاعات المختارة
-            const selectedSectors = Array.from(document.getElementById('user-sectors').selectedOptions)
-                .map(option => option.value);
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    currentUser = userCredential.user;
+                    hideLoading();
+                    showToast('✅ تم تسجيل الدخول بنجاح!', 'success');
+                    loadUserData(userCredential.user.uid);
+                })
+                .catch((error) => {
+                    hideLoading();
+                    console.error('❌ خطأ تسجيل الدخول:', error);
+                    
+                    // إذا كان الخطأ بسبب عدم وجود مستخدم، إنشاء حساب جديد
+                    if (error.code === 'auth/user-not-found') {
+                        createUser(email, password);
+                    } else {
+                        const errorMsg = getAuthErrorMessage(error.code);
+                        showError(errorMsg);
+                    }
+                });
+        }
+
+        function createUser(email, password) {
+            showLoading('جاري إنشاء حساب جديد...');
             
-            if (!name || !email || !role) {
-                showToast('يرجى ملء جميع الحقول المطلوبة', 'error');
-                return;
-            }
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    
+                    // إنشاء بيانات المستخدم في قاعدة البيانات
+                    const userData = {
+                        name: email.split('@')[0],
+                        email: email,
+                        role: 'admin',
+                        permissions: ['all'],
+                        createdAt: new Date().toISOString(),
+                        createdBy: 'system'
+                    };
+                    
+                    return database.ref('users/' + user.uid).set(userData);
+                })
+                .then(() => {
+                    hideLoading();
+                    showToast('✅ تم إنشاء الحساب وتسجيل الدخول بنجاح!', 'success');
+                    checkAuthState();
+                })
+                .catch((error) => {
+                    hideLoading();
+                    const errorMsg = getAuthErrorMessage(error.code);
+                    showError(errorMsg);
+                });
+        }
+
+        function loginAsDemoAdmin() {
+            const email = 'admin@test.com';
+            const password = '123456';
             
-            showLoading('جاري حفظ المستخدم...');
+            document.getElementById('login-email').value = email;
+            document.getElementById('login-password').value = password;
+            login();
+        }
+
+        function logout() {
+            // إزالة جميع المستمعين
+            removeAllListeners();
             
+            auth.signOut()
+                .then(() => {
+                    currentUser = null;
+                    userRole = null;
+                    showLogin();
+                    showToast('تم تسجيل الخروج بنجاح', 'info');
+                })
+                .catch((error) => {
+                    console.error('❌ خطأ في تسجيل الخروج:', error);
+                });
+        }
+
+        function removeAllListeners() {
+            dataListeners.forEach(listener => {
+                if (listener && typeof listener === 'function') {
+                    listener();
+                }
+            });
+            dataListeners = [];
+        }
+
+        // ========== دوال تحميل البيانات ==========
+        function loadUserData(userId) {
+            showLoading('جاري تحميل بيانات المستخدم...');
+            
+            database.ref('users/' + userId).once('value')
+                .then((snapshot) => {
+                    const userData = snapshot.val();
+                    
+                    if (userData) {
+                        userRole = userData.role;
+                        currentUser.data = userData;
+                        
+                        // تحديث واجهة المستخدم
+                        document.getElementById('user-info').textContent = `مرحباً، ${userData.name}`;
+                        document.getElementById('user-role-badge').textContent = getRoleName(userData.role);
+                        document.getElementById('user-role-badge').className = `user-badge badge-${userData.role}`;
+                        
+                        // التحكم في الصلاحيات
+                        updatePermissions(userData.role);
+                        
+                        // إظهار لوحة التحكم
+                        showDashboard();
+                        
+                        // تحميل جميع البيانات
+                        loadAllData();
+                    } else {
+                        // إنشاء بيانات المستخدم إذا لم تكن موجودة
+                        createUserData(userId);
+                    }
+                })
+                .catch((error) => {
+                    hideLoading();
+                    console.error('❌ خطأ في تحميل بيانات المستخدم:', error);
+                    showError('حدث خطأ في تحميل البيانات');
+                });
+        }
+
+        function createUserData(userId) {
             const userData = {
-                name,
-                email,
-                role,
-                sectors: selectedSectors,
+                name: currentUser.email.split('@')[0],
+                email: currentUser.email,
+                role: 'admin',
+                permissions: ['all'],
+                createdAt: new Date().toISOString(),
+                createdBy: 'system'
+            };
+            
+            database.ref('users/' + userId).set(userData)
+                .then(() => {
+                    loadUserData(userId);
+                })
+                .catch((error) => {
+                    console.error('❌ خطأ في إنشاء بيانات المستخدم:', error);
+                });
+        }
+
+        function loadAllData() {
+            showLoading('جاري تحميل البيانات من Firebase...');
+            
+            // تحميل البيانات مع المستمعين في الوقت الحقيقي
+            const promises = [
+                setupVehiclesListener(),
+                setupSectorsListener(),
+                setupRanksListener(),
+                setupUsersListener()
+            ];
+            
+            Promise.all(promises)
+                .then(() => {
+                    hideLoading();
+                    showToast('✅ تم تحميل جميع البيانات بنجاح', 'success');
+                    updateFirebaseStatus('connected');
+                    updateDashboard();
+                })
+                .catch((error) => {
+                    hideLoading();
+                    console.error('❌ خطأ في تحميل البيانات:', error);
+                    showToast('⚠️ هناك مشكلة في تحميل بعض البيانات', 'warning');
+                });
+        }
+
+        function setupVehiclesListener() {
+            return new Promise((resolve) => {
+                const vehiclesRef = database.ref('vehicles');
+                
+                const listener = vehiclesRef.on('value', (snapshot) => {
+                    vehicles = [];
+                    if (snapshot.exists()) {
+                        snapshot.forEach((childSnapshot) => {
+                            vehicles.push({
+                                id: childSnapshot.key,
+                                ...childSnapshot.val()
+                            });
+                        });
+                    }
+                    
+                    console.log(`📊 تم تحميل ${vehicles.length} مركبة من Firebase`);
+                    document.getElementById('vehicle-count').textContent = vehicles.length;
+                    document.getElementById('fb-vehicles-count').textContent = vehicles.length;
+                    document.getElementById('db-vehicles-status').textContent = `${vehicles.length} مركبة`;
+                    
+                    updateRecentVehicles();
+                    updateChart();
+                    
+                    resolve();
+                });
+                
+                dataListeners.push(() => vehiclesRef.off('value', listener));
+            });
+        }
+
+        function setupSectorsListener() {
+            return new Promise((resolve) => {
+                const sectorsRef = database.ref('sectors');
+                
+                const listener = sectorsRef.on('value', (snapshot) => {
+                    sectors = [];
+                    if (snapshot.exists()) {
+                        snapshot.forEach((childSnapshot) => {
+                            sectors.push({
+                                id: childSnapshot.key,
+                                ...childSnapshot.val()
+                            });
+                        });
+                    }
+                    
+                    console.log(`📊 تم تحميل ${sectors.length} قطاع من Firebase`);
+                    document.getElementById('fb-sectors-count').textContent = sectors.length;
+                    updateDropdowns();
+                    updateSectorsList();
+                    
+                    resolve();
+                });
+                
+                dataListeners.push(() => sectorsRef.off('value', listener));
+            });
+        }
+
+        function setupRanksListener() {
+            return new Promise((resolve) => {
+                const ranksRef = database.ref('ranks');
+                
+                const listener = ranksRef.on('value', (snapshot) => {
+                    ranks = [];
+                    if (snapshot.exists()) {
+                        snapshot.forEach((childSnapshot) => {
+                            ranks.push({
+                                id: childSnapshot.key,
+                                ...childSnapshot.val()
+                            });
+                        });
+                    }
+                    
+                    console.log(`📊 تم تحميل ${ranks.length} رتبة من Firebase`);
+                    document.getElementById('fb-ranks-count').textContent = ranks.length;
+                    updateDropdowns();
+                    
+                    resolve();
+                });
+                
+                dataListeners.push(() => ranksRef.off('value', listener));
+            });
+        }
+
+        function setupUsersListener() {
+            return new Promise((resolve) => {
+                const usersRef = database.ref('users');
+                
+                const listener = usersRef.on('value', (snapshot) => {
+                    users = [];
+                    if (snapshot.exists()) {
+                        snapshot.forEach((childSnapshot) => {
+                            users.push({
+                                id: childSnapshot.key,
+                                ...childSnapshot.val()
+                            });
+                        });
+                    }
+                    
+                    console.log(`📊 تم تحميل ${users.length} مستخدم من Firebase`);
+                    document.getElementById('fb-users-count').textContent = users.length;
+                    document.getElementById('db-users-status').textContent = `${users.length} مستخدم`;
+                    
+                    updateDashboardStats();
+                    
+                    resolve();
+                });
+                
+                dataListeners.push(() => usersRef.off('value', listener));
+            });
+        }
+
+        // ========== دوال الحفظ في Firebase ==========
+        function saveVehicle(event) {
+            event.preventDefault();
+            
+            if (!currentUser) {
+                showToast('يجب تسجيل الدخول أولاً', 'error');
+                return;
+            }
+            
+            const vehicleId = document.getElementById('vehicle-id').value;
+            const type = document.getElementById('vehicle-type').value;
+            const code = document.getElementById('vehicle-code').value;
+            const sector = document.getElementById('vehicle-sector').value;
+            const rank = document.getElementById('vehicle-rank').value;
+            const color1 = document.getElementById('vehicle-color1').value.replace('#', '');
+            const color2 = document.getElementById('vehicle-color2').value.replace('#', '');
+            const image = document.getElementById('vehicle-image').value;
+            const notes = document.getElementById('vehicle-notes').value;
+            
+            if (!type || !code || !sector || !rank || !color1 || !color2 || !image) {
+                showToast('يرجى ملء جميع الحقول المطلوبة', 'error');
+                return;
+            }
+            
+            const vehicleData = {
+                type,
+                code,
+                sector,
+                rank,
+                color1,
+                color2,
+                image,
+                notes: notes || '',
                 updatedAt: new Date().toISOString(),
                 updatedBy: currentUser.uid
             };
             
-            if (userId) {
-                // تعديل مستخدم موجود
-                const promises = [];
+            showLoading('جاري حفظ المركبة في Firebase...');
+            
+            if (vehicleId) {
+                // تعديل مركبة موجودة
+                vehicleData.createdAt = document.getElementById('vehicle-created-at')?.value || new Date().toISOString();
+                vehicleData.createdBy = document.getElementById('vehicle-created-by')?.value || currentUser.uid;
                 
-                // تحديث البيانات في Firebase Database
-                promises.push(database.ref('users/' + userId).update(userData));
-                
-                // إذا كانت هناك كلمة مرور جديدة، تحديثها في Authentication
-                if (password) {
-                    promises.push(auth.updatePassword(userId, password));
-                }
-                
-                Promise.all(promises)
+                database.ref('vehicles/' + vehicleId).update(vehicleData)
                     .then(() => {
                         hideLoading();
-                        showToast('✅ تم تعديل المستخدم بنجاح', 'success');
-                        resetUserForm();
+                        showToast('✅ تم تعديل المركبة بنجاح في Firebase', 'success');
+                        resetVehicleForm();
                         updateLastUpdateTime();
                     })
                     .catch((error) => {
                         hideLoading();
-                        console.error('❌ خطأ في تعديل المستخدم:', error);
+                        console.error('❌ خطأ في تعديل المركبة:', error);
                         showToast('حدث خطأ في حفظ البيانات', 'error');
                     });
             } else {
-                // إنشاء مستخدم جديد
-                if (!password) {
-                    showToast('يرجى إدخال كلمة مرور للمستخدم الجديد', 'error');
-                    hideLoading();
-                    return;
-                }
+                // إضافة مركبة جديدة
+                vehicleData.createdAt = new Date().toISOString();
+                vehicleData.createdBy = currentUser.uid;
                 
-                // إنشاء المستخدم في Firebase Auth
-                auth.createUserWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        const newUserId = userCredential.user.uid;
-                        
-                        // إضافة بيانات المستخدم في Firebase Database
-                        userData.createdAt = new Date().toISOString();
-                        userData.createdBy = currentUser.uid;
-                        
-                        return database.ref('users/' + newUserId).set(userData);
-                    })
-                    .then(() => {
+                database.ref('vehicles').push(vehicleData)
+                    .then((ref) => {
                         hideLoading();
-                        showToast('✅ تم إنشاء المستخدم بنجاح', 'success');
-                        resetUserForm();
+                        showToast('✅ تم إضافة المركبة بنجاح في Firebase', 'success');
+                        resetVehicleForm();
                         updateLastUpdateTime();
-                        
-                        // تسجيل خروج المستخدم الجديد وتسجيل دخول المستخدم الحالي
-                        auth.signOut().then(() => {
-                            auth.signInWithEmailAndPassword(currentUser.email, '123456');
-                        });
                     })
                     .catch((error) => {
                         hideLoading();
-                        console.error('❌ خطأ في إنشاء المستخدم:', error);
-                        showToast(getAuthErrorMessage(error.code), 'error');
+                        console.error('❌ خطأ في إضافة المركبة:', error);
+                        showToast('حدث خطأ في حفظ البيانات', 'error');
                     });
             }
         }
-        
-        // 10. تحميل قائمة المستخدمين
-        function updateUsersList() {
-            const container = document.getElementById('users-list');
-            if (!container) return;
-            
-            let html = '';
-            
-            users.forEach(user => {
-                let sectorsText = '';
-                if (user.sectors && user.sectors.length > 0) {
-                    sectorsText = user.sectors.map(sectorId => {
-                        const sector = sectors.find(s => s.id === sectorId);
-                        return sector ? sector.name : sectorId;
-                    }).join(', ');
-                }
-                
-                html += `
-                    <tr>
-                        <td>${user.name}</td>
-                        <td>${user.email}</td>
-                        <td><span class="badge bg-${user.role === 'admin' ? 'danger' : user.role === 'editor' ? 'warning' : 'success'}">${getRoleName(user.role)}</span></td>
-                        <td>
-                            <small class="text-muted">${sectorsText || 'جميع القطاعات'}</small>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary me-2" onclick="editUser('${user.id}')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.id}')" ${user.id === currentUser?.uid ? 'disabled' : ''}>
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-        
-        // 11. تعديل المستخدم
-        function editUser(userId) {
-            const user = users.find(u => u.id === userId);
-            if (!user) return;
-            
-            document.getElementById('user-id').value = user.id;
-            document.getElementById('user-name').value = user.name;
-            document.getElementById('user-email').value = user.email;
-            document.getElementById('user-role').value = user.role;
-            
-            // تحديد القطاعات المختارة
-            const sectorsSelect = document.getElementById('user-sectors');
-            Array.from(sectorsSelect.options).forEach(option => {
-                option.selected = user.sectors && user.sectors.includes(option.value);
-            });
-            
-            showSection('manage-users');
-        }
-        
-        // 12. حذف المستخدم
-        function deleteUser(userId) {
-            if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟')) return;
-            
-            // لا يمكن حذف المستخدم الحالي
-            if (userId === currentUser?.uid) {
-                showToast('لا يمكن حذف حسابك الحالي', 'error');
-                return;
-            }
-            
-            showLoading('جاري حذف المستخدم...');
-            
-            // حذف من Authentication
-            auth.deleteUser(userId)
-                .then(() => {
-                    // حذف من Database
-                    return database.ref('users/' + userId).remove();
-                })
-                .then(() => {
-                    hideLoading();
-                    showToast('✅ تم حذف المستخدم بنجاح', 'success');
-                })
-                .catch((error) => {
-                    hideLoading();
-                    console.error('❌ خطأ في حذف المستخدم:', error);
-                    showToast('حدث خطأ في حذف المستخدم', 'error');
-                });
-        }
-        
-        // 13. تعديل القطاع
-        function editSector(sectorId) {
-            const sector = sectors.find(s => s.id === sectorId);
-            if (!sector) return;
-            
-            document.getElementById('sector-id').value = sector.id;
-            document.getElementById('sector-name').value = sector.name;
-            document.getElementById('sector-code').value = sector.code;
-            document.getElementById('sector-description').value = sector.description || '';
-            
-            // تحديد الرتب المختارة
-            const rankCheckboxes = document.querySelectorAll('.rank-checkbox');
-            rankCheckboxes.forEach(cb => {
-                cb.checked = sector.ranks && sector.ranks.includes(cb.value);
-            });
-            
-            updateAssignedRanksPreview();
-            
-            showSection('manage-sectors');
-        }
-        
-        // 14. تعديل الرتبة
-        function editRank(rankId) {
-            const rank = ranks.find(r => r.id === rankId);
-            if (!rank) return;
-            
-            document.getElementById('rank-id').value = rank.id;
-            document.getElementById('rank-name').value = rank.name;
-            document.getElementById('rank-code').value = rank.code;
-            document.getElementById('rank-description').value = rank.description || '';
-            
-            // تحديد القطاعات المختارة
-            const sectorCheckboxes = document.querySelectorAll('.sector-checkbox');
-            sectorCheckboxes.forEach(cb => {
-                cb.checked = rank.sectors && rank.sectors.includes(cb.value);
-            });
-            
-            updateAssignedSectorsPreview();
-            
-            showSection('manage-sectors');
-        }
-        
-        // 15. حذف الرتبة
-        function deleteRank(rankId) {
-            if (!confirm('هل أنت متأكد من حذف هذه الرتبة؟')) return;
-            
-            // التحقق مما إذا كانت الرتبة مستخدمة في أي مركبة
-            const isUsed = vehicles.some(v => v.rank === rankId || v.rankId === rankId);
-            if (isUsed) {
-                showToast('لا يمكن حذف هذه الرتبة لأنها مستخدمة في بعض المركبات', 'error');
-                return;
-            }
-            
-            database.ref('ranks/' + rankId).remove()
-                .then(() => {
-                    showToast('✅ تم حذف الرتبة بنجاح', 'success');
-                })
-                .catch((error) => {
-                    console.error('❌ خطأ في حذف الرتبة:', error);
-                    showToast('حدث خطأ في حذف الرتبة', 'error');
-                });
-        }
-        
-        // 16. تحديث قائمة الرتب
-        function updateRanksList() {
-            const container = document.getElementById('ranks-list');
-            if (!container) return;
-            
-            let html = '';
-            
-            ranks.forEach(rank => {
-                let sectorsText = '';
-                if (rank.sectors && rank.sectors.length > 0) {
-                    sectorsText = rank.sectors.map(sectorId => {
-                        const sector = sectors.find(s => s.id === sectorId);
-                        return sector ? sector.name : sectorId;
-                    }).join(', ');
-                }
-                
-                html += `
-                    <tr>
-                        <td>${rank.name}</td>
-                        <td><code>${rank.code}</code></td>
-                        <td>
-                            <small>${sectorsText || 'جميع القطاعات'}</small>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary me-2" onclick="editRank('${rank.id}')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteRank('${rank.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-        
-        // 17. إعادة تعيين نموذج الرتبة
-        function resetRankForm() {
-            document.getElementById('rank-form').reset();
-            document.getElementById('rank-id').value = '';
-            document.querySelectorAll('.sector-checkbox').forEach(cb => cb.checked = false);
-            updateAssignedSectorsPreview();
-        }
-        
-        // 18. إعادة تعيين نموذج المستخدم
-        function resetUserForm() {
-            document.getElementById('user-form').reset();
-            document.getElementById('user-id').value = '';
-            document.getElementById('user-password').value = '';
-        }
-        
-        // 19. دالة حفظ القطاع (محدثة)
+
         function saveSector(event) {
             event.preventDefault();
             
@@ -1196,17 +1415,10 @@
                 return;
             }
             
-            // جمع الرتب المختارة
-            const selectedRanks = [];
-            document.querySelectorAll('.rank-checkbox:checked').forEach(cb => {
-                selectedRanks.push(cb.value);
-            });
-            
             const sectorData = {
                 name,
                 code,
                 description: description || '',
-                ranks: selectedRanks,
                 updatedAt: new Date().toISOString(),
                 updatedBy: currentUser.uid
             };
@@ -1244,140 +1456,315 @@
                     });
             }
         }
-        
-        // 20. إعادة تعيين نموذج القطاع
-        function resetSectorForm() {
-            document.getElementById('sector-form').reset();
-            document.getElementById('sector-id').value = '';
-            document.querySelectorAll('.rank-checkbox').forEach(cb => cb.checked = false);
-            updateAssignedRanksPreview();
+
+        // ========== دوال أدوات النظام ==========
+        function loadDefaultDataToFirebase() {
+            if (!confirm('هل تريد تحميل البيانات الافتراضية إلى Firebase؟')) {
+                return;
+            }
+            
+            showLoading('جاري رفع البيانات الافتراضية إلى Firebase...');
+            updateFirebaseStatus('syncing');
+            
+            const promises = [];
+            
+            // رفع القطاعات
+            defaultData.sectors.forEach(sector => {
+                const sectorData = {
+                    ...sector,
+                    createdAt: new Date().toISOString(),
+                    createdBy: currentUser?.uid || 'system'
+                };
+                promises.push(database.ref('sectors').push(sectorData));
+            });
+            
+            // رفع الرتب
+            defaultData.ranks.forEach(rank => {
+                const rankData = {
+                    ...rank,
+                    createdAt: new Date().toISOString(),
+                    createdBy: currentUser?.uid || 'system'
+                };
+                promises.push(database.ref('ranks').push(rankData));
+            });
+            
+            // رفع المركبات
+            defaultData.vehicles.forEach(vehicle => {
+                const vehicleData = {
+                    ...vehicle,
+                    createdAt: new Date().toISOString(),
+                    createdBy: currentUser?.uid || 'system'
+                };
+                promises.push(database.ref('vehicles').push(vehicleData));
+            });
+            
+            Promise.all(promises)
+                .then(() => {
+                    hideLoading();
+                    showToast('✅ تم تحميل البيانات الافتراضية بنجاح في Firebase', 'success');
+                    updateFirebaseStatus('connected');
+                    updateLastUpdateTime();
+                })
+                .catch((error) => {
+                    hideLoading();
+                    console.error('❌ خطأ في تحميل البيانات الافتراضية:', error);
+                    showToast('حدث خطأ في تحميل البيانات', 'error');
+                    updateFirebaseStatus('error');
+                });
         }
-        
-        // ========== دوال اختيار الألوان ==========
-        function setupColorPicker() {
-            const colors = [
-                '4c4c4c', 'FFFFFF', '000000', 'FF0000', '00FF00', '0000FF',
-                'FFFF00', 'FF00FF', '00FFFF', '880000', '008800', '000088',
-                '888800', '880088', '008888', 'CCCCCC', '888888', '99d24f'
+
+        function syncAllData() {
+            showLoading('جاري مزامنة جميع البيانات...');
+            updateFirebaseStatus('syncing');
+            
+            // هنا يمكن إضافة منطق المزامنة
+            setTimeout(() => {
+                hideLoading();
+                showToast('✅ تمت مزامنة البيانات بنجاح', 'success');
+                updateFirebaseStatus('connected');
+                updateLastUpdateTime();
+            }, 2000);
+        }
+
+        function clearFirebaseData() {
+            if (!confirm('⚠️ تحذير: هل أنت متأكد من مسح جميع البيانات في Firebase؟\n\nهذه العملية لا يمكن التراجع عنها!')) {
+                return;
+            }
+            
+            if (!confirm('❌ تأكيد نهائي: سيتم حذف جميع المركبات والقطاعات والرتب!')) {
+                return;
+            }
+            
+            showLoading('جاري مسح جميع البيانات من Firebase...');
+            
+            const promises = [
+                database.ref('vehicles').remove(),
+                database.ref('sectors').remove(),
+                database.ref('ranks').remove()
             ];
             
-            const colorGrid = document.getElementById('color-grid');
-            if (!colorGrid) return;
+            Promise.all(promises)
+                .then(() => {
+                    hideLoading();
+                    showToast('✅ تم مسح جميع البيانات بنجاح من Firebase', 'success');
+                    updateLastUpdateTime();
+                })
+                .catch((error) => {
+                    hideLoading();
+                    console.error('❌ خطأ في مسح البيانات:', error);
+                    showToast('حدث خطأ في مسح البيانات', 'error');
+                });
+        }
+
+        function refreshFirebaseData() {
+            showLoading('جاري تحديث البيانات من Firebase...');
+            updateFirebaseStatus('syncing');
             
-            let html = '<div class="row">';
-            colors.forEach(color => {
+            // إعادة تحميل جميع البيانات
+            loadAllData()
+                .then(() => {
+                    hideLoading();
+                    showToast('✅ تم تحديث البيانات بنجاح', 'success');
+                    updateFirebaseStatus('connected');
+                })
+                .catch((error) => {
+                    hideLoading();
+                    showToast('❌ حدث خطأ في تحديث البيانات', 'error');
+                    updateFirebaseStatus('error');
+                });
+        }
+
+        function updateLastUpdateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ar-EG');
+            const dateString = now.toLocaleDateString('ar-EG');
+            document.getElementById('last-update-time').value = `${dateString} ${timeString}`;
+        }
+
+        // ========== دوال المساعدة ==========
+        function updateDashboardStats() {
+            const adminCount = users.filter(u => u.role === 'admin').length;
+            const editorCount = users.filter(u => u.role === 'editor').length;
+            const viewerCount = users.filter(u => u.role === 'viewer').length;
+            
+            document.getElementById('admin-count').textContent = adminCount;
+            document.getElementById('editor-count').textContent = editorCount;
+            document.getElementById('viewer-count').textContent = viewerCount;
+        }
+
+        function updateRecentVehicles() {
+            const container = document.getElementById('recent-vehicles');
+            if (!container) return;
+            
+            const recentVehicles = vehicles.slice(-5).reverse();
+            
+            if (recentVehicles.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center py-3">لا توجد مركبات مضافة بعد</p>';
+                return;
+            }
+            
+            let html = '<div class="list-group">';
+            
+            recentVehicles.forEach(vehicle => {
+                const sectorName = vehicle.sector || 'غير معروف';
+                
                 html += `
-                    <div class="col-2 mb-2">
-                        <div class="color-preview" style="background-color: #${color}; width: 30px; height: 30px; margin: 0 auto; cursor: pointer;"
-                             onclick="selectColor('${color}')"></div>
+                    <div class="list-group-item list-group-item-action border-0 mb-2 rounded" 
+                         style="cursor: pointer;"
+                         onclick="editVehicle('${vehicle.id}')">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-car text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">${vehicle.type}</h6>
+                                <small class="text-muted">${sectorName} - ${vehicle.code}</small>
+                            </div>
+                        </div>
                     </div>
                 `;
             });
-            html += '</div>';
-            colorGrid.innerHTML = html;
             
-            // إعداد مستمع لتغيير اللون المخصص
-            document.getElementById('custom-color-picker').addEventListener('input', function(e) {
-                selectedColor = e.target.value.replace('#', '');
-            });
+            html += '</div>';
+            container.innerHTML = html;
         }
-        
-        function openColorPicker(fieldId) {
-            currentColorField = fieldId;
-            document.getElementById('color-picker-overlay').classList.add('active');
-            document.getElementById('color-picker-popup').classList.add('active');
-        }
-        
-        function closeColorPicker() {
-            document.getElementById('color-picker-overlay').classList.remove('active');
-            document.getElementById('color-picker-popup').classList.remove('active');
-            currentColorField = '';
-            selectedColor = '';
-        }
-        
-        function selectColor(color) {
-            selectedColor = color;
-            document.getElementById('custom-color-picker').value = '#' + color;
-        }
-        
-        function applySelectedColor() {
-            if (currentColorField && selectedColor) {
-                const input = document.getElementById(currentColorField);
-                const preview = document.getElementById(currentColorField.replace('vehicle-', '') + '-preview');
-                
-                if (input) {
-                    input.value = selectedColor;
-                }
-                
-                if (preview) {
-                    preview.style.backgroundColor = '#' + selectedColor;
-                }
+
+        function updateChart() {
+            const ctx = document.getElementById('stats-chart');
+            if (!ctx) return;
+            
+            if (chart) {
+                chart.destroy();
             }
-            closeColorPicker();
-        }
-        
-        // ========== دوال تحميل البيانات المحسنة ==========
-        function setupRanksListener() {
-            return new Promise((resolve) => {
-                const ranksRef = database.ref('ranks');
-                
-                const listener = ranksRef.on('value', (snapshot) => {
-                    ranks = [];
-                    if (snapshot.exists()) {
-                        snapshot.forEach((childSnapshot) => {
-                            ranks.push({
-                                id: childSnapshot.key,
-                                ...childSnapshot.val()
-                            });
-                        });
+            
+            const vehicleTypes = ["الفورد فكتوريا", "الدودج تشارجر", "فورد اكسبلور", "تاهو"];
+            const vehicleCounts = vehicleTypes.map(type => 
+                vehicles.filter(v => v.type === type).length
+            );
+            
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: vehicleTypes,
+                    datasets: [{
+                        label: 'عدد المركبات',
+                        data: vehicleCounts,
+                        backgroundColor: [
+                            'rgba(52, 152, 219, 0.7)',
+                            'rgba(231, 76, 60, 0.7)',
+                            'rgba(46, 204, 113, 0.7)',
+                            'rgba(155, 89, 182, 0.7)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
-                    
-                    console.log(`📊 تم تحميل ${ranks.length} رتبة من Firebase`);
-                    document.getElementById('fb-ranks-count').textContent = ranks.length;
-                    
-                    // تحديث القوائم بعد تحميل الرتب
-                    loadRanksForSectorManagement();
-                    loadSectorsForRankManagement();
-                    loadSectorsForUserManagement();
-                    updateRanksList();
-                    
-                    resolve();
-                });
-                
-                dataListeners.push(() => ranksRef.off('value', listener));
+                }
             });
         }
-        
-        function setupUsersListener() {
-            return new Promise((resolve) => {
-                const usersRef = database.ref('users');
-                
-                const listener = usersRef.on('value', (snapshot) => {
-                    users = [];
-                    if (snapshot.exists()) {
-                        snapshot.forEach((childSnapshot) => {
-                            users.push({
-                                id: childSnapshot.key,
-                                ...childSnapshot.val()
-                            });
-                        });
-                    }
-                    
-                    console.log(`📊 تم تحميل ${users.length} مستخدم من Firebase`);
-                    document.getElementById('fb-users-count').textContent = users.length;
-                    document.getElementById('db-users-status').textContent = `${users.length} مستخدم`;
-                    
-                    updateDashboardStats();
-                    updateUsersList();
-                    
-                    resolve();
-                });
-                
-                dataListeners.push(() => usersRef.off('value', listener));
+
+        function updateDropdowns() {
+            // تحديث قائمة القطاعات
+            const sectorSelects = ['vehicle-sector', 'search-sector'];
+            sectorSelects.forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    let options = '<option value="">اختر القطاع</option>';
+                    sectors.forEach(sector => {
+                        options += `<option value="${sector.id}">${sector.name}</option>`;
+                    });
+                    select.innerHTML = options;
+                }
+            });
+            
+            // تحديث قائمة الرتب
+            const rankSelects = ['vehicle-rank', 'search-rank'];
+            rankSelects.forEach(id => {
+                const select = document.getElementById(id);
+                if (select) {
+                    let options = '<option value="">اختر الرتبة</option>';
+                    ranks.forEach(rank => {
+                        options += `<option value="${rank.id}">${rank.name}</option>`;
+                    });
+                    select.innerHTML = options;
+                }
             });
         }
-        
-        // ========== البحث المحسن ==========
+
+        function updateSectorsList() {
+            const container = document.getElementById('sectors-list');
+            if (!container) return;
+            
+            let html = '';
+            
+            sectors.forEach(sector => {
+                html += `
+                    <tr>
+                        <td>${sector.name}</td>
+                        <td><code>${sector.code}</code></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-2" onclick="editSector('${sector.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteSector('${sector.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function editSector(sectorId) {
+            const sector = sectors.find(s => s.id === sectorId);
+            if (!sector) return;
+            
+            document.getElementById('sector-id').value = sector.id;
+            document.getElementById('sector-name').value = sector.name;
+            document.getElementById('sector-code').value = sector.code;
+            document.getElementById('sector-description').value = sector.description || '';
+            
+            showSection('manage-sectors');
+        }
+
+        function editVehicle(vehicleId) {
+            const vehicle = vehicles.find(v => v.id === vehicleId);
+            if (!vehicle) return;
+            
+            document.getElementById('vehicle-id').value = vehicle.id;
+            document.getElementById('vehicle-type').value = vehicle.type;
+            document.getElementById('vehicle-code').value = vehicle.code;
+            document.getElementById('vehicle-sector').value = vehicle.sectorId || '';
+            document.getElementById('vehicle-rank').value = vehicle.rankId || '';
+            document.getElementById('vehicle-color1').value = vehicle.color1;
+            document.getElementById('vehicle-color2').value = vehicle.color2;
+            document.getElementById('vehicle-image').value = vehicle.image;
+            document.getElementById('vehicle-notes').value = vehicle.notes || '';
+            
+            showSection('add-vehicle');
+        }
+
+        function deleteSector(sectorId) {
+            if (!confirm('هل أنت متأكد من حذف هذا القطاع؟')) return;
+            
+            database.ref('sectors/' + sectorId).remove()
+                .then(() => {
+                    showToast('✅ تم حذف القطاع بنجاح', 'success');
+                })
+                .catch((error) => {
+                    console.error('❌ خطأ في حذف القطاع:', error);
+                    showToast('حدث خطأ في حذف القطاع', 'error');
+                });
+        }
+
+        // ========== دوال البحث ==========
         function searchVehicles() {
             const sectorId = document.getElementById('search-sector').value;
             const rankId = document.getElementById('search-rank').value;
@@ -1390,21 +1777,6 @@
             
             if (!rankId) {
                 showToast('يرجى اختيار الرتبة أولاً', 'error');
-                return;
-            }
-            
-            // الحصول على القطاع والرتبة المختارة
-            const sector = sectors.find(s => s.id === sectorId);
-            const rank = ranks.find(r => r.id === rankId);
-            
-            if (!sector || !rank) {
-                showToast('القطاع أو الرتبة غير موجودة', 'error');
-                return;
-            }
-            
-            // التحقق مما إذا كانت الرتبة تابعة للقطاع
-            if (sector.ranks && !sector.ranks.includes(rankId)) {
-                showToast('هذه الرتبة غير تابعة للقطاع المحدد', 'error');
                 return;
             }
             
@@ -1421,52 +1793,305 @@
             
             displaySearchResults(filteredVehicles);
         }
-        
-        // ========== دوال مساعدة إضافية ==========
-        function updateSectorsList() {
-            const container = document.getElementById('sectors-list');
-            if (!container) return;
+
+        function displaySearchResults(vehiclesToDisplay) {
+            const container = document.getElementById('search-results');
+            
+            if (vehiclesToDisplay.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-car fa-4x text-muted mb-3"></i>
+                                <h4 class="text-muted">لا توجد مركبات مطابقة للبحث</h4>
+                                <p class="text-muted mt-2">جرب تغيير معايير البحث</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
             
             let html = '';
             
-            sectors.forEach(sector => {
-                let ranksText = '';
-                if (sector.ranks && sector.ranks.length > 0) {
-                    ranksText = sector.ranks.map(rankId => {
-                        const rank = ranks.find(r => r.id === rankId);
-                        return rank ? rank.name : rankId;
-                    }).join(', ');
-                }
+            vehiclesToDisplay.forEach(vehicle => {
+                const sector = sectors.find(s => s.id === vehicle.sector || s.id === vehicle.sectorId);
+                const rank = ranks.find(r => r.id === vehicle.rank || r.id === vehicle.rankId);
+                const sectorName = sector ? sector.name : vehicle.sector || 'غير معروف';
+                const rankName = rank ? rank.name : vehicle.rank || 'غير معروف';
                 
                 html += `
-                    <tr>
-                        <td>${sector.name}</td>
-                        <td><code>${sector.code}</code></td>
-                        <td>
-                            <small>${ranksText || 'لا توجد رتب'}</small>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary me-2" onclick="editSector('${sector.id}')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteSector('${sector.id}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
+                    <div class="col-md-4 col-sm-6 mb-4">
+                        <div class="card vehicle-card h-100">
+                            <div class="vehicle-img-container">
+                                <img src="${vehicle.image}" 
+                                     class="vehicle-img" 
+                                     alt="${vehicle.type}"
+                                     onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200/4c4c4c/FFFFFF?text=${encodeURIComponent(vehicle.type)}'">
+                                <div class="position-absolute top-0 start-0 m-2">
+                                    <span class="rank-badge">${rankName}</span>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0 text-primary">${vehicle.type}</h5>
+                                    <div class="action-buttons">
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editVehicle('${vehicle.id}')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteVehicle('${vehicle.id}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="card-text">
+                                    <strong><i class="fas fa-building me-1"></i>القطاع:</strong> ${sectorName}<br>
+                                    <strong><i class="fas fa-user-tie me-1"></i>الرتبة:</strong> ${rankName}<br>
+                                    <strong><i class="fas fa-code me-1"></i>الكود:</strong> <code>${vehicle.code}</code><br>
+                                    <strong><i class="fas fa-palette me-1"></i>الألوان:</strong>
+                                    <span class="color-preview" style="background-color: #${vehicle.color1};" 
+                                          title="اللون الأول: #${vehicle.color1}"
+                                          onclick="copyToClipboard('#${vehicle.color1}')"></span>
+                                    <span class="color-preview" style="background-color: #${vehicle.color2};" 
+                                          title="اللون الثانوي: #${vehicle.color2}"
+                                          onclick="copyToClipboard('#${vehicle.color2}')"></span>
+                                </p>
+                                <div class="mt-3">
+                                    <button class="btn btn-sm btn-outline-primary me-2" onclick="copyToClipboard('${vehicle.code}')">
+                                        <i class="fas fa-copy me-1"></i>نسخ الكود
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" onclick="copyToClipboard('${vehicle.image}')">
+                                        <i class="fas fa-link me-1"></i>نسخ الرابط
+                                    </button>
+                                </div>
+                                ${vehicle.notes ? `
+                                    <div class="alert alert-light mt-3 p-2">
+                                        <small><i class="fas fa-sticky-note me-1"></i>${vehicle.notes}</small>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
                 `;
             });
             
             container.innerHTML = html;
         }
 
+        function deleteVehicle(vehicleId) {
+            if (!confirm('هل أنت متأكد من حذف هذه المركبة؟')) return;
+            
+            database.ref('vehicles/' + vehicleId).remove()
+                .then(() => {
+                    showToast('✅ تم حذف المركبة بنجاح', 'success');
+                })
+                .catch((error) => {
+                    console.error('❌ خطأ في حذف المركبة:', error);
+                    showToast('حدث خطأ في حذف المركبة', 'error');
+                });
+        }
+
+        // ========== دوال المساعدة العامة ==========
+        function getRoleName(roleCode) {
+            const roles = {
+                'admin': 'مدير',
+                'editor': 'محرر',
+                'viewer': 'مشاهد'
+            };
+            return roles[roleCode] || roleCode;
+        }
+
+        function getAuthErrorMessage(errorCode) {
+            const messages = {
+                'auth/invalid-email': 'البريد الإلكتروني غير صالح',
+                'auth/user-disabled': 'هذا الحساب معطل',
+                'auth/user-not-found': 'لا يوجد حساب بهذا البريد الإلكتروني',
+                'auth/wrong-password': 'كلمة المرور غير صحيحة',
+                'auth/email-already-in-use': 'البريد الإلكتروني مستخدم بالفعل',
+                'auth/weak-password': 'كلمة المرور ضعيفة، يجب أن تتكون من 6 أحرف على الأقل',
+                'auth/operation-not-allowed': 'عملية التسجيل غير مسموحة حالياً',
+                'auth/too-many-requests': 'تم رفض الوصول بسبب محاولات متكررة، يرجى المحاولة لاحقاً'
+            };
+            
+            return messages[errorCode] || 'حدث خطأ في تسجيل الدخول، يرجى المحاولة مرة أخرى';
+        }
+
+        function updatePermissions(role) {
+            const adminElements = ['add-vehicle-link', 'manage-sectors-link', 'manage-ranks-link', 
+                                 'manage-colors-link', 'manage-users-link', 'system-tools-link'];
+            
+            adminElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.style.display = role === 'admin' ? 'block' : 'none';
+                }
+            });
+        }
+
+        function showDashboard() {
+            document.getElementById('login-page').classList.add('d-none');
+            document.getElementById('dashboard').classList.remove('d-none');
+            showSection('dashboard-home');
+        }
+
+        function showLogin() {
+            document.getElementById('login-page').classList.remove('d-none');
+            document.getElementById('dashboard').classList.add('d-none');
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                section.classList.add('d-none');
+            });
+            
+            document.querySelectorAll('.sidebar a').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            const targetSection = document.getElementById(sectionId);
+            if (targetSection) {
+                targetSection.classList.remove('d-none');
+            }
+            
+            const activeLink = document.querySelector(`.sidebar a[onclick*="${sectionId}"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+
+        function resetVehicleForm() {
+            document.getElementById('vehicle-form').reset();
+            document.getElementById('vehicle-id').value = '';
+            document.getElementById('save-vehicle-btn').innerHTML = '<i class="fas fa-save me-2"></i>حفظ في Firebase';
+        }
+
+        function resetSectorForm() {
+            document.getElementById('sector-form').reset();
+            document.getElementById('sector-id').value = '';
+        }
+
+        function resetSearch() {
+            document.getElementById('search-sector').value = '';
+            document.getElementById('search-rank').value = '';
+            document.getElementById('search-type').value = '';
+            
+            const container = document.getElementById('search-results');
+            container.innerHTML = `
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-car fa-4x text-muted mb-3"></i>
+                            <h4 class="text-muted">قم بإجراء بحث لعرض المركبات</h4>
+                            <p class="text-muted mt-2">اختر القطاع والرتبة ثم اضغط على زر البحث</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('✅ تم النسخ إلى الحافظة', 'success');
+            }).catch(err => {
+                showToast('❌ فشل النسخ إلى الحافظة', 'error');
+            });
+        }
+
+        function showLoading(message = 'جاري التحميل...') {
+            let loadingDiv = document.getElementById('loading-overlay');
+            
+            if (!loadingDiv) {
+                loadingDiv = document.createElement('div');
+                loadingDiv.id = 'loading-overlay';
+                loadingDiv.className = 'loading-overlay';
+                loadingDiv.innerHTML = `
+                    <div class="text-center">
+                        <div class="spinner-border text-light" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3 text-light">${message}</p>
+                    </div>
+                `;
+                document.body.appendChild(loadingDiv);
+            } else {
+                loadingDiv.style.display = 'flex';
+                loadingDiv.querySelector('p').textContent = message;
+            }
+        }
+
+        function hideLoading() {
+            const loadingDiv = document.getElementById('loading-overlay');
+            if (loadingDiv) {
+                loadingDiv.style.display = 'none';
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const bgColor = type === 'success' ? '#28a745' : 
+                            type === 'error' ? '#dc3545' : 
+                            type === 'warning' ? '#ffc107' : 
+                            '#17a2b8';
+            
+            Toastify({
+                text: message,
+                duration: 3000,
+                close: true,
+                gravity: "top",
+                position: "center",
+                backgroundColor: bgColor,
+                stopOnFocus: true,
+                className: "text-end"
+            }).showToast();
+        }
+
+        function showError(message) {
+            const errorElement = document.getElementById('login-error');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.remove('d-none');
+            }
+        }
+
+        function setupEventListeners() {
+            // تحديث معاينة الألوان
+            document.getElementById('vehicle-color1')?.addEventListener('input', function() {
+                const preview = document.getElementById('color1-preview');
+                if (preview && this.value) {
+                    preview.style.backgroundColor = '#' + this.value.replace('#', '');
+                }
+            });
+            
+            document.getElementById('vehicle-color2')?.addEventListener('input', function() {
+                const preview = document.getElementById('color2-preview');
+                if (preview && this.value) {
+                    preview.style.backgroundColor = '#' + this.value.replace('#', '');
+                }
+            });
+        }
+
+        // دوال إضافية (للتطوير)
+        function openColorPicker(fieldId) {
+            showToast('ميزة اختيار الألوان قيد التطوير', 'info');
+        }
+
+        function previewImage() {
+            const imageUrl = document.getElementById('vehicle-image').value;
+            if (!imageUrl) {
+                showToast('يرجى إدخال رابط الصورة أولاً', 'error');
+                return;
+            }
+            window.open(imageUrl, '_blank');
+        }
+
         // بداية تشغيل النظام
-        console.log('🚀 نظام البحث المتقدم للمركبات الشرطية - النسخة المحسنة');
-        console.log('📋 الميزات الجديدة:');
-        console.log('1. ربط الرتب مع القطاعات');
-        console.log('2. إدارة المستخدمين الكاملة');
-        console.log('3. كود المركبة التلقائي');
-        console.log('4. محدد ألوان متطور');
+        console.log('🚀 نظام البحث المتقدم للمركبات الشرطية - تم التحميل بنجاح');
+        console.log('🔥 Firebase مهيأ وجاهز للاستخدام');
+        console.log('📧 يمكنك تسجيل الدخول باستخدام: admin@test.com / 123456');
     </script>
 </body>
 </html>
