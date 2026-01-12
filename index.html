@@ -3,1776 +3,1487 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام ميكانيكي فيرج</title>
-    
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
-    <!-- الخطوط -->
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>نظام البحث المتقدم للمركبات الشرطية</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
         :root {
-            --primary: #4ecca3;
-            --primary-dark: #3daa8a;
-            --primary-light: rgba(78, 204, 163, 0.1);
-            --bg: #0f172a;
-            --card: #1e293b;
-            --card-light: #334155;
-            --text: #f8fafc;
-            --text-secondary: #94a3b8;
-            --danger: #ef4444;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --info: #3b82f6;
-            --border: #475569;
-            --admin: #3b82f6;
-            --editor: #8b5cf6;
-            --viewer: #64748b;
-            --vip: #fbbf24;
-            --vip-dark: #f59e0b;
-            --vip-light: rgba(251, 191, 36, 0.1);
-            --sidebar-width: 260px;
-            --header-height: 70px;
-            --transition: all 0.3s ease;
-            --radius: 12px;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --admin-color: #e74c3c;
+            --editor-color: #f39c12;
+            --viewer-color: #27ae60;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Tajawal', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* صفحة تسجيل الدخول */
-        .auth-page {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            background: linear-gradient(135deg, var(--bg) 0%, #1e293b 100%);
-        }
-
-        .auth-container {
-            background: var(--card);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 450px;
-            border: 3px solid var(--primary);
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .auth-header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .auth-header img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            border: 3px solid var(--primary);
-            margin-bottom: 20px;
-            object-fit: cover;
-        }
-
-        .auth-header h1 {
-            color: var(--primary);
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        .auth-header p {
-            color: var(--text-secondary);
-            font-size: 1rem;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 15px;
-            border-radius: 8px;
-            border: 2px solid var(--border);
-            background: rgba(0, 0, 0, 0.2);
-            color: var(--text);
-            font-family: 'Tajawal';
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(78, 204, 163, 0.2);
-        }
-
-        .btn {
-            padding: 12px 20px;
-            border-radius: var(--radius);
-            border: none;
-            font-family: 'Tajawal';
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: #000;
-        }
-
-        .auth-footer {
-            text-align: center;
-            margin-top: 30px;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 30px;
-            border-radius: 50px;
-            z-index: 2000;
-            font-weight: 600;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: slideInUp 0.3s ease-out;
-            min-width: 300px;
-            max-width: 500px;
-            text-align: center;
-            display: none;
-        }
-
-        @keyframes slideInUp {
-            from { bottom: 0; opacity: 0; }
-            to { bottom: 30px; opacity: 1; }
-        }
-
-        .toast-success { background: var(--success); color: white; }
-        .toast-error { background: var(--danger); color: white; }
-        .toast-warning { background: var(--warning); color: #000; }
-        .toast-info { background: var(--info); color: white; }
         
-        /* محتوى التطبيق */
-        .app-container {
-            display: none;
-            flex-direction: column;
-            min-height: 100vh;
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
         }
-
-        .top-header {
-            background: var(--card);
-            height: var(--header-height);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 25px;
-            border-bottom: 2px solid var(--primary);
-            box-shadow: var(--shadow);
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .menu-toggle {
-            background: none;
-            border: none;
-            color: var(--text);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 8px;
-            transition: var(--transition);
-        }
-
-        .menu-toggle:hover {
-            background: var(--primary-light);
-            color: var(--primary);
-        }
-
-        .page-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .page-title .page-icon {
-            color: var(--primary);
-            margin-left: 10px;
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .quick-stats {
-            display: flex;
-            gap: 15px;
-        }
-
-        .stat-box {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 8px 15px;
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .stat-box i {
-            color: var(--primary);
-        }
-
-        .stat-box span {
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        /* الشريط الجانبي */
+        
         .sidebar {
-            width: var(--sidebar-width);
-            background: var(--card);
-            border-left: 3px solid var(--primary);
+            height: 100vh;
             position: fixed;
-            top: 0;
-            right: -100%;
-            bottom: 0;
-            z-index: 1000;
-            transition: var(--transition);
-            overflow-y: auto;
-            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.4);
-        }
-
-        .sidebar.active {
             right: 0;
+            top: 0;
+            background-color: var(--primary-color);
+            color: white;
+            padding-top: 20px;
+            width: 250px;
+            transition: all 0.3s;
+            z-index: 1000;
         }
-
-        .sidebar-header {
-            padding: 25px 20px;
-            border-bottom: 1px solid var(--border);
-            text-align: center;
-            background: rgba(0, 0, 0, 0.2);
+        
+        .main-content {
+            margin-right: 250px;
+            padding: 20px;
+            transition: all 0.3s;
         }
-
-        .sidebar-header .logo {
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                margin-right: -250px;
+            }
+            
+            .sidebar.active {
+                margin-right: 0;
+            }
+            
+            .main-content {
+                margin-right: 0;
+            }
+        }
+        
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+        
+        .sidebar a:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .sidebar a.active {
+            background-color: var(--secondary-color);
+        }
+        
+        .user-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .badge-admin {
+            background-color: var(--admin-color);
+        }
+        
+        .badge-editor {
+            background-color: var(--editor-color);
+        }
+        
+        .badge-viewer {
+            background-color: var(--viewer-color);
+        }
+        
+        .vehicle-card {
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s;
+            height: 100%;
+        }
+        
+        .vehicle-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .vehicle-img-container {
+            height: 200px;
+            overflow: hidden;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 15px;
+            justify-content: center;
+            background-color: #f5f5f5;
         }
-
-        .sidebar-header img {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 3px solid var(--primary);
+        
+        .vehicle-img {
+            max-height: 100%;
+            max-width: 100%;
             object-fit: cover;
         }
-
-        .sidebar-header h2 {
-            color: var(--primary);
-            font-size: 1.4rem;
-            font-weight: 700;
-        }
-
-        .sidebar-header p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-
-        .user-profile {
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: rgba(0, 0, 0, 0.1);
-        }
-
-        .user-avatar {
-            width: 50px;
-            height: 50px;
+        
+        .color-preview {
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #000;
-        }
-
-        .user-details {
-            flex: 1;
-        }
-
-        .user-name {
-            font-weight: 700;
-            color: var(--text);
-            margin-bottom: 5px;
-        }
-
-        .user-role {
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
+            margin: 0 5px;
+            border: 1px solid #ddd;
         }
-
-        .user-role.admin { background: var(--admin); color: white; }
-        .user-role.editor { background: var(--editor); color: white; }
-        .user-role.viewer { background: var(--viewer); color: white; }
-        .user-role.vip { background: linear-gradient(135deg, var(--vip), var(--vip-dark)); color: #000; }
-
-        .nav-menu {
-            padding: 20px 0;
-        }
-
-        .nav-section {
-            margin-bottom: 25px;
-        }
-
-        .nav-title {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            padding: 0 20px 10px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 20px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: var(--transition);
-            cursor: pointer;
-            border-right: 4px solid transparent;
-        }
-
-        .nav-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text);
-            border-right-color: var(--primary);
-        }
-
-        .nav-item.active {
-            background: var(--primary-light);
-            color: var(--primary);
-            border-right-color: var(--primary);
-            font-weight: 600;
-        }
-
-        .nav-item .nav-icon {
-            width: 20px;
-            text-align: center;
-            font-size: 1.1rem;
-        }
-
-        .nav-item .nav-text {
-            flex: 1;
-        }
-
-        .logout-btn {
-            margin: 20px;
-            padding: 12px;
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger);
-            border: 1px solid var(--danger);
-            border-radius: var(--radius);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 600;
-        }
-
-        .logout-btn:hover {
-            background: var(--danger);
-            color: white;
-        }
-
-        /* محتوى الصفحات */
-        .page-content {
+        
+        .login-container {
+            max-width: 500px;
+            margin: 100px auto;
             padding: 30px;
-            max-width: 1400px;
-            margin: 0 auto;
-            animation: fadeIn 0.4s ease-out;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+        
+        .logo {
+            font-weight: bold;
+            font-size: 24px;
+            color: var(--primary-color);
         }
-
-        .stat-card {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 25px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            border: 2px solid transparent;
-            transition: var(--transition);
-            box-shadow: var(--shadow);
+        
+        .logo span {
+            color: var(--secondary-color);
         }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-        }
-
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-        }
-
-        .stat-icon.primary { background: rgba(78, 204, 163, 0.2); color: var(--primary); }
-        .stat-icon.vip { background: rgba(251, 191, 36, 0.2); color: var(--vip); }
-        .stat-icon.admin { background: rgba(59, 130, 246, 0.2); color: var(--admin); }
-        .stat-icon.users { background: rgba(139, 92, 246, 0.2); color: var(--editor); }
-
-        .stat-info h3 {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 5px;
-        }
-
-        .stat-info p {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .content-section {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--primary);
-        }
-
+        
         .section-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            color: var(--primary-color);
         }
-
-        .section-title i {
-            color: var(--primary);
+        
+        .toggle-sidebar {
+            display: none;
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1001;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
         }
-
-        .loading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 200px;
-            gap: 20px;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* تحسينات للجوال */
+        
         @media (max-width: 768px) {
-            .auth-container {
-                padding: 30px 20px;
+            .toggle-sidebar {
+                display: block;
             }
-            
-            .top-header {
-                padding: 0 15px;
-                flex-direction: column;
-                height: auto;
-                padding: 15px;
-            }
-            
-            .header-left, .header-right {
-                width: 100%;
-                justify-content: space-between;
-                margin-bottom: 10px;
-            }
-            
-            .quick-stats {
-                display: none;
-            }
-            
-            .page-content {
-                padding: 20px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
+        }
+        
+        .dashboard-card {
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .dashboard-card i {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+        
+        .card-admin {
+            background-color: var(--admin-color);
+        }
+        
+        .card-editor {
+            background-color: var(--editor-color);
+        }
+        
+        .card-viewer {
+            background-color: var(--viewer-color);
+        }
+        
+        .card-vehicles {
+            background-color: #9b59b6;
+        }
+        
+        .card-sectors {
+            background-color: #1abc9c;
         }
     </style>
 </head>
 <body>
+    <!-- تسجيل الدخول -->
+    <div id="login-page" class="login-container">
+        <div class="text-center mb-4">
+            <h1 class="logo">نظام <span>البحث</span> المتقدم</h1>
+            <p class="text-muted">إدارة وتصفح المركبات الشرطية</p>
+        </div>
+        
+        <div class="mb-3">
+            <label for="login-email" class="form-label">البريد الإلكتروني</label>
+            <input type="email" class="form-control" id="login-email" placeholder="أدخل بريدك الإلكتروني">
+        </div>
+        
+        <div class="mb-3">
+            <label for="login-password" class="form-label">كلمة المرور</label>
+            <input type="password" class="form-control" id="login-password" placeholder="أدخل كلمة المرور">
+        </div>
+        
+        <div class="d-grid gap-2">
+            <button class="btn btn-primary" onclick="login()">تسجيل الدخول</button>
+            <button class="btn btn-outline-secondary" onclick="showRegister()">إنشاء حساب جديد</button>
+        </div>
+        
+        <div id="login-error" class="alert alert-danger mt-3 d-none"></div>
+    </div>
 
-<!-- صفحة تسجيل الدخول -->
-<div id="authPage" class="auth-page">
-    <div class="auth-container">
-        <div class="auth-header">
-            <div id="logoContainer" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary); margin: 0 auto 20px; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
-                <i class="fas fa-car"></i>
-            </div>
-            <h1>ميكانيكي فيرج</h1>
-            <p>نظام إدارة المركبات الميكانيكية المتكامل</p>
+    <!-- تسجيل مستخدم جديد -->
+    <div id="register-page" class="login-container d-none">
+        <div class="text-center mb-4">
+            <h1 class="logo">إنشاء <span>حساب</span> جديد</h1>
+            <p class="text-muted">يرجى تعبئة البيانات التالية</p>
         </div>
         
-        <div class="form-group">
-            <label for="loginUsername" class="form-label">
-                <i class="fas fa-user"></i> اسم المستخدم
-            </label>
-            <input type="text" id="loginUsername" class="form-control" placeholder="أدخل اسم المستخدم" autocomplete="username">
+        <div class="mb-3">
+            <label for="register-name" class="form-label">الاسم الكامل</label>
+            <input type="text" class="form-control" id="register-name" placeholder="أدخل اسمك الكامل">
         </div>
         
-        <div class="form-group">
-            <label for="loginPassword" class="form-label">
-                <i class="fas fa-lock"></i> كلمة المرور
-            </label>
-            <input type="password" id="loginPassword" class="form-control" placeholder="أدخل كلمة المرور" autocomplete="current-password">
+        <div class="mb-3">
+            <label for="register-email" class="form-label">البريد الإلكتروني</label>
+            <input type="email" class="form-control" id="register-email" placeholder="أدخل بريدك الإلكتروني">
         </div>
         
-        <div id="loginError" style="color: var(--danger); text-align: center; margin: 15px 0; display: none;"></div>
+        <div class="mb-3">
+            <label for="register-password" class="form-label">كلمة المرور</label>
+            <input type="password" class="form-control" id="register-password" placeholder="أدخل كلمة المرور (6 أحرف على الأقل)">
+        </div>
         
-        <button class="btn btn-primary" id="loginButton" style="width: 100%; padding: 14px; font-size: 1.1rem;">
-            <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+        <div class="mb-3">
+            <label for="register-role" class="form-label">دور المستخدم</label>
+            <select class="form-control" id="register-role">
+                <option value="viewer">مشاهد (يمكنه البحث والمشاهدة فقط)</option>
+                <option value="editor">محرر (يمكنه إضافة وتعديل البيانات)</option>
+                <option value="admin">مدير (صلاحيات كاملة)</option>
+            </select>
+        </div>
+        
+        <div class="d-grid gap-2">
+            <button class="btn btn-primary" onclick="register()">إنشاء الحساب</button>
+            <button class="btn btn-outline-secondary" onclick="showLogin()">العودة لتسجيل الدخول</button>
+        </div>
+        
+        <div id="register-error" class="alert alert-danger mt-3 d-none"></div>
+    </div>
+
+    <!-- لوحة التحكم الرئيسية -->
+    <div id="dashboard" class="d-none">
+        <!-- شريط التنقل الجانبي -->
+        <button class="toggle-sidebar" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
         </button>
         
-        <div class="auth-footer">
-            <p><i class="fas fa-info-circle"></i> لاختبار النظام يمكنك استخدام:</p>
-            <p><strong>مدير:</strong> admin / admin123</p>
-            <p><strong>محرر:</strong> editor / editor123</p>
-            <p><strong>VIP:</strong> vip / vip123</p>
-            <p><strong>عضو:</strong> user / user123</p>
-        </div>
-    </div>
-</div>
-
-<!-- الهيكل الرئيسي للتطبيق -->
-<div id="appContainer" class="app-container">
-    <!-- الشريط الجانبي -->
-    <div id="sidebar" class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo">
-                <div id="sidebarLogo" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--primary); background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white;">
-                    <i class="fas fa-car"></i>
-                </div>
-                <div>
-                    <h2>ميكانيكي فيرج</h2>
-                    <p id="siteVersion">v2.1.0</p>
-                </div>
+        <div class="sidebar" id="sidebar">
+            <div class="text-center mb-4">
+                <h2 class="logo">نظام <span>البحث</span></h2>
+                <p class="text-muted small" id="user-info">مرحباً، محمد</p>
+                <span class="user-badge" id="user-role-badge">مدير</span>
             </div>
+            
+            <a href="#" class="active" onclick="showSection('dashboard-home')">
+                <i class="fas fa-home me-2"></i> لوحة التحكم
+            </a>
+            
+            <a href="#" onclick="showSection('search-vehicles')">
+                <i class="fas fa-search me-2"></i> بحث المركبات
+            </a>
+            
+            <a href="#" onclick="showSection('add-vehicle')" id="add-vehicle-link">
+                <i class="fas fa-car me-2"></i> إضافة مركبة
+            </a>
+            
+            <a href="#" onclick="showSection('manage-sectors')" id="manage-sectors-link">
+                <i class="fas fa-list me-2"></i> إدارة القطاعات
+            </a>
+            
+            <a href="#" onclick="showSection('manage-colors')" id="manage-colors-link">
+                <i class="fas fa-palette me-2"></i> إدارة الألوان
+            </a>
+            
+            <a href="#" onclick="showSection('manage-users')" id="manage-users-link">
+                <i class="fas fa-users me-2"></i> إدارة المستخدمين
+            </a>
+            
+            <a href="#" onclick="logout()" class="mt-5">
+                <i class="fas fa-sign-out-alt me-2"></i> تسجيل الخروج
+            </a>
         </div>
         
-        <div class="user-profile">
-            <div class="user-avatar" id="userAvatar">م</div>
-            <div class="user-details">
-                <div class="user-name" id="userDisplayName">مستخدم</div>
-                <div id="userRoleBadge" class="user-role viewer">مشاهد</div>
-            </div>
-        </div>
-        
-        <div class="nav-menu">
-            <div class="nav-section">
-                <div class="nav-title">العامة</div>
-                <a class="nav-item active" data-page="dashboard">
-                    <div class="nav-icon"><i class="fas fa-home"></i></div>
-                    <div class="nav-text">الرئيسية</div>
-                </a>
-                <a class="nav-item" data-page="search">
-                    <div class="nav-icon"><i class="fas fa-search"></i></div>
-                    <div class="nav-text">البحث العام</div>
-                </a>
-            </div>
-            
-            <div class="nav-section" id="vipNavSection" style="display: none;">
-                <div class="nav-title" style="color: var(--vip);">قسم VIP</div>
-                <a class="nav-item" data-page="vip-search">
-                    <div class="nav-icon"><i class="fas fa-crown"></i></div>
-                    <div class="nav-text">بحث VIP</div>
-                </a>
-                <a class="nav-item" data-page="vip-manage">
-                    <div class="nav-icon"><i class="fas fa-plus-circle"></i></div>
-                    <div class="nav-text">إضافة مركبة VIP</div>
-                </a>
-            </div>
-            
-            <div class="nav-section" id="adminNavSection" style="display: none;">
-                <div class="nav-title" style="color: var(--admin);">الإدارة</div>
-                <a class="nav-item" data-page="vehicles">
-                    <div class="nav-icon"><i class="fas fa-car"></i></div>
-                    <div class="nav-text">إدارة المركبات</div>
-                </a>
-                <a class="nav-item" data-page="sectors">
-                    <div class="nav-icon"><i class="fas fa-layer-group"></i></div>
-                    <div class="nav-text">إدارة القطاعات</div>
-                </a>
-            </div>
-            
-            <div class="nav-section" id="superAdminNavSection" style="display: none;">
-                <div class="nav-title" style="color: var(--danger);">إدارة النظام</div>
-                <a class="nav-item" data-page="users">
-                    <div class="nav-icon"><i class="fas fa-users-cog"></i></div>
-                    <div class="nav-text">إدارة المستخدمين</div>
-                </a>
-                <a class="nav-item" data-page="logs">
-                    <div class="nav-icon"><i class="fas fa-history"></i></div>
-                    <div class="nav-text">سجلات النظام</div>
-                </a>
-                <a class="nav-item" data-page="system-settings">
-                    <div class="nav-icon"><i class="fas fa-cogs"></i></div>
-                    <div class="nav-text">إعدادات النظام</div>
-                </a>
-            </div>
-        </div>
-        
-        <div class="logout-btn" id="logoutButton">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>تسجيل الخروج</span>
-        </div>
-    </div>
-    
-    <!-- المحتوى الرئيسي -->
-    <div id="mainContent">
-        <div class="top-header">
-            <div class="header-left">
-                <button class="menu-toggle" id="menuToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <div class="page-title">
-                    <i class="fas fa-home page-icon"></i>
-                    <span id="pageTitle">الرئيسية</span>
-                </div>
-            </div>
-            
-            <div class="header-right">
-                <div class="quick-stats">
-                    <div class="stat-box">
-                        <i class="fas fa-car"></i>
-                        <span id="totalVehicles">0</span>
+        <!-- المحتوى الرئيسي -->
+        <div class="main-content" id="main-content">
+            <!-- لوحة التحكم الرئيسية -->
+            <div id="dashboard-home" class="dashboard-section">
+                <h2 class="section-title">لوحة التحكم</h2>
+                
+                <div class="row">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="dashboard-card card-admin">
+                            <i class="fas fa-user-shield"></i>
+                            <h4>المديرون</h4>
+                            <h2 id="admin-count">0</h2>
+                        </div>
                     </div>
-                    <div class="stat-box">
-                        <i class="fas fa-users"></i>
-                        <span id="totalUsers">0</span>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="dashboard-card card-editor">
+                            <i class="fas fa-edit"></i>
+                            <h4>المحررون</h4>
+                            <h2 id="editor-count">0</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="dashboard-card card-viewer">
+                            <i class="fas fa-eye"></i>
+                            <h4>المشاهدون</h4>
+                            <h2 id="viewer-count">0</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <div class="dashboard-card card-vehicles">
+                            <i class="fas fa-car"></i>
+                            <h4>المركبات</h4>
+                            <h2 id="vehicle-count">0</h2>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="stat-box">
-                    <i class="fas fa-clock"></i>
-                    <span id="currentTime">--:--</span>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">آخر المركبات المضافة</h5>
+                                <div id="recent-vehicles" class="mt-3">
+                                    <!-- سيتم ملؤها بالبيانات -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">إحصائيات النظام</h5>
+                                <canvas id="stats-chart" height="200"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- قسم البحث -->
+            <div id="search-vehicles" class="dashboard-section d-none">
+                <h2 class="section-title">بحث المركبات</h2>
+                
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">نوع المركبة</label>
+                                <select class="form-control" id="search-type">
+                                    <option value="">جميع الأنواع</option>
+                                    <option value="الفورد فكتوريا">الفورد فكتوريا</option>
+                                    <option value="الدودج تشارجر">الدودج تشارجر</option>
+                                    <option value="فورد اكسبلور">فورد اكسبلور</option>
+                                    <option value="تاهو">تاهو</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">القطاع</label>
+                                <select class="form-control" id="search-sector">
+                                    <option value="">جميع القطاعات</option>
+                                    <!-- سيتم ملؤها بالبيانات -->
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">اللون</label>
+                                <div id="color-filter">
+                                    <!-- سيتم ملؤها بالبيانات -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button class="btn btn-primary" onclick="searchVehicles()">
+                                <i class="fas fa-search me-2"></i>بحث
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="resetSearch()">
+                                <i class="fas fa-redo me-2"></i>إعادة تعيين
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row" id="search-results">
+                    <!-- سيتم ملؤها بالبيانات -->
+                </div>
+            </div>
+            
+            <!-- إضافة مركبة جديدة -->
+            <div id="add-vehicle" class="dashboard-section d-none">
+                <h2 class="section-title">إضافة مركبة جديدة</h2>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <form id="add-vehicle-form">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">نوع المركبة *</label>
+                                    <select class="form-control" id="vehicle-type" required>
+                                        <option value="">اختر نوع المركبة</option>
+                                        <option value="الفورد فكتوريا">الفورد فكتوريا</option>
+                                        <option value="الدودج تشارجر">الدودج تشارجر</option>
+                                        <option value="فورد اكسبلور">فورد اكسبلور</option>
+                                        <option value="تاهو">تاهو</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">الكود الفني *</label>
+                                    <input type="text" class="form-control" id="vehicle-code" required>
+                                    <small class="text-muted">مثال: cvpi_sign_1 أو alphatexture</small>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">القطاع *</label>
+                                    <select class="form-control" id="vehicle-sector" required>
+                                        <option value="">اختر القطاع</option>
+                                        <!-- سيتم ملؤها بالبيانات -->
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">الرابط المرجعي *</label>
+                                    <input type="url" class="form-control" id="vehicle-image" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">اللون الأول *</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="primary-color" placeholder="مثال: 4c4c4c" required>
+                                        <span class="input-group-text color-preview" id="primary-color-preview"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">اللون الثانوي *</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="secondary-color" placeholder="مثال: FFFFFF" required>
+                                        <span class="input-group-text color-preview" id="secondary-color-preview"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">ملاحظات إضافية</label>
+                                <textarea class="form-control" id="vehicle-notes" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>حفظ المركبة
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>إلغاء
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- إدارة القطاعات -->
+            <div id="manage-sectors" class="dashboard-section d-none">
+                <h2 class="section-title">إدارة القطاعات</h2>
+                
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">إضافة قطاع جديد</h5>
+                        <form id="add-sector-form">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">اسم القطاع *</label>
+                                    <input type="text" class="form-control" id="sector-name" required>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">رمز القطاع *</label>
+                                    <input type="text" class="form-control" id="sector-code" required>
+                                    <small class="text-muted">يستخدم في البحث والتصفية</small>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>إضافة قطاع
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">القطاعات الحالية</h5>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="sectors-table">
+                                <thead>
+                                    <tr>
+                                        <th>اسم القطاع</th>
+                                        <th>الرمز</th>
+                                        <th>عدد المركبات</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- سيتم ملؤها بالبيانات -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- إدارة الألوان -->
+            <div id="manage-colors" class="dashboard-section d-none">
+                <h2 class="section-title">إدارة الألوان</h2>
+                
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">الألوان المستخدمة في النظام</h5>
+                        <div id="colors-list" class="row">
+                            <!-- سيتم ملؤها بالبيانات -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- إدارة المستخدمين -->
+            <div id="manage-users" class="dashboard-section d-none">
+                <h2 class="section-title">إدارة المستخدمين</h2>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="users-table">
+                                <thead>
+                                    <tr>
+                                        <th>الاسم</th>
+                                        <th>البريد الإلكتروني</th>
+                                        <th>الدور</th>
+                                        <th>تاريخ التسجيل</th>
+                                        <th>الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- سيتم ملؤها بالبيانات -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <div class="page-content">
-            <div id="pageContent"></div>
-        </div>
     </div>
-</div>
 
-<!-- رسائل التنبيه -->
-<div id="toast" class="toast"></div>
-
-<script>
-// ============================================
-// إعدادات الموقع
-// ============================================
-const SITE_CONFIG = {
-    SITE_NAME: "ميكانيكي فيرج",
-    VERSION: "2.1.0",
-    DISCORD_WEBHOOK: "https://discord.com/api/webhooks/1458500452642459710/CdH2_1zjm_khy-CV_6MccOgA6GcE339W9t2KZ2kPVEa6j9ilfC6UMGzWYn15DuR6MKGF",
-    LOG_RETENTION_DAYS: 30,
-    SESSION_TIMEOUT: 120
-};
-
-// ============================================
-// تهيئة Firebase
-// ============================================
-const firebaseConfig = {
-    apiKey: "AIzaSyB7M71r2TRprVxzABMILImHoylagdY74JY",
-    authDomain: "verg-micanic1.firebaseapp.com",
-    databaseURL: "https://verg-micanic1-default-rtdb.firebaseio.com",
-    projectId: "verg-micanic1",
-    storageBucket: "verg-micanic1.firebasestorage.app",
-    messagingSenderId: "796906815750",
-    appId: "1:796906815750:web:5315930336c6a851d95e87",
-    measurementId: "G-24QNS5X3FQ"
-};
-
-// تهيئة Firebase
-try {
-    firebase.initializeApp(firebaseConfig);
-    console.log('✅ Firebase initialized');
-} catch (error) {
-    console.error('❌ Firebase error:', error);
-}
-
-const db = firebase.database();
-
-// ============================================
-// متغيرات عامة
-// ============================================
-let currentUser = null;
-let usersData = {};
-let siteData = {};
-let systemLogs = [];
-let systemSettings = {};
-let currentPage = 'dashboard';
-
-// ============================================
-// وظائف المساعدة
-// ============================================
-function showToast(message, type = 'success', duration = 3000) {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.className = `toast toast-${type}`;
-    toast.style.display = 'flex';
+    <!-- Chart.js for statistics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    setTimeout(() => {
-        toast.style.display = 'none';
-    }, duration);
-}
-
-function formatDate(dateString) {
-    try {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('ar-SA', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    } catch {
-        return 'غير معروف';
-    }
-}
-
-function updateCurrentTime() {
-    const now = new Date();
-    const timeString = now.toLocaleTimeString('ar-SA', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    document.getElementById('currentTime').textContent = timeString;
-}
-
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('active');
-}
-
-function getRoleName(role) {
-    const roles = {
-        'admin': 'مدير',
-        'editor': 'محرر',
-        'viewer': 'عضو',
-        'vip': 'VIP'
-    };
-    return roles[role] || role;
-}
-
-// ============================================
-// نظام إدارة السجلات وWebhook
-// ============================================
-async function sendDiscordWebhook(logData) {
-    try {
-        if (!SITE_CONFIG.DISCORD_WEBHOOK) return;
-        
-        let color = 0x808080;
-        switch(logData.type) {
-            case 'login': color = 0x00ff00; break;
-            case 'logout': color = 0xffa500; break;
-            case 'add': color = 0x0099ff; break;
-            case 'edit': color = 0xffff00; break;
-            case 'delete': color = 0xff0000; break;
-            case 'error': color = 0xff0000; break;
-        }
-        
-        let actionText = '';
-        switch(logData.type) {
-            case 'login': actionText = 'تسجيل دخول'; break;
-            case 'logout': actionText = 'تسجيل خروج'; break;
-            case 'add': actionText = 'إضافة'; break;
-            case 'edit': actionText = 'تعديل'; break;
-            case 'delete': actionText = 'حذف'; break;
-            case 'error': actionText = 'خطأ'; break;
-            default: actionText = logData.type;
-        }
-        
-        const embed = {
-            title: `📝 ${actionText} - ${SITE_CONFIG.SITE_NAME}`,
-            description: logData.message,
-            color: color,
-            fields: [
-                {
-                    name: "👤 المستخدم",
-                    value: logData.user || "غير معروف",
-                    inline: true
-                },
-                {
-                    name: "🕐 الوقت",
-                    value: new Date().toLocaleString('ar-SA'),
-                    inline: true
-                }
-            ],
-            timestamp: new Date().toISOString(),
-            footer: {
-                text: `${SITE_CONFIG.SITE_NAME} v${SITE_CONFIG.VERSION}`
-            }
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- التطبيق الرئيسي -->
+    <script>
+        // تهيئة Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCg3Dmf_Odgfm2IL1IZXr_Kl16IaqiWqso",
+            authDomain: "verg-micanic.firebaseapp.com",
+            databaseURL: "https://verg-micanic-default-rtdb.firebaseio.com",
+            projectId: "verg-micanic",
+            storageBucket: "verg-micanic.firebasestorage.app",
+            messagingSenderId: "881689454596",
+            appId: "1:881689454596:web:e630ad9f555ba8feabed51",
+            measurementId: "G-B9JZ3CR9GS"
         };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
         
-        if (logData.details) {
-            embed.fields.push({
-                name: "📋 تفاصيل",
-                value: logData.details,
-                inline: false
+        // بيانات التطبيق
+        let currentUser = null;
+        let sectors = [];
+        let vehicles = [];
+        let users = [];
+        let colors = [];
+        
+        // تهيئة التطبيق عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            // التحقق من حالة تسجيل الدخول
+            auth.onAuthStateChanged(function(user) {
+                if (user) {
+                    currentUser = user;
+                    loadUserData();
+                } else {
+                    showLogin();
+                }
             });
-        }
-        
-        const payload = {
-            embeds: [embed],
-            username: `${SITE_CONFIG.SITE_NAME} Logger`
-        };
-        
-        await fetch(SITE_CONFIG.DISCORD_WEBHOOK, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            
+            // استعداد نموذج إضافة مركبة
+            document.getElementById('add-vehicle-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addVehicle();
+            });
+            
+            // استعداد نموذج إضافة قطاع
+            document.getElementById('add-sector-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addSector();
+            });
+            
+            // تحديث معاينة الألوان
+            document.getElementById('primary-color').addEventListener('input', function() {
+                updateColorPreview('primary-color-preview', this.value);
+            });
+            
+            document.getElementById('secondary-color').addEventListener('input', function() {
+                updateColorPreview('secondary-color-preview', this.value);
+            });
+            
+            // تحميل البيانات الأولية
+            loadInitialData();
         });
-        
-    } catch (error) {
-        console.error('❌ Error sending Discord webhook:', error);
-    }
-}
-
-async function addSystemLog(type, message, details = null) {
-    try {
-        const logData = {
-            id: 'log_' + Date.now(),
-            type: type,
-            message: message,
-            user: currentUser ? currentUser.username : 'system',
-            details: details,
-            timestamp: new Date().toISOString(),
-            timestampReadable: new Date().toLocaleString('ar-SA')
-        };
-        
-        systemLogs.unshift(logData);
-        systemLogs = systemLogs.slice(0, 1000);
-        
-        await db.ref('systemLogs').set(systemLogs);
-        await sendDiscordWebhook(logData);
-        
-    } catch (error) {
-        console.error('❌ Error adding system log:', error);
-    }
-}
-
-// ============================================
-// تحميل البيانات
-// ============================================
-function loadAllData() {
-    loadUsersData();
-    loadSiteData();
-    loadSystemLogs();
-    loadSystemSettings();
-}
-
-function loadUsersData() {
-    db.ref('users').on('value', snapshot => {
-        usersData = snapshot.val() || {};
-        initializeDefaultUsers();
-        restoreUserSession();
-    });
-}
-
-function loadSiteData() {
-    db.ref('siteData').on('value', snapshot => {
-        const data = snapshot.val();
-        
-        if (data) {
-            siteData = data;
-        } else {
-            siteData = {
-                sectors: { 's_default': 'القطاع العام' },
-                s_default: {
-                    colors: ["#4ecca3", "#1e293b"],
-                    vehicles: []
-                }
-            };
-            db.ref('siteData').set(siteData);
-        }
-        
-        updateDashboardStats();
-    });
-}
-
-function loadSystemLogs() {
-    db.ref('systemLogs').limitToLast(1000).on('value', snapshot => {
-        const logs = snapshot.val() || [];
-        systemLogs = Array.isArray(logs) ? logs : Object.values(logs);
-    });
-}
-
-function loadSystemSettings() {
-    db.ref('systemSettings').on('value', snapshot => {
-        const settings = snapshot.val();
-        
-        if (settings) {
-            systemSettings = settings;
-        } else {
-            systemSettings = {
-                siteName: SITE_CONFIG.SITE_NAME,
-                discordWebhook: SITE_CONFIG.DISCORD_WEBHOOK,
-                maintenanceMode: false,
-                registrationEnabled: true
-            };
-            db.ref('systemSettings').set(systemSettings);
-        }
-    });
-}
-
-// ============================================
-// إدارة المستخدمين
-// ============================================
-function initializeDefaultUsers() {
-    const defaultUsers = {
-        'admin': {
-            password: btoa('admin123' + firebaseConfig.apiKey),
-            email: 'admin@verg.com',
-            role: 'admin',
-            displayName: 'المدير العام',
-            createdAt: new Date().toISOString(),
-            lastLogin: null,
-            isActive: true
-        },
-        'editor': {
-            password: btoa('editor123' + firebaseConfig.apiKey),
-            email: 'editor@verg.com',
-            role: 'editor',
-            displayName: 'محرر النظام',
-            createdAt: new Date().toISOString(),
-            lastLogin: null,
-            isActive: true
-        },
-        'vip': {
-            password: btoa('vip123' + firebaseConfig.apiKey),
-            email: 'vip@verg.com',
-            role: 'vip',
-            displayName: 'عضو VIP',
-            createdAt: new Date().toISOString(),
-            lastLogin: null,
-            isActive: true
-        },
-        'user': {
-            password: btoa('user123' + firebaseConfig.apiKey),
-            email: 'user@verg.com',
-            role: 'viewer',
-            displayName: 'مستخدم عادي',
-            createdAt: new Date().toISOString(),
-            lastLogin: null,
-            isActive: true
-        }
-    };
-    
-    let needsUpdate = false;
-    for (let username in defaultUsers) {
-        if (!usersData[username]) {
-            usersData[username] = defaultUsers[username];
-            needsUpdate = true;
-        }
-    }
-    
-    if (needsUpdate) {
-        db.ref('users').set(usersData);
-    }
-}
-
-function hashPassword(password) {
-    return btoa(password + firebaseConfig.apiKey);
-}
-
-function verifyPassword(inputPassword, storedHash) {
-    return hashPassword(inputPassword) === storedHash;
-}
-
-// ============================================
-// نظام تسجيل الدخول
-// ============================================
-async function performLogin() {
-    const username = document.getElementById('loginUsername').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    const errorElement = document.getElementById('loginError');
-    
-    errorElement.style.display = 'none';
-    errorElement.textContent = '';
-    
-    if (!username || !password) {
-        errorElement.textContent = 'الرجاء إدخال اسم المستخدم وكلمة المرور';
-        errorElement.style.display = 'block';
-        return;
-    }
-    
-    const user = usersData[username];
-    
-    if (!user) {
-        errorElement.textContent = 'اسم المستخدم غير صحيح';
-        errorElement.style.display = 'block';
-        return;
-    }
-    
-    if (!user.isActive) {
-        errorElement.textContent = 'هذا الحساب غير مفعل';
-        errorElement.style.display = 'block';
-        return;
-    }
-    
-    if (!verifyPassword(password, user.password)) {
-        errorElement.textContent = 'كلمة المرور غير صحيحة';
-        errorElement.style.display = 'block';
-        return;
-    }
-    
-    try {
-        // تحديث وقت آخر دخول
-        usersData[username].lastLogin = new Date().toISOString();
-        await db.ref('users').set(usersData);
         
         // تسجيل الدخول
-        currentUser = {
-            username: username,
-            role: user.role,
-            email: user.email,
-            displayName: user.displayName || username,
-            loginTime: new Date().toISOString()
-        };
-        
-        // حفظ الجلسة
-        localStorage.setItem('verg_user_session', JSON.stringify({
-            username: username,
-            role: user.role,
-            displayName: user.displayName || username,
-            timestamp: Date.now()
-        }));
-        
-        // إضافة سجل للنشاط
-        await addSystemLog('login', `${username} قام بتسجيل الدخول`);
-        
-        // عرض التطبيق
-        document.getElementById('authPage').style.display = 'none';
-        document.getElementById('appContainer').style.display = 'flex';
-        
-        // تحديث واجهة المستخدم
-        updateUserInterface();
-        
-        // تحديث الوقت
-        updateCurrentTime();
-        setInterval(updateCurrentTime, 60000);
-        
-        // عرض الصفحة الرئيسية
-        navigateTo('dashboard');
-        
-        showToast(`مرحباً ${currentUser.displayName}!`, 'success');
-        
-    } catch (error) {
-        console.error('❌ Error during login:', error);
-        errorElement.textContent = 'حدث خطأ أثناء تسجيل الدخول';
-        errorElement.style.display = 'block';
-    }
-}
-
-function restoreUserSession() {
-    const session = localStorage.getItem('verg_user_session');
-    if (session) {
-        try {
-            const sessionData = JSON.parse(session);
-            const user = usersData[sessionData.username];
+        function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const errorElement = document.getElementById('login-error');
             
-            if (user && user.isActive) {
-                const sessionAge = Date.now() - sessionData.timestamp;
-                const sessionTimeout = SITE_CONFIG.SESSION_TIMEOUT * 60 * 1000;
-                
-                if (sessionAge < sessionTimeout) {
-                    currentUser = {
-                        username: sessionData.username,
-                        role: user.role,
-                        email: user.email,
-                        displayName: user.displayName || sessionData.username,
-                        loginTime: new Date(sessionData.timestamp).toISOString()
+            if (!email || !password) {
+                showError(errorElement, 'يرجى إدخال البريد الإلكتروني وكلمة المرور');
+                return;
+            }
+            
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // تسجيل الدخول ناجح
+                    currentUser = userCredential.user;
+                    loadUserData();
+                    hideError(errorElement);
+                })
+                .catch((error) => {
+                    showError(errorElement, getAuthErrorMessage(error.code));
+                });
+        }
+        
+        // تسجيل مستخدم جديد
+        function register() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const role = document.getElementById('register-role').value;
+            const errorElement = document.getElementById('register-error');
+            
+            if (!name || !email || !password) {
+                showError(errorElement, 'يرجى تعبئة جميع الحقول');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showError(errorElement, 'كلمة المرور يجب أن تتكون من 6 أحرف على الأقل');
+                return;
+            }
+            
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // حفظ بيانات المستخدم في قاعدة البيانات
+                    const user = userCredential.user;
+                    const userData = {
+                        name: name,
+                        email: email,
+                        role: role,
+                        createdAt: new Date().toISOString()
                     };
                     
-                    document.getElementById('authPage').style.display = 'none';
-                    document.getElementById('appContainer').style.display = 'flex';
-                    
-                    updateUserInterface();
-                    
-                    usersData[sessionData.username].lastLogin = new Date().toISOString();
-                    db.ref('users').set(usersData);
-                    
-                    updateCurrentTime();
-                    setInterval(updateCurrentTime, 60000);
-                    
-                    navigateTo('dashboard');
-                    
-                    localStorage.setItem('verg_user_session', JSON.stringify({
-                        username: sessionData.username,
-                        role: user.role,
-                        displayName: user.displayName || sessionData.username,
-                        timestamp: Date.now()
-                    }));
-                } else {
-                    localStorage.removeItem('verg_user_session');
-                }
-            }
-        } catch (error) {
-            localStorage.removeItem('verg_user_session');
+                    return database.ref('users/' + user.uid).set(userData);
+                })
+                .then(() => {
+                    // التسجيل ناجح
+                    hideError(errorElement);
+                    showLogin();
+                    alert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.');
+                })
+                .catch((error) => {
+                    showError(errorElement, getAuthErrorMessage(error.code));
+                });
         }
-    }
-}
-
-function updateUserInterface() {
-    if (!currentUser) return;
-    
-    document.getElementById('userDisplayName').textContent = currentUser.displayName;
-    document.getElementById('userAvatar').textContent = currentUser.displayName.charAt(0);
-    document.getElementById('userRoleBadge').textContent = getRoleName(currentUser.role);
-    document.getElementById('userRoleBadge').className = `user-role ${currentUser.role}`;
-    
-    const vipNavSection = document.getElementById('vipNavSection');
-    const adminNavSection = document.getElementById('adminNavSection');
-    const superAdminNavSection = document.getElementById('superAdminNavSection');
-    
-    if (currentUser.role === 'vip') {
-        vipNavSection.style.display = 'block';
-    } else {
-        vipNavSection.style.display = 'none';
-    }
-    
-    if (currentUser.role === 'admin' || currentUser.role === 'editor') {
-        adminNavSection.style.display = 'block';
-    } else {
-        adminNavSection.style.display = 'none';
-    }
-    
-    if (currentUser.role === 'admin') {
-        superAdminNavSection.style.display = 'block';
-    } else {
-        superAdminNavSection.style.display = 'none';
-    }
-}
-
-function logout() {
-    if (currentUser) {
-        addSystemLog('logout', `${currentUser.username} قام بتسجيل الخروج`);
-    }
-    
-    currentUser = null;
-    localStorage.removeItem('verg_user_session');
-    
-    document.getElementById('authPage').style.display = 'flex';
-    document.getElementById('appContainer').style.display = 'none';
-    
-    document.getElementById('loginUsername').value = '';
-    document.getElementById('loginPassword').value = '';
-    document.getElementById('loginError').style.display = 'none';
-    
-    showToast('تم تسجيل الخروج بنجاح', 'info');
-}
-
-// ============================================
-// تحديث الإحصائيات
-// ============================================
-function updateDashboardStats() {
-    let totalVehicles = 0;
-    for (let sectorId in siteData) {
-        if (sectorId !== 'sectors' && siteData[sectorId] && siteData[sectorId].vehicles) {
-            totalVehicles += siteData[sectorId].vehicles.length;
+        
+        // تسجيل الخروج
+        function logout() {
+            auth.signOut().then(() => {
+                currentUser = null;
+                showLogin();
+            });
         }
-    }
-    
-    document.getElementById('totalVehicles').textContent = totalVehicles;
-    document.getElementById('totalUsers').textContent = Object.keys(usersData).length;
-    
-    if (currentPage === 'dashboard') {
-        document.getElementById('dashboardVehicles')?.textContent = totalVehicles;
-        document.getElementById('dashboardUsers')?.textContent = Object.keys(usersData).length;
-        document.getElementById('dashboardSectors')?.textContent = Object.keys(siteData.sectors || {}).length;
-    }
-}
-
-// ============================================
-// نظام التنقل
-// ============================================
-function navigateTo(page) {
-    if (!currentUser) return;
-    
-    currentPage = page;
-    
-    const pageTitles = {
-        'dashboard': 'الرئيسية',
-        'search': 'البحث العام',
-        'vip-search': 'بحث VIP',
-        'vip-manage': 'إضافة مركبة VIP',
-        'vehicles': 'إدارة المركبات',
-        'sectors': 'إدارة القطاعات',
-        'users': 'إدارة المستخدمين',
-        'logs': 'سجلات النظام',
-        'system-settings': 'إعدادات النظام'
-    };
-    
-    document.getElementById('pageTitle').textContent = pageTitles[page] || 'صفحة';
-    
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    
-    document.querySelector(`.nav-item[data-page="${page}"]`)?.classList.add('active');
-    
-    loadPageContent(page);
-    
-    if (window.innerWidth < 992) {
-        toggleSidebar();
-    }
-}
-
-function checkPagePermission(page) {
-    if (!currentUser) return false;
-    
-    const permissions = {
-        'dashboard': ['admin', 'editor', 'viewer', 'vip'],
-        'search': ['admin', 'editor', 'viewer', 'vip'],
-        'vip-search': ['vip'],
-        'vip-manage': ['vip'],
-        'vehicles': ['admin', 'editor'],
-        'sectors': ['admin', 'editor'],
-        'users': ['admin'],
-        'logs': ['admin'],
-        'system-settings': ['admin']
-    };
-    
-    return permissions[page] ? permissions[page].includes(currentUser.role) : true;
-}
-
-async function loadPageContent(page) {
-    const pageContent = document.getElementById('pageContent');
-    pageContent.innerHTML = '<div class="loading"><div class="loading-spinner"></div><p>جاري تحميل الصفحة...</p></div>';
-    
-    if (!checkPagePermission(page)) {
-        pageContent.innerHTML = '<div class="content-section"><p>غير مصرح لك بالوصول إلى هذه الصفحة</p></div>';
-        return;
-    }
-    
-    try {
-        switch(page) {
-            case 'dashboard':
-                await loadDashboard();
-                break;
-            case 'search':
-                await loadSearchPage();
-                break;
-            case 'system-settings':
-                await loadSystemSettingsPage();
-                break;
-            default:
-                pageContent.innerHTML = `<div class="content-section"><p>صفحة ${page} قيد التطوير...</p></div>`;
-        }
-    } catch (error) {
-        pageContent.innerHTML = '<div class="content-section"><p>حدث خطأ أثناء تحميل الصفحة</p></div>';
-    }
-}
-
-// ============================================
-// الصفحات
-// ============================================
-async function loadDashboard() {
-    let html = `
-        <div class="fade-in">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon primary">
-                        <i class="fas fa-car"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="dashboardVehicles">0</h3>
-                        <p>إجمالي المركبات</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon admin">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="dashboardUsers">0</h3>
-                        <p>إجمالي المستخدمين</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon users">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="dashboardSectors">0</h3>
-                        <p>عدد القطاعات</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon vip">
-                        <i class="fas fa-history"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="dashboardLogs">${systemLogs.length}</h3>
-                        <p>عدد السجلات</p>
-                    </div>
-                </div>
-            </div>
+        
+        // تحميل بيانات المستخدم
+        function loadUserData() {
+            const userRef = database.ref('users/' + currentUser.uid);
             
-            <div class="content-section">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-bolt"></i>
-                        <span>الوصول السريع</span>
-                    </div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
-                    <div class="card-item" onclick="navigateTo('search')" style="cursor: pointer; background: var(--card-light); padding: 20px; border-radius: var(--radius);">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                            <div style="font-size: 1.2rem; font-weight: 700;">البحث العام</div>
-                            <div style="padding: 4px 10px; border-radius: 12px; background: var(--admin); color: white; font-size: 0.75rem;">عام</div>
-                        </div>
-                        <div style="color: var(--text-secondary); margin-bottom: 15px;">
-                            ابحث في جميع المركبات المتاحة في النظام حسب القطاع والرتبة
-                        </div>
-                    </div>
+            userRef.once('value').then((snapshot) => {
+                const userData = snapshot.val();
+                if (userData) {
+                    // تحديث واجهة المستخدم
+                    document.getElementById('user-info').textContent = `مرحباً، ${userData.name}`;
                     
-                    ${currentUser.role === 'vip' ? `
-                    <div class="card-item" onclick="navigateTo('vip-search')" style="cursor: pointer; background: var(--card-light); padding: 20px; border-radius: var(--radius);">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                            <div style="font-size: 1.2rem; font-weight: 700;">بحث VIP</div>
-                            <div style="padding: 4px 10px; border-radius: 12px; background: var(--vip); color: #000; font-size: 0.75rem;">VIP</div>
-                        </div>
-                        <div style="color: var(--text-secondary); margin-bottom: 15px;">
-                            قم بالبحث في المركبات الخاصة بأعضاء VIP فقط
-                        </div>
-                    </div>
-                    ` : ''}
+                    // تحديث شارة الدور
+                    const roleBadge = document.getElementById('user-role-badge');
+                    roleBadge.textContent = getRoleName(userData.role);
+                    roleBadge.className = `user-badge badge-${userData.role}`;
                     
-                    ${currentUser.role === 'admin' || currentUser.role === 'editor' ? `
-                    <div class="card-item" onclick="navigateTo('vehicles')" style="cursor: pointer; background: var(--card-light); padding: 20px; border-radius: var(--radius);">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                            <div style="font-size: 1.2rem; font-weight: 700;">إدارة المركبات</div>
-                            <div style="padding: 4px 10px; border-radius: 12px; background: var(--editor); color: white; font-size: 0.75rem;">محرر</div>
-                        </div>
-                        <div style="color: var(--text-secondary); margin-bottom: 15px;">
-                            أضف أو عدل أو احذف المركبات العامة في النظام
-                        </div>
-                    </div>
-                    ` : ''}
-                </div>
-            </div>
-            
-            <div class="content-section">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-history"></i>
-                        <span>آخر النشاطات</span>
-                    </div>
-                </div>
-                
-                <div id="recentActivity">
-                    ${systemLogs.slice(0, 5).map(log => `
-                        <div style="padding: 15px; background: var(--card-light); border-radius: 8px; margin-bottom: 10px; border-right: 4px solid ${
-                            log.type === 'login' ? 'var(--success)' :
-                            log.type === 'logout' ? 'var(--warning)' :
-                            log.type === 'add' ? 'var(--primary)' :
-                            log.type === 'edit' ? 'var(--info)' :
-                            log.type === 'delete' ? 'var(--danger)' : 'var(--border)'
-                        };">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                                <div style="font-weight: 600;">${log.message}</div>
-                                <div style="font-size: 0.8rem; color: var(--text-secondary);">${log.timestampReadable}</div>
-                            </div>
-                            <div style="font-size: 0.9rem; color: var(--text-secondary);">
-                                <i class="fas fa-user"></i> ${log.user}
-                            </div>
-                        </div>
-                    `).join('')}
+                    // التحكم في صلاحيات الوصول
+                    updatePermissions(userData.role);
                     
-                    ${systemLogs.length === 0 ? '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">لا توجد نشاطات مؤخراً</p>' : ''}
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('pageContent').innerHTML = html;
-    updateDashboardStats();
-}
-
-async function loadSearchPage() {
-    let html = `
-        <div class="fade-in">
-            <div class="content-section">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-search"></i>
-                        <span>البحث العام في المركبات</span>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">القطاع:</label>
-                    <select id="searchSector" class="form-control">
-                        <option value="">-- اختر القطاع --</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">الرتبة:</label>
-                    <select id="searchRank" class="form-control" disabled>
-                        <option value="">-- اختر الرتبة --</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">المركبة:</label>
-                    <select id="searchVehicle" class="form-control" disabled>
-                        <option value="">-- اختر المركبة --</option>
-                    </select>
-                </div>
-                
-                <div id="searchResult" style="display: none; margin-top: 30px; padding: 20px; background: var(--card-light); border-radius: var(--radius);">
-                    <h3 id="resultTitle" style="text-align: center; margin-bottom: 20px;"></h3>
-                    <div id="resultContent"></div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('pageContent').innerHTML = html;
-    
-    const sectorSelect = document.getElementById('searchSector');
-    sectorSelect.innerHTML = '<option value="">-- اختر القطاع --</option>';
-    for (let sectorId in siteData.sectors) {
-        sectorSelect.innerHTML += `<option value="${sectorId}">${siteData.sectors[sectorId]}</option>`;
-    }
-    
-    sectorSelect.onchange = function() {
-        const sectorId = this.value;
-        const rankSelect = document.getElementById('searchRank');
-        
-        rankSelect.innerHTML = '<option value="">-- اختر الرتبة --</option>';
-        rankSelect.disabled = true;
-        document.getElementById('searchVehicle').disabled = true;
-        document.getElementById('searchResult').style.display = 'none';
-        
-        if (sectorId && siteData[sectorId] && siteData[sectorId].vehicles) {
-            const ranksSet = new Set();
-            siteData[sectorId].vehicles.forEach(vehicle => ranksSet.add(vehicle.rank || "عام"));
-            const ranks = Array.from(ranksSet).sort();
-            ranks.forEach(rank => rankSelect.innerHTML += `<option value="${rank}">${rank}</option>`);
-            rankSelect.disabled = false;
-        }
-    };
-    
-    document.getElementById('searchRank').onchange = function() {
-        const sectorId = document.getElementById('searchSector').value;
-        const rankValue = this.value;
-        const vehicleSelect = document.getElementById('searchVehicle');
-        
-        vehicleSelect.innerHTML = '<option value="">-- اختر المركبة --</option>';
-        vehicleSelect.disabled = true;
-        document.getElementById('searchResult').style.display = 'none';
-        
-        if (sectorId && rankValue && siteData[sectorId] && siteData[sectorId].vehicles) {
-            let hasVehicles = false;
-            siteData[sectorId].vehicles.forEach((vehicle, index) => {
-                if ((vehicle.rank || "عام") === rankValue) {
-                    vehicleSelect.innerHTML += `<option value="${index}">${vehicle.name}</option>`;
-                    hasVehicles = true;
+                    // إخفاء صفحة تسجيل الدخول وإظهار لوحة التحكم
+                    showDashboard();
+                    
+                    // تحميل البيانات
+                    loadSectors();
+                    loadVehicles();
+                    loadUsers();
+                    extractColorsFromVehicles();
                 }
             });
-            if (hasVehicles) vehicleSelect.disabled = false;
-        }
-    };
-    
-    document.getElementById('searchVehicle').onchange = function() {
-        const sectorId = document.getElementById('searchSector').value;
-        const vehicleIndex = this.value;
-        const resultSection = document.getElementById('searchResult');
-        
-        if (vehicleIndex === "" || !sectorId) {
-            resultSection.style.display = 'none';
-            return;
         }
         
-        try {
-            const vehicle = siteData[sectorId].vehicles[parseInt(vehicleIndex)];
-            const colors = siteData[sectorId].colors || ["#FFFFFF", "#000000"];
+        // تحديث الصلاحيات بناءً على دور المستخدم
+        function updatePermissions(role) {
+            // إخفاء/إظهار العناصر بناءً على الدور
+            const adminOnly = ['manage-users-link', 'manage-sectors-link', 'manage-colors-link', 'add-vehicle-link'];
+            const editorOnly = ['add-vehicle-link'];
             
-            let resultHtml = `
-                <h3 style="text-align:center; margin-bottom:20px; color: var(--primary);">${vehicle.name || "غير معروف"}</h3>
-                
-                <div style="display:flex; gap:15px; margin:15px 0;">
-                    <div style="flex:1; background: ${colors[0]}; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-family: monospace; font-weight: bold;">
-                        ${colors[0]}
-                    </div>
-                    <div style="flex:1; background: ${colors[1]}; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-family: monospace; font-weight: bold;">
-                        ${colors[1]}
-                    </div>
-                </div>
-                
-                <div style="margin: 15px 0;">
-                    <div style="font-weight: 600; margin-bottom: 5px;">كود الوشم:</div>
-                    <div style="background: var(--bg); padding: 15px; border-radius: 8px; font-family: monospace;">
-                        ${vehicle.sign || "لا يوجد كود"}
-                    </div>
-                </div>
-            `;
+            // إخفاء جميع العناصر أولاً
+            adminOnly.concat(editorOnly).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) element.style.display = 'none';
+            });
             
-            if (vehicle.link && vehicle.link.startsWith('http')) {
-                resultHtml += `
-                    <div style="margin: 15px 0;">
-                        <div style="font-weight: 600; margin-bottom: 5px;">معاينة الوشم:</div>
-                        <img src="${vehicle.link}" style="width:100%; max-height:300px; object-fit:contain; border-radius:10px; border:2px solid var(--primary);">
-                    </div>
-                `;
+            // إظهار العناصر بناءً على الدور
+            if (role === 'admin') {
+                adminOnly.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) element.style.display = 'block';
+                });
+            } else if (role === 'editor') {
+                editorOnly.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) element.style.display = 'block';
+                });
+            }
+        }
+        
+        // تحميل القطاعات
+        function loadSectors() {
+            database.ref('sectors').once('value').then((snapshot) => {
+                sectors = [];
+                snapshot.forEach((childSnapshot) => {
+                    sectors.push({
+                        id: childSnapshot.key,
+                        ...childSnapshot.val()
+                    });
+                });
+                
+                // تحديث القوائم المنسدلة
+                updateSectorDropdowns();
+                updateSectorsTable();
+            });
+        }
+        
+        // تحميل المركبات
+        function loadVehicles() {
+            database.ref('vehicles').once('value').then((snapshot) => {
+                vehicles = [];
+                snapshot.forEach((childSnapshot) => {
+                    vehicles.push({
+                        id: childSnapshot.key,
+                        ...childSnapshot.val()
+                    });
+                });
+                
+                // تحديث الإحصائيات
+                updateDashboardStats();
+                updateRecentVehicles();
+                
+                // تحديث نتائج البحث
+                displayVehicles(vehicles);
+            });
+        }
+        
+        // تحميل المستخدمين
+        function loadUsers() {
+            database.ref('users').once('value').then((snapshot) => {
+                users = [];
+                snapshot.forEach((childSnapshot) => {
+                    users.push({
+                        id: childSnapshot.key,
+                        ...childSnapshot.val()
+                    });
+                });
+                
+                updateUsersTable();
+            });
+        }
+        
+        // استخراج الألوان من المركبات
+        function extractColorsFromVehicles() {
+            colors = [];
+            
+            vehicles.forEach(vehicle => {
+                if (vehicle.primaryColor && !colors.includes(vehicle.primaryColor)) {
+                    colors.push(vehicle.primaryColor);
+                }
+                
+                if (vehicle.secondaryColor && !colors.includes(vehicle.secondaryColor)) {
+                    colors.push(vehicle.secondaryColor);
+                }
+            });
+            
+            updateColorsList();
+            updateColorFilter();
+        }
+        
+        // إضافة مركبة جديدة
+        function addVehicle() {
+            const type = document.getElementById('vehicle-type').value;
+            const code = document.getElementById('vehicle-code').value;
+            const sector = document.getElementById('vehicle-sector').value;
+            const image = document.getElementById('vehicle-image').value;
+            const primaryColor = document.getElementById('primary-color').value;
+            const secondaryColor = document.getElementById('secondary-color').value;
+            const notes = document.getElementById('vehicle-notes').value;
+            
+            if (!type || !code || !sector || !image || !primaryColor || !secondaryColor) {
+                alert('يرجى تعبئة جميع الحقول الإلزامية');
+                return;
             }
             
-            document.getElementById('resultContent').innerHTML = resultHtml;
-            document.getElementById('resultTitle').textContent = vehicle.name;
-            resultSection.style.display = 'block';
-            
-        } catch (error) {
-            console.error('Error showing result:', error);
-            showToast('خطأ في عرض النتيجة', 'error');
-        }
-    };
-}
-
-async function loadSystemSettingsPage() {
-    if (currentUser.role !== 'admin') {
-        showToast('غير مصرح لك', 'error');
-        navigateTo('dashboard');
-        return;
-    }
-    
-    let html = `
-        <div class="fade-in">
-            <div class="content-section">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-cogs"></i>
-                        <span>إعدادات النظام</span>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">اسم الموقع:</label>
-                    <input type="text" id="siteName" class="form-control" value="${systemSettings.siteName || SITE_CONFIG.SITE_NAME}">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">رابط Discord Webhook:</label>
-                    <input type="text" id="discordWebhook" class="form-control" value="${systemSettings.discordWebhook || SITE_CONFIG.DISCORD_WEBHOOK}">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">
-                        <input type="checkbox" id="maintenanceMode" ${systemSettings.maintenanceMode ? 'checked' : ''}>
-                        وضع الصيانة
-                    </label>
-                </div>
-                
-                <button class="btn btn-primary" id="saveSettings" style="width: 100%; padding: 15px; margin-top: 20px;">
-                    <i class="fas fa-save"></i> حفظ الإعدادات
-                </button>
-            </div>
-            
-            <div class="content-section">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fas fa-database"></i>
-                        <span>إحصائيات قاعدة البيانات</span>
-                    </div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                    <div style="background: var(--card-light); padding: 20px; border-radius: var(--radius); text-align: center;">
-                        <div style="font-size: 2rem; font-weight: 800; color: var(--primary);">${Object.keys(usersData).length}</div>
-                        <div style="color: var(--text-secondary);">عدد المستخدمين</div>
-                    </div>
-                    
-                    <div style="background: var(--card-light); padding: 20px; border-radius: var(--radius); text-align: center;">
-                        <div style="font-size: 2rem; font-weight: 800; color: var(--primary);">${systemLogs.length}</div>
-                        <div style="color: var(--text-secondary);">عدد السجلات</div>
-                    </div>
-                    
-                    <div style="background: var(--card-light); padding: 20px; border-radius: var(--radius); text-align: center;">
-                        <div style="font-size: 2rem; font-weight: 800; color: var(--primary);">${Object.keys(siteData.sectors || {}).length}</div>
-                        <div style="color: var(--text-secondary);">عدد القطاعات</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('pageContent').innerHTML = html;
-    
-    document.getElementById('saveSettings').onclick = async function() {
-        try {
-            const updatedSettings = {
-                ...systemSettings,
-                siteName: document.getElementById('siteName').value,
-                discordWebhook: document.getElementById('discordWebhook').value,
-                maintenanceMode: document.getElementById('maintenanceMode').checked
+            const vehicleData = {
+                type: type,
+                code: code,
+                sector: sector,
+                image: image,
+                primaryColor: primaryColor,
+                secondaryColor: secondaryColor,
+                notes: notes,
+                createdAt: new Date().toISOString(),
+                createdBy: currentUser.uid
             };
             
-            await db.ref('systemSettings').set(updatedSettings);
-            systemSettings = updatedSettings;
-            
-            await addSystemLog('edit', 'تم تحديث إعدادات النظام');
-            showToast('تم حفظ الإعدادات بنجاح', 'success');
-            
-        } catch (error) {
-            console.error('❌ Error saving settings:', error);
-            showToast('خطأ في حفظ الإعدادات', 'error');
+            database.ref('vehicles').push(vehicleData)
+                .then(() => {
+                    alert('تم إضافة المركبة بنجاح');
+                    document.getElementById('add-vehicle-form').reset();
+                    loadVehicles();
+                })
+                .catch((error) => {
+                    alert('حدث خطأ أثناء إضافة المركبة: ' + error.message);
+                });
         }
-    };
-}
-
-// ============================================
-// تهيئة النظام
-// ============================================
-window.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 بدء تحميل النظام...');
-    
-    // تحميل البيانات
-    loadAllData();
-    
-    // إعداد الأحداث
-    document.getElementById('loginButton').addEventListener('click', performLogin);
-    document.getElementById('loginPassword').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') performLogin();
-    });
-    
-    document.getElementById('menuToggle').addEventListener('click', toggleSidebar);
-    document.getElementById('logoutButton').addEventListener('click', logout);
-    
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', function() {
-            const page = this.getAttribute('data-page');
-            if (page) navigateTo(page);
-        });
-    });
-    
-    // إضافة اللوجو المحلي
-    const logoContainer = document.getElementById('logoContainer');
-    const sidebarLogo = document.getElementById('sidebarLogo');
-    
-    // محاولة تحميل اللوجو المحلي
-    const localLogo = localStorage.getItem('verg_logo');
-    if (localLogo) {
-        logoContainer.innerHTML = `<img src="${localLogo}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-        sidebarLogo.innerHTML = `<img src="${localLogo}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-    }
-    
-    console.log('✅ تم تهيئة النظام');
-});
-</script>
+        
+        // إضافة قطاع جديد
+        function addSector() {
+            const name = document.getElementById('sector-name').value;
+            const code = document.getElementById('sector-code').value;
+            
+            if (!name || !code) {
+                alert('يرجى تعبئة جميع الحقول');
+                return;
+            }
+            
+            const sectorData = {
+                name: name,
+                code: code,
+                createdAt: new Date().toISOString(),
+                createdBy: currentUser.uid
+            };
+            
+            database.ref('sectors').push(sectorData)
+                .then(() => {
+                    alert('تم إضافة القطاع بنجاح');
+                    document.getElementById('add-sector-form').reset();
+                    loadSectors();
+                })
+                .catch((error) => {
+                    alert('حدث خطأ أثناء إضافة القطاع: ' + error.message);
+                });
+        }
+        
+        // البحث عن المركبات
+        function searchVehicles() {
+            const type = document.getElementById('search-type').value;
+            const sector = document.getElementById('search-sector').value;
+            const selectedColors = Array.from(document.querySelectorAll('.color-checkbox:checked')).map(cb => cb.value);
+            
+            let filteredVehicles = vehicles;
+            
+            if (type) {
+                filteredVehicles = filteredVehicles.filter(v => v.type === type);
+            }
+            
+            if (sector) {
+                filteredVehicles = filteredVehicles.filter(v => v.sector === sector);
+            }
+            
+            if (selectedColors.length > 0) {
+                filteredVehicles = filteredVehicles.filter(v => 
+                    selectedColors.includes(v.primaryColor) || 
+                    selectedColors.includes(v.secondaryColor)
+                );
+            }
+            
+            displayVehicles(filteredVehicles);
+        }
+        
+        // عرض المركبات
+        function displayVehicles(vehiclesToDisplay) {
+            const container = document.getElementById('search-results');
+            
+            if (vehiclesToDisplay.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-car fa-3x text-muted mb-3"></i>
+                        <h4 class="text-muted">لا توجد مركبات مطابقة للبحث</h4>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            vehiclesToDisplay.forEach(vehicle => {
+                const sectorName = getSectorName(vehicle.sector);
+                
+                html += `
+                    <div class="col-md-4 col-sm-6 mb-4">
+                        <div class="card vehicle-card h-100">
+                            <div class="vehicle-img-container">
+                                <img src="${vehicle.image}" class="vehicle-img" alt="${vehicle.type}">
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">${vehicle.type}</h5>
+                                <p class="card-text">
+                                    <strong>القطاع:</strong> ${sectorName}<br>
+                                    <strong>الكود:</strong> ${vehicle.code}<br>
+                                    <strong>الألوان:</strong>
+                                    <span class="color-preview" style="background-color: #${vehicle.primaryColor};" title="اللون الأول"></span>
+                                    <span class="color-preview" style="background-color: #${vehicle.secondaryColor};" title="اللون الثانوي"></span>
+                                </p>
+                                ${vehicle.notes ? `<p class="card-text"><small>${vehicle.notes}</small></p>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // إعادة تعيين البحث
+        function resetSearch() {
+            document.getElementById('search-type').value = '';
+            document.getElementById('search-sector').value = '';
+            document.querySelectorAll('.color-checkbox').forEach(cb => cb.checked = false);
+            displayVehicles(vehicles);
+        }
+        
+        // تحديث إحصائيات لوحة التحكم
+        function updateDashboardStats() {
+            // تعداد المستخدمين حسب الدور
+            const adminCount = users.filter(u => u.role === 'admin').length;
+            const editorCount = users.filter(u => u.role === 'editor').length;
+            const viewerCount = users.filter(u => u.role === 'viewer').length;
+            
+            document.getElementById('admin-count').textContent = adminCount;
+            document.getElementById('editor-count').textContent = editorCount;
+            document.getElementById('viewer-count').textContent = viewerCount;
+            document.getElementById('vehicle-count').textContent = vehicles.length;
+            
+            // تحديث الرسم البياني
+            updateChart();
+        }
+        
+        // تحديث المركبات الأخيرة
+        function updateRecentVehicles() {
+            const container = document.getElementById('recent-vehicles');
+            const recentVehicles = vehicles.slice(-5).reverse();
+            
+            if (recentVehicles.length === 0) {
+                container.innerHTML = '<p class="text-muted">لا توجد مركبات مضافة بعد</p>';
+                return;
+            }
+            
+            let html = '<div class="list-group">';
+            
+            recentVehicles.forEach(vehicle => {
+                const sectorName = getSectorName(vehicle.sector);
+                html += `
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">${vehicle.type}</h6>
+                            <small>${formatDate(vehicle.createdAt)}</small>
+                        </div>
+                        <p class="mb-1">${sectorName} - ${vehicle.code}</p>
+                    </a>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        // تحديث القوائم المنسدلة للقطاعات
+        function updateSectorDropdowns() {
+            const searchSector = document.getElementById('search-sector');
+            const vehicleSector = document.getElementById('vehicle-sector');
+            
+            let searchOptions = '<option value="">جميع القطاعات</option>';
+            let vehicleOptions = '<option value="">اختر القطاع</option>';
+            
+            sectors.forEach(sector => {
+                searchOptions += `<option value="${sector.id}">${sector.name}</option>`;
+                vehicleOptions += `<option value="${sector.id}">${sector.name}</option>`;
+            });
+            
+            searchSector.innerHTML = searchOptions;
+            vehicleSector.innerHTML = vehicleOptions;
+        }
+        
+        // تحديث جدول القطاعات
+        function updateSectorsTable() {
+            const tbody = document.querySelector('#sectors-table tbody');
+            
+            if (sectors.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center">لا توجد قطاعات مضافة بعد</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            sectors.forEach(sector => {
+                const vehicleCount = vehicles.filter(v => v.sector === sector.id).length;
+                
+                html += `
+                    <tr>
+                        <td>${sector.name}</td>
+                        <td><code>${sector.code}</code></td>
+                        <td>${vehicleCount}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-2">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteSector('${sector.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+        
+        // تحديث قائمة الألوان
+        function updateColorsList() {
+            const container = document.getElementById('colors-list');
+            
+            if (colors.length === 0) {
+                container.innerHTML = '<p class="text-muted">لا توجد ألوان مسجلة بعد</p>';
+                return;
+            }
+            
+            let html = '';
+            
+            colors.forEach(color => {
+                html += `
+                    <div class="col-md-3 col-sm-4 col-6 mb-3">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <div class="color-preview mx-auto mb-2" style="background-color: #${color}; width: 50px; height: 50px;"></div>
+                                <h6>#${color}</h6>
+                                <small>${countColorUsage(color)} مركبة</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        // تحديث فلتر الألوان
+        function updateColorFilter() {
+            const container = document.getElementById('color-filter');
+            
+            if (colors.length === 0) {
+                container.innerHTML = '<p class="text-muted">لا توجد ألوان مسجلة</p>';
+                return;
+            }
+            
+            let html = '<div class="d-flex flex-wrap gap-2">';
+            
+            colors.forEach(color => {
+                html += `
+                    <div class="form-check">
+                        <input class="form-check-input color-checkbox" type="checkbox" value="${color}" id="color-${color}">
+                        <label class="form-check-label d-flex align-items-center" for="color-${color}">
+                            <span class="color-preview me-2" style="background-color: #${color};"></span>
+                            #${color}
+                        </label>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        // تحديث جدول المستخدمين
+        function updateUsersTable() {
+            const tbody = document.querySelector('#users-table tbody');
+            
+            if (users.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center">لا توجد مستخدمين مسجلين</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            
+            users.forEach(user => {
+                html += `
+                    <tr>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td><span class="user-badge badge-${user.role}">${getRoleName(user.role)}</span></td>
+                        <td>${formatDate(user.createdAt)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-2" onclick="editUser('${user.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+        
+        // تحديث الرسم البياني
+        function updateChart() {
+            const ctx = document.getElementById('stats-chart').getContext('2d');
+            
+            // تجميع المركبات حسب النوع
+            const vehicleTypes = ["الفورد فكتوريا", "الدودج تشارجر", "فورد اكسبلور", "تاهو"];
+            const vehicleCounts = vehicleTypes.map(type => 
+                vehicles.filter(v => v.type === type).length
+            );
+            
+            // إذا كان هناك رسم بياني موجود بالفعل، قم بتدميره
+            if (window.vehiclesChart) {
+                window.vehiclesChart.destroy();
+            }
+            
+            window.vehiclesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: vehicleTypes,
+                    datasets: [{
+                        label: 'عدد المركبات',
+                        data: vehicleCounts,
+                        backgroundColor: [
+                            'rgba(52, 152, 219, 0.7)',
+                            'rgba(231, 76, 60, 0.7)',
+                            'rgba(46, 204, 113, 0.7)',
+                            'rgba(155, 89, 182, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(52, 152, 219)',
+                            'rgb(231, 76, 60)',
+                            'rgb(46, 204, 113)',
+                            'rgb(155, 89, 182)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // مساعدة: الحصول على اسم القطاع من ID
+        function getSectorName(sectorId) {
+            const sector = sectors.find(s => s.id === sectorId);
+            return sector ? sector.name : 'غير معروف';
+        }
+        
+        // مساعدة: الحصول على اسم الدور
+        function getRoleName(roleCode) {
+            const roles = {
+                'admin': 'مدير',
+                'editor': 'محرر',
+                'viewer': 'مشاهد'
+            };
+            return roles[roleCode] || roleCode;
+        }
+        
+        // مساعدة: عد استخدامات اللون
+        function countColorUsage(color) {
+            return vehicles.filter(v => 
+                v.primaryColor === color || v.secondaryColor === color
+            ).length;
+        }
+        
+        // مساعدة: تحديث معاينة اللون
+        function updateColorPreview(elementId, colorValue) {
+            const element = document.getElementById(elementId);
+            if (element && colorValue) {
+                element.style.backgroundColor = '#' + colorValue;
+            }
+        }
+        
+        // مساعدة: تنسيق التاريخ
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ar-EG');
+        }
+        
+        // مساعدة: عرض رسالة خطأ
+        function showError(element, message) {
+            element.textContent = message;
+            element.classList.remove('d-none');
+        }
+        
+        // مساعدة: إخفاء رسالة الخطأ
+        function hideError(element) {
+            element.classList.add('d-none');
+        }
+        
+        // مساعدة: تحويل رسالة خطأ Firebase
+        function getAuthErrorMessage(errorCode) {
+            const messages = {
+                'auth/invalid-email': 'البريد الإلكتروني غير صالح',
+                'auth/user-disabled': 'هذا الحساب معطل',
+                'auth/user-not-found': 'لا يوجد حساب بهذا البريد الإلكتروني',
+                'auth/wrong-password': 'كلمة المرور غير صحيحة',
+                'auth/email-already-in-use': 'البريد الإلكتروني مستخدم بالفعل',
+                'auth/weak-password': 'كلمة المرور ضعيفة، يجب أن تتكون من 6 أحرف على الأقل',
+                'auth/operation-not-allowed': 'عملية التسجيل غير مسموحة حالياً'
+            };
+            
+            return messages[errorCode] || 'حدث خطأ غير معروف، يرجى المحاولة مرة أخرى';
+        }
+        
+        // التحكم في عرض الأقسام
+        function showSection(sectionId) {
+            // إخفاء جميع الأقسام
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                section.classList.add('d-none');
+            });
+            
+            // إزالة النشط من جميع عناصر القائمة
+            document.querySelectorAll('.sidebar a').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // إظهار القسم المطلوب
+            document.getElementById(sectionId).classList.remove('d-none');
+            
+            // إضافة النشط إلى العنصر المناسب في القائمة الجانبية
+            const activeLink = Array.from(document.querySelectorAll('.sidebar a')).find(link => 
+                link.textContent.includes(getSectionName(sectionId))
+            );
+            
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+        }
+        
+        // الحصول على اسم القسم من الـ ID
+        function getSectionName(sectionId) {
+            const sections = {
+                'dashboard-home': 'لوحة التحكم',
+                'search-vehicles': 'بحث المركبات',
+                'add-vehicle': 'إضافة مركبة',
+                'manage-sectors': 'إدارة القطاعات',
+                'manage-colors': 'إدارة الألوان',
+                'manage-users': 'إدارة المستخدمين'
+            };
+            
+            return sections[sectionId] || '';
+        }
+        
+        // تبديل شريط التنقل الجانبي (للأجهزة المحمولة)
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('active');
+        }
+        
+        // إظهار صفحة تسجيل الدخول
+        function showLogin() {
+            document.getElementById('login-page').classList.remove('d-none');
+            document.getElementById('register-page').classList.add('d-none');
+            document.getElementById('dashboard').classList.add('d-none');
+        }
+        
+        // إظهار صفحة التسجيل
+        function showRegister() {
+            document.getElementById('login-page').classList.add('d-none');
+            document.getElementById('register-page').classList.remove('d-none');
+            document.getElementById('dashboard').classList.add('d-none');
+        }
+        
+        // إظهار لوحة التحكم
+        function showDashboard() {
+            document.getElementById('login-page').classList.add('d-none');
+            document.getElementById('register-page').classList.add('d-none');
+            document.getElementById('dashboard').classList.remove('d-none');
+            showSection('dashboard-home');
+        }
+        
+        // تحميل البيانات الأولية للقطاعات (إذا لم تكن موجودة)
+        function loadInitialData() {
+            // هذه بيانات افتراضية للقطاعات (يمكن إضافتها يدوياً)
+            const initialSectors = [
+                { name: "إدارة الشرطة", code: "police" },
+                { name: "أمن الموانئ", code: "ports" },
+                { name: "وزارة الصحة", code: "health" }
+            ];
+            
+            // هذه بيانات افتراضية للمركبات من طلبك
+            const initialVehicles = [
+                {
+                    type: "تاهو",
+                    code: "rematahoe15",
+                    sector: "initial-police",
+                    image: "http://i.epvpimg.com/zr6gaab.png",
+                    primaryColor: "4c4c4c",
+                    secondaryColor: "FFFFFF",
+                    notes: "تاهو قيادة إدارة الشرطة"
+                },
+                {
+                    type: "الفورد فكتوريا",
+                    code: "cvpi_sign_1",
+                    sector: "initial-police",
+                    image: "http://i.epvpimg.com/R59idab.png",
+                    primaryColor: "4c4c4c",
+                    secondaryColor: "FFFFFF",
+                    notes: "فورد إدارة الشرطة"
+                },
+                {
+                    type: "تاهو",
+                    code: "rematahoe15",
+                    sector: "initial-ports",
+                    image: "http://i.epvpimg.com/HIl1fab.jpg",
+                    primaryColor: "99d24f",
+                    secondaryColor: "FFFFFF",
+                    notes: "تاهو امن موانئ"
+                },
+                {
+                    type: "تاهو",
+                    code: "rematahoe15",
+                    sector: "initial-health",
+                    image: "http://i.epvpimg.com/Ay3Hbab.jpg",
+                    primaryColor: "880000",
+                    secondaryColor: "880000",
+                    notes: "تاهو وزارة الصحة"
+                }
+            ];
+            
+            // التحقق مما إذا كانت القطاعات موجودة بالفعل
+            database.ref('sectors').once('value').then((snapshot) => {
+                if (!snapshot.exists()) {
+                    // إضافة القطاعات الافتراضية
+                    initialSectors.forEach((sector, index) => {
+                        database.ref('sectors/initial-' + sector.code).set({
+                            name: sector.name,
+                            code: sector.code,
+                            createdAt: new Date().toISOString(),
+                            createdBy: 'system'
+                        });
+                    });
+                }
+            });
+        }
+        
+        // وظائف إضافية للتحكم (يمكن تطويرها)
+        function deleteSector(sectorId) {
+            if (confirm('هل أنت متأكد من حذف هذا القطاع؟')) {
+                database.ref('sectors/' + sectorId).remove()
+                    .then(() => {
+                        alert('تم حذف القطاع بنجاح');
+                        loadSectors();
+                    })
+                    .catch((error) => {
+                        alert('حدث خطأ أثناء حذف القطاع: ' + error.message);
+                    });
+            }
+        }
+        
+        function editUser(userId) {
+            alert('ميزة التعديل قيد التطوير');
+        }
+        
+        function deleteUser(userId) {
+            if (confirm('هل أنت متأكد من حذف هذا المستخدم؟')) {
+                database.ref('users/' + userId).remove()
+                    .then(() => {
+                        alert('تم حذف المستخدم بنجاح');
+                        loadUsers();
+                    })
+                    .catch((error) => {
+                        alert('حدث خطأ أثناء حذف المستخدم: ' + error.message);
+                    });
+            }
+        }
+    </script>
 </body>
 </html>
